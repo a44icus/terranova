@@ -41,7 +41,7 @@ const DEPARTEMENTS = [
   { value: '95', label: '95 – Val-d\'Oise' },
 ]
 
-export default function Filters() {
+export default function Filters({ hideReset, hideTabs }: { hideReset?: boolean; hideTabs?: boolean }) {
   const {
     filtres,
     setFiltreType, setFiltreCategorie, setFiltrePrixMax,
@@ -51,23 +51,25 @@ export default function Filters() {
     resetFiltres,
   } = useMapStore()
 
-  const hasActiveFilters = filtres.type !== 'all' || filtres.categorie ||
+  const hasActiveFilters = !hideReset && (filtres.type !== 'all' || filtres.categorie ||
     filtres.surface || filtres.pieces > 0 || filtres.options.size > 0 ||
-    filtres.dpe.size > 0 || filtres.ville || filtres.departement
+    filtres.dpe.size > 0 || filtres.ville || filtres.departement)
 
   return (
-    <div className="flex-shrink-0 border-b border-navy/10">
-      {/* Type */}
-      <div className="p-3 border-b border-navy/10">
-        <div className="flex bg-navy/06 rounded-lg p-0.5 gap-0.5">
-          {(['all', 'vente', 'location'] as const).map(t => (
-            <button key={t} onClick={() => setFiltreType(t)}
-              className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-all ${filtres.type === t ? 'bg-white text-navy shadow-sm' : 'text-navy/50 hover:text-navy'}`}>
-              {t === 'all' ? 'Tout' : t === 'vente' ? 'Vente' : 'Location'}
-            </button>
-          ))}
+    <div className="flex-shrink-0">
+      {/* Type — masqué si géré par Sidebar */}
+      {!hideTabs && (
+        <div className="p-3 border-b border-navy/10">
+          <div className="flex bg-navy/06 rounded-lg p-0.5 gap-0.5">
+            {(['all', 'vente', 'location'] as const).map(t => (
+              <button key={t} onClick={() => setFiltreType(t)}
+                className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-all ${filtres.type === t ? 'bg-white text-navy shadow-sm' : 'text-navy/50 hover:text-navy'}`}>
+                {t === 'all' ? 'Tout' : t === 'vente' ? 'Vente' : 'Location'}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Ville + Département */}
       <div className="p-3 border-b border-navy/10 space-y-2">
@@ -172,7 +174,7 @@ export default function Filters() {
       <div className="px-3 pt-2 pb-3">
         <div className="flex items-center justify-between mb-2">
           <div className="text-[11px] font-medium text-navy/40 uppercase tracking-wider">DPE</div>
-          {hasActiveFilters && (
+          {hasActiveFilters && !hideReset && (
             <button onClick={resetFiltres}
               className="text-[10px] text-primary hover:underline font-medium">
               Réinitialiser
