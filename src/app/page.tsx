@@ -134,16 +134,16 @@ export default async function LandingPage() {
       `}</style>
 
       {/* ── Nav ──────────────────────────────────────────────────── */}
-      <header className="absolute top-8 left-0 right-0 z-50 px-10 lg:px-16 xl:px-20 flex items-center justify-between">
+      <header className="absolute top-5 lg:top-8 left-0 right-0 z-50 px-5 lg:px-16 xl:px-20 flex items-center justify-between">
 
-        {/* Logo — gauche, hors navbar */}
-        <Link href="/" className="font-serif text-[28px] tracking-wide text-white"
+        {/* Logo */}
+        <Link href="/" className="font-serif text-[22px] lg:text-[28px] tracking-wide text-white flex-shrink-0"
           style={{ fontFamily: "'DM Serif Display', serif" }}>
           Terra<span className="text-[#818CF8] italic">nova</span>
         </Link>
 
-        {/* Navbar glass — centrée en absolu */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center px-3 py-2"
+        {/* Navbar glass — centrée, desktop uniquement */}
+        <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center px-3 py-2"
           style={{
             background: 'rgba(255,255,255,0.07)',
             backdropFilter: 'blur(16px)',
@@ -151,7 +151,6 @@ export default async function LandingPage() {
             border: '1px solid rgba(255,255,255,0.12)',
             borderRadius: 9999,
           }}>
-          {/* Liens nav */}
           <nav className="flex items-center gap-0.5">
             <Link href="/annonces"
               className="text-white/70 hover:text-white text-sm px-4 py-1.5 rounded-full hover:bg-white/10 transition-all">
@@ -171,11 +170,7 @@ export default async function LandingPage() {
               Estimer
             </Link>
           </nav>
-
-          {/* Séparateur */}
           <div className="w-px h-5 mx-3 bg-white/15 flex-shrink-0" />
-
-          {/* Recherche intégrée */}
           <form action="/annonces" method="get" className="flex items-center gap-2">
             <input
               name="ville"
@@ -190,31 +185,40 @@ export default async function LandingPage() {
           </form>
         </div>
 
-        {/* Actions — droite */}
+        {/* Actions droite */}
         <div className="flex items-center gap-2">
           {user ? (
             <>
+              {/* Desktop : Mon compte */}
               <Link href="/compte"
-                className="flex items-center gap-1.5 text-white/70 hover:text-white text-sm px-3 py-1.5 rounded-full hover:bg-white/10 transition-all">
+                className="hidden lg:flex items-center gap-1.5 text-white/70 hover:text-white text-sm px-3 py-1.5 rounded-full hover:bg-white/10 transition-all">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
                 </svg>
                 Mon compte
               </Link>
+              {/* Mobile : icône seule */}
+              <Link href="/compte"
+                className="lg:hidden flex items-center justify-center w-9 h-9 rounded-full text-white/70 hover:text-white transition-all"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+              </Link>
               <Link href="/publier"
-                className="bg-[#4F46E5] text-white text-sm font-medium px-4 py-1.5 rounded-full hover:bg-[#4338CA] transition-colors">
+                className="bg-[#4F46E5] text-white text-xs lg:text-sm font-medium px-3 lg:px-4 py-1.5 rounded-full hover:bg-[#4338CA] transition-colors whitespace-nowrap">
                 + Publier
               </Link>
             </>
           ) : (
             <>
               <Link href="/auth/login"
-                className="text-white/70 hover:text-white text-sm px-3 py-1.5 rounded-full hover:bg-white/10 transition-all">
+                className="hidden lg:block text-white/70 hover:text-white text-sm px-3 py-1.5 rounded-full hover:bg-white/10 transition-all">
                 Se connecter
               </Link>
               <Link href="/publier"
-                className="bg-[#4F46E5] text-white text-sm font-medium px-4 py-1.5 rounded-full hover:bg-[#4338CA] transition-colors">
-                + Publier un bien
+                className="bg-[#4F46E5] text-white text-xs lg:text-sm font-medium px-3 lg:px-4 py-1.5 rounded-full hover:bg-[#4338CA] transition-colors whitespace-nowrap">
+                + Publier
               </Link>
             </>
           )}
@@ -223,51 +227,55 @@ export default async function LandingPage() {
       </header>
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section className="h-screen flex overflow-hidden relative bg-[#0F172A]">
+      <section className="min-h-screen flex overflow-hidden relative bg-[#0F172A]">
 
-        {/* Photo plein écran derrière tout */}
+        {/* Photo plein écran */}
         <Image
           src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=90&auto=format&fit=crop"
           alt=""
           fill
-          className="object-cover"
+          className="object-cover object-center"
           sizes="100vw"
           quality={90}
           priority
         />
 
-        {/* Gradient gauche pour lisibilité du texte */}
-        <div className="absolute inset-0 pointer-events-none" style={{
+        {/* Gradient mobile : overlay sombre uniforme */}
+        <div className="absolute inset-0 pointer-events-none lg:hidden" style={{
+          background: 'rgba(9,9,35,0.78)',
+        }} />
+        {/* Gradient desktop : gauche → droite */}
+        <div className="absolute inset-0 pointer-events-none hidden lg:block" style={{
           background: 'linear-gradient(to right, rgba(9,9,35,0.88) 0%, rgba(9,9,35,0.75) 35%, rgba(9,9,35,0.3) 60%, rgba(9,9,35,0.05) 100%)',
         }} />
         {/* Vignette haut & bas */}
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: 'linear-gradient(to bottom, rgba(9,9,35,0.4) 0%, transparent 20%, transparent 80%, rgba(9,9,35,0.5) 100%)',
+          background: 'linear-gradient(to bottom, rgba(9,9,35,0.5) 0%, transparent 25%, transparent 75%, rgba(9,9,35,0.6) 100%)',
         }} />
 
-        {/* ── Colonne gauche — texte ── */}
-        <div className="relative flex flex-col justify-center px-10 lg:px-16 xl:px-20 w-[52%] flex-shrink-0 z-10">
+        {/* ── Colonne texte ── */}
+        <div className="relative flex flex-col justify-center px-6 lg:px-16 xl:px-20 w-full lg:w-[52%] lg:flex-shrink-0 z-10 pt-28 pb-16 lg:pt-0 lg:pb-0">
+          <div className="relative z-10 max-w-lg lg:max-w-none mx-auto lg:mx-0">
 
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 text-[#818CF8] text-[11px] font-semibold tracking-[0.18em] uppercase mb-7">
+            <div className="flex items-center gap-3 text-[#818CF8] text-[11px] font-semibold tracking-[0.18em] uppercase mb-6">
               <span className="w-8 h-px bg-[#4F46E5]" />
               Immobilier &middot; France
             </div>
 
-            <h1 className="font-serif text-white leading-[0.95] mb-7"
-              style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(3.2rem, 5vw, 5.5rem)' }}>
+            <h1 className="font-serif text-white leading-[0.95] mb-6"
+              style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(2.8rem, 8vw, 5.5rem)' }}>
               {"L'immobilier"}<br />
               <em className="text-[#818CF8]">autrement.</em>
             </h1>
 
-            <p className="text-white/50 text-base leading-relaxed mb-10 max-w-sm">
-              Carte interactive, filtres intelligents,<br />contact direct. Sans interm&eacute;diaire.
+            <p className="text-white/50 text-sm lg:text-base leading-relaxed mb-8 max-w-sm">
+              Carte interactive, filtres intelligents,<br className="hidden sm:block" />contact direct. Sans interm&eacute;diaire.
             </p>
 
             {/* CTAs */}
-            <div className="flex gap-3 mb-12 flex-wrap">
+            <div className="flex flex-col sm:flex-row gap-3 mb-10">
               <Link href="/carte"
-                className="inline-flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold px-7 py-3.5 rounded-xl text-sm transition-all shadow-xl shadow-[#4F46E5]/30 hover:-translate-y-0.5 whitespace-nowrap">
+                className="inline-flex items-center justify-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold px-6 py-3.5 rounded-xl text-sm transition-all shadow-xl shadow-[#4F46E5]/30 hover:-translate-y-0.5">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
                   <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
@@ -275,34 +283,33 @@ export default async function LandingPage() {
                 Voir la carte
               </Link>
               <Link href="/publier"
-                className="inline-flex items-center gap-2 border-2 border-white/20 hover:border-[#4F46E5] hover:bg-[#4F46E5]/10 text-white font-semibold px-7 py-3.5 rounded-xl text-sm transition-all hover:-translate-y-0.5 whitespace-nowrap">
+                className="inline-flex items-center justify-center gap-2 border-2 border-white/20 hover:border-[#4F46E5] hover:bg-[#4F46E5]/10 text-white font-semibold px-6 py-3.5 rounded-xl text-sm transition-all hover:-translate-y-0.5">
                 + Publier une annonce
               </Link>
               <Link href="/estimer"
-                className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm font-medium px-5 py-3.5 rounded-xl transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2 text-white/70 hover:text-white text-sm font-medium px-5 py-3.5 rounded-xl transition-all hover:-translate-y-0.5 sm:hidden lg:inline-flex"
                 style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)' }}>
                 Estimer mon bien →
               </Link>
             </div>
 
             {/* Stats */}
-            <div className="flex gap-10 pt-8 border-t border-white/08">
+            <div className="flex gap-8 lg:gap-10 pt-6 border-t border-white/10">
               {[
                 { val: (totalBiens ?? 0).toLocaleString('fr-FR'), label: 'biens' },
                 { val: (totalVilles ?? 0).toLocaleString('fr-FR'), label: 'villes' },
               ].map(s => (
                 <div key={s.label}>
-                  <div className="font-serif text-4xl text-white" style={{ fontFamily: "'DM Serif Display', serif" }}>{s.val}</div>
+                  <div className="font-serif text-3xl lg:text-4xl text-white" style={{ fontFamily: "'DM Serif Display', serif" }}>{s.val}</div>
                   <div className="text-xs text-white/30 mt-1">{s.label}</div>
                 </div>
               ))}
             </div>
           </div>
-
         </div>
 
-        {/* ── Colonne droite — bulles ── */}
-        <div className="relative flex-1 z-10">
+        {/* ── Colonne droite — bulles (desktop only) ── */}
+        <div className="relative flex-1 z-10 hidden lg:block">
           <HeroBubbles fallback={biens.slice(1, 5)} />
         </div>
 
@@ -321,11 +328,11 @@ export default async function LandingPage() {
       </div>
 
       {/* ── Sélection magazine ───────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 py-20">
-        <div className="flex items-end justify-between mb-10">
+      <section className="max-w-7xl mx-auto px-4 py-12 lg:py-20">
+        <div className="flex items-end justify-between mb-6 lg:mb-10">
           <div>
             <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#4F46E5]">S&eacute;lection</span>
-            <h2 className="font-serif text-4xl text-[#0F172A] mt-1.5"
+            <h2 className="font-serif text-2xl lg:text-4xl text-[#0F172A] mt-1"
               style={{ fontFamily: "'DM Serif Display', serif" }}>
               Derni&egrave;res annonces
             </h2>
@@ -337,7 +344,7 @@ export default async function LandingPage() {
         </div>
 
         {/* Grille magazine */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3" style={{ gridAutoRows: '220px' }}>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-3" style={{ gridAutoRows: 'clamp(140px, 20vw, 220px)' }}>
 
           {biens[0] && (
             <Link href={`/annonce/${biens[0].id}`}
@@ -417,7 +424,7 @@ export default async function LandingPage() {
 
 
       {/* ── Features ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden py-32 px-4" style={{ background: '#ebe8e5' }}>
+      <section className="relative overflow-hidden py-16 lg:py-32 px-4" style={{ background: '#ebe8e5' }}>
 
         <style>{`
           .feature-card:hover .feature-num { opacity: 0.09; }
@@ -440,14 +447,14 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto relative z-10">
 
           {/* En-tête */}
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 lg:gap-8 mb-10 lg:mb-16">
             <div>
               <div className="flex items-center gap-3 mb-5">
                 <span className="w-6 h-px bg-[#4F46E5]" />
                 <span className="text-[10px] font-mono font-semibold tracking-[0.3em] uppercase text-[#4F46E5]">Pourquoi Terranova</span>
               </div>
               <h2 className="font-serif leading-[1] text-[#0F172A]"
-                style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(3rem, 5vw, 5rem)' }}>
+                style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(2rem, 5vw, 5rem)' }}>
                 Tout ce {"qu'il"} faut.<br />
                 <em style={{ color: '#4F46E5' }}>Rien de superflu.</em>
               </h2>
@@ -467,11 +474,11 @@ export default async function LandingPage() {
 
             {/* ── 01 Carte interactive — hero card ── */}
             <Link href="/carte"
-              className="feature-card group relative lg:col-span-7 rounded-3xl overflow-hidden flex flex-col justify-between p-10 cursor-pointer"
+              className="feature-card group relative lg:col-span-7 rounded-3xl overflow-hidden flex flex-col justify-between p-7 lg:p-10 cursor-pointer"
               style={{
                 background: 'linear-gradient(145deg, #0f0c29 0%, #1a1660 50%, #24243e 100%)',
                 border: '1px solid rgba(255,255,255,0.06)',
-                minHeight: 380,
+                minHeight: 320,
                 transition: 'border-color 0.4s',
               }}>
               <span className="feature-num absolute -right-4 -top-6 font-serif font-bold select-none pointer-events-none"
@@ -489,7 +496,7 @@ export default async function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
                   </svg>
                 </div>
-                <h3 className="font-serif text-4xl text-white leading-tight mb-3"
+                <h3 className="font-serif text-2xl lg:text-4xl text-white leading-tight mb-3"
                   style={{ fontFamily: "'DM Serif Display', serif" }}>Carte interactive</h3>
                 <p className="text-white/45 text-base leading-relaxed max-w-sm mb-6">
                   Dessinez une zone au lasso, activez la vue 3D, explorez les biens en un coup d&apos;&oelig;il.
@@ -675,7 +682,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Vendeurs & Tarifs (section fusionnée) ────────────────── */}
-      <section className="bg-[#0F172A] relative overflow-hidden px-6 pt-24 pb-16">
+      <section className="bg-[#0F172A] relative overflow-hidden px-6 pt-16 lg:pt-24 pb-16">
 
         {/* Fond */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.035]" style={{
@@ -689,24 +696,24 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto relative z-10">
 
           {/* ── En-tête centré ── */}
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 lg:mb-16">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#818CF8]">
               Pour les vendeurs
             </span>
             <h2 className="font-serif text-white mt-3 mb-4 leading-tight"
-              style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(2.4rem, 4vw, 4rem)' }}>
+              style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(2rem, 4vw, 4rem)' }}>
               Publiez. Gérez. <em style={{ color: '#818CF8' }}>Vendez.</em>
             </h2>
-            <p className="text-white/40 text-sm mx-auto leading-relaxed whitespace-nowrap">
+            <p className="text-white/40 text-sm mx-auto leading-relaxed sm:whitespace-nowrap">
               Commencez gratuitement. Passez au plan supérieur quand vous en avez besoin.
             </p>
           </div>
 
           {/* ── Grille : pitch gauche + tarifs droite ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-24 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-24 items-start">
 
             {/* Colonne gauche : pitch vendeur */}
-            <div className="lg:col-span-2 flex flex-col gap-5">
+            <div className="lg:col-span-2 flex flex-col gap-5 max-w-md mx-auto lg:max-w-none lg:mx-0 w-full">
 
               {/* Mock annonce */}
               <div className="rounded-2xl overflow-hidden"
@@ -760,12 +767,12 @@ export default async function LandingPage() {
             </div>
 
             {/* Colonne droite : 3 plans */}
-            <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
               {PLANS.map(plan => (
                 <div key={plan.name}
                   className={`relative rounded-2xl p-6 flex flex-col transition-all ${
                     plan.featured
-                      ? 'bg-[#4F46E5] shadow-2xl shadow-[#4F46E5]/40 scale-[1.02]'
+                      ? 'bg-[#4F46E5] shadow-2xl shadow-[#4F46E5]/40 lg:scale-[1.02]'
                       : 'bg-white/05 border border-white/10 hover:border-[#4F46E5]/40'
                   }`}>
 

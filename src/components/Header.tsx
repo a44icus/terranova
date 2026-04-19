@@ -26,11 +26,14 @@ export default function Header({ user, unreadCount = 0 }: Props) {
   }
 
   return (
-    <header className="flex items-center justify-between px-6 h-14 bg-navy text-white flex-shrink-0 z-10">
-      <Link href="/" className="font-serif text-[22px] tracking-wide">
+    <header className="flex items-center justify-between px-4 lg:px-6 h-14 bg-navy text-white flex-shrink-0 z-10">
+
+      {/* Logo */}
+      <Link href="/" className="font-serif text-[20px] lg:text-[22px] tracking-wide flex-shrink-0">
         Terra<span className="text-primary italic">nova</span>
       </Link>
 
+      {/* Nav desktop uniquement */}
       <nav className="hidden md:flex items-center gap-1">
         <Link href="/annonces" className="text-white/50 hover:text-white text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-all">
           Annonces
@@ -43,10 +46,11 @@ export default function Header({ user, unreadCount = 0 }: Props) {
         </Link>
       </nav>
 
-      <div className="flex items-center gap-2">
+      {/* Actions */}
+      <div className="flex items-center gap-1 lg:gap-2">
         {user ? (
           <>
-            {/* Bouton favoris */}
+            {/* Favoris */}
             <button
               onClick={() => setFavsPanelOpen(true)}
               title="Mes favoris"
@@ -63,8 +67,9 @@ export default function Header({ user, unreadCount = 0 }: Props) {
               )}
             </button>
 
-            {/* Cloche de notification */}
-            <Link href="/compte/messages" title="Messages" className="relative w-9 h-9 flex items-center justify-center rounded-md hover:bg-white/10 transition-all">
+            {/* Messages */}
+            <Link href="/compte/messages" title="Messages"
+              className="relative w-9 h-9 flex items-center justify-center rounded-md hover:bg-white/10 transition-all">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
                 className={`w-5 h-5 ${unreadCount > 0 ? 'text-white' : 'text-white/50'}`}>
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -77,45 +82,40 @@ export default function Header({ user, unreadCount = 0 }: Props) {
               )}
             </Link>
 
-            <Link
-              href="/compte"
-              className="text-white/60 hover:text-white text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-all"
-            >
+            {/* Mon compte — desktop uniquement */}
+            <Link href="/compte"
+              className="hidden md:block text-white/60 hover:text-white text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-all whitespace-nowrap">
               Mon compte
             </Link>
-            <Link
-              href="/publier"
-              className="bg-primary text-white text-sm font-medium px-4 py-1.5 rounded-md hover:bg-primary-dark transition-colors"
-            >
-              + Publier un bien
+
+            {/* Publier */}
+            <Link href="/publier"
+              className="bg-primary text-white text-xs lg:text-sm font-medium px-3 lg:px-4 py-1.5 rounded-md hover:bg-primary-dark transition-colors whitespace-nowrap">
+              <span className="md:hidden">+ Publier</span>
+              <span className="hidden md:inline">+ Publier un bien</span>
             </Link>
-            <button
-              onClick={handleLogout}
-              className="text-white/40 hover:text-white text-sm px-2 py-1.5 rounded-md hover:bg-white/10 transition-all"
-            >
+
+            {/* Déconnexion — desktop uniquement */}
+            <button onClick={handleLogout}
+              className="hidden md:block text-white/40 hover:text-white text-sm px-2 py-1.5 rounded-md hover:bg-white/10 transition-all whitespace-nowrap">
               Déconnexion
             </button>
           </>
         ) : (
           <>
-            <Link
-              href="/auth/login"
-              className="text-white/60 hover:text-white text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-all"
-            >
+            <Link href="/auth/login"
+              className="hidden md:block text-white/60 hover:text-white text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-all whitespace-nowrap">
               Se connecter
             </Link>
-            <Link
-              href="/publier"
-              className="bg-primary text-white text-sm font-medium px-4 py-1.5 rounded-md hover:bg-primary-dark transition-colors"
-            >
-              + Publier un bien
+            <Link href="/publier"
+              className="bg-primary text-white text-xs lg:text-sm font-medium px-3 lg:px-4 py-1.5 rounded-md hover:bg-primary-dark transition-colors whitespace-nowrap">
+              <span className="md:hidden">+ Publier</span>
+              <span className="hidden md:inline">+ Publier un bien</span>
             </Link>
           </>
         )}
       </div>
+
     </header>
   )
 }
-
-
-

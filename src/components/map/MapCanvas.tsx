@@ -720,10 +720,10 @@ export default function MapCanvas() {
         />
       )}
 
-      {/* Bouton toggle sidebar */}
+      {/* Bouton toggle sidebar — desktop uniquement */}
       <button
         onClick={toggleSidebar}
-        className="absolute top-1/2 -translate-y-1/2 left-0 z-10 w-5 h-12 bg-white border border-navy/12 border-l-0 rounded-r-lg flex items-center justify-center text-[11px] text-navy/45 shadow-sm hover:bg-navy hover:text-white transition-all"
+        className="hidden lg:flex absolute top-1/2 -translate-y-1/2 left-0 z-10 w-5 h-12 bg-white border border-navy/12 border-l-0 rounded-r-lg items-center justify-center text-[11px] text-navy/45 shadow-sm hover:bg-navy hover:text-white transition-all"
       >
         {sidebarOpen ? '‹' : '›'}
       </button>
