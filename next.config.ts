@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: '/terranova', // ← adapte selon ton sous-dossier
   images: {
     remotePatterns: [
       {
