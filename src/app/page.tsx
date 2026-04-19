@@ -183,11 +183,12 @@ export default async function LandingPage() {
 
         {/* Photo plein écran derrière tout */}
         <Image
-          src={biens[0]?.photo_url ?? '/hero2.jpg'}
+          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=90&auto=format&fit=crop"
           alt=""
           fill
           className="object-cover"
           sizes="100vw"
+          quality={90}
           priority
         />
 
