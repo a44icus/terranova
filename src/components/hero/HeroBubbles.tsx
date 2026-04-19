@@ -126,13 +126,13 @@ export default function HeroBubbles({ fallback }: Props) {
       {/* Label + indicateur */}
       <div className="flex items-center gap-2 px-1 mb-1">
         {status === 'loading' ? (
-          <span className="flex items-center gap-2 text-[10px] text-white/40 font-semibold tracking-widest uppercase">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#4F46E5] animate-pulse" />
+          <span className="flex items-center gap-2 text-xs text-white/50 font-semibold tracking-widest uppercase">
+            <span className="w-2 h-2 rounded-full bg-[#4F46E5] animate-pulse" />
             Localisation…
           </span>
         ) : (
-          <span className="flex items-center gap-2 text-[10px] text-white/40 font-semibold tracking-widest uppercase">
-            <span className={`w-1.5 h-1.5 rounded-full ${status === 'ready' ? 'bg-emerald-400' : 'bg-[#4F46E5]'}`} />
+          <span className="flex items-center gap-2 text-xs text-white/50 font-semibold tracking-widest uppercase">
+            <span className={`w-2 h-2 rounded-full ${status === 'ready' ? 'bg-emerald-400' : 'bg-[#4F46E5]'}`} />
             {label}
           </span>
         )}
@@ -141,42 +141,42 @@ export default function HeroBubbles({ fallback }: Props) {
       {/* Cartes */}
       {biens.slice(0, 4).map((b, i) => (
         <Link key={b.id} href={`/annonce/${b.id}`}
-          className="flex items-center gap-3 rounded-2xl px-3 py-2.5 border border-white/12 hover:border-[#4F46E5]/50 hover:shadow-xl group"
+          className="flex items-center gap-4 rounded-2xl px-4 py-3.5 border border-white/12 hover:border-[#4F46E5]/50 hover:shadow-xl group"
           style={{
             background: 'rgba(255,255,255,0.07)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
-            width: '230px',
-            marginLeft: i % 2 === 1 ? '28px' : '0px',
+            width: '290px',
+            marginLeft: i % 2 === 1 ? '36px' : '0px',
             animation: `bubbleIn 0.5s ease both, bubbleFloat ${3.5 + i * 0.4}s ease-in-out ${i * 0.6}s infinite`,
             transition: 'border-color 0.2s, box-shadow 0.2s',
           }}>
           {/* Photo */}
-          <div className="relative w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-white/10">
+          <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-white/10">
             {b.photo_url
-              ? <Image src={b.photo_url} alt="" fill className="object-cover" sizes="44px" />
+              ? <Image src={b.photo_url} alt="" fill className="object-cover" sizes="56px" />
               : <div className="w-full h-full bg-indigo-800" />
             }
           </div>
           {/* Infos */}
           <div className="min-w-0 flex-1">
-            <div className="font-serif text-sm text-white leading-tight truncate"
+            <div className="font-serif text-base text-white leading-tight truncate"
               style={{ fontFamily: "'DM Serif Display', serif" }}>
               {formatPrix(b.prix, b.type)}
             </div>
-            <div className="text-white/50 text-[11px] truncate mt-0.5">{b.titre}</div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full text-white"
+            <div className="text-white/50 text-xs truncate mt-0.5">{b.titre}</div>
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white"
                 style={{ background: b.type === 'vente' ? '#4F46E5' : '#0891B2' }}>
                 {b.type === 'vente' ? 'Vente' : 'Location'}
               </span>
-              <span className="text-white/30 text-[10px] truncate">
+              <span className="text-white/30 text-[11px] truncate">
                 {(b as any).dist !== undefined ? `${(b as any).dist} km` : b.ville}
               </span>
             </div>
           </div>
           {/* Flèche */}
-          <svg className="w-3.5 h-3.5 text-white/20 group-hover:text-[#818CF8] transition-colors flex-shrink-0"
+          <svg className="w-4 h-4 text-white/20 group-hover:text-[#818CF8] transition-colors flex-shrink-0"
             fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
           </svg>
