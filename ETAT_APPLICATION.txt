@@ -1,0 +1,291 @@
+════════════════════════════════════════════════════════════════
+  TERRANOVA — État de l'application (avril 2026)
+════════════════════════════════════════════════════════════════
+
+Stack technique
+───────────────
+  • Next.js 16 (App Router, Server Components, Server Actions)
+  • Supabase (base de données PostgreSQL + Auth + Storage)
+  • MapLibre GL (carte interactive open-source)
+  • Tailwind CSS v4
+  • Stripe (abonnements Pro)
+  • Resend (emails transactionnels)
+  • Zustand (état global côté client)
+  • TypeScript
+
+
+════════════════════════════════════════════════════════════════
+  1. PAGE D'ACCUEIL  (/}
+════════════════════════════════════════════════════════════════
+
+  • Hero plein écran avec photo de fond (1ère annonce publiée
+    ou image statique /public/hero2.jpg en fallback)
+  • Titre animé, CTA "Voir la carte" et "Publier une annonce"
+  • Compteurs dynamiques : nb de biens, nb de villes, 0 € commission
+  • Barre de recherche par ville intégrée au hero
+  • Bandeau défilant (marquee) : "Carte interactive · Sans commission
+    · Contact direct · Filtres avancés · …"
+  • Section "Pourquoi Terranova" : bento-grid 5 cartes (fonctionnalités clés)
+  • Section carte interactive : aperçu visuel avec CTA
+  • Section tarifs : 3 plans (Gratuit / Essentiel / Agence)
+  • Section "Pour les vendeurs" : avantages + CTA publication
+  • Footer avec liens légaux (CGU, Confidentialité, Mentions légales)
+  • Navigation transparente en overlay sur le hero
+
+
+════════════════════════════════════════════════════════════════
+  2. CARTE INTERACTIVE  (/carte)
+════════════════════════════════════════════════════════════════
+
+  Carte
+  -----
+  • MapLibre GL avec plusieurs styles : rue, satellite, sombre, clair
+  • Marqueurs personnalisés par type (vente/location) avec prix affiché
+  • Clustering automatique des marqueurs (supercluster)
+  • Outil lasso : sélection polygonale à main levée sur la carte
+  • Géolocalisation de l'utilisateur (bouton dédié)
+  • Rayon de proximité configurable autour d'un point
+
+  Filtres
+  -------
+  • Type : vente / location
+  • Catégorie : appartement, maison, bureau, terrain, parking, local
+  • Prix max
+  • Surface min/max
+  • Nombre de pièces
+  • Options : parking, terrasse, cave, piscine, jardin, ascenseur…
+  • Classe DPE (A à G)
+  • Ville / département
+  • Synchronisation des filtres dans l'URL (partage de recherche)
+
+  Sidebar biens
+  -------------
+  • Liste et vue grille commutables
+  • Tri : prix croissant/décroissant, surface, date
+  • Cartes biens avec photo, prix, surface, ville, type
+  • Mise en favori depuis la liste
+
+  Popup détail bien
+  -----------------
+  • Photo principale + galerie
+  • Prix, surface, pièces, DPE, options
+  • Score de quartier calculé à partir des POI environnants
+  • Points d'intérêt proches : restaurants, écoles, santé, transport…
+  • Bouton itinéraire (calcul de route depuis la position utilisateur)
+  • Bouton favoris
+  • Bouton comparer (jusqu'à 3 biens simultanément)
+  • Lien vers la fiche complète
+
+  Panneaux flottants
+  ------------------
+  • Favoris : liste des biens sauvegardés
+  • Comparateur : tableau comparatif côte à côte (max 3 biens)
+  • Biens à proximité : rayon paramétrable autour d'un point
+
+
+════════════════════════════════════════════════════════════════
+  3. ANNONCES  (/annonces)
+════════════════════════════════════════════════════════════════
+
+  • Liste paginée de tous les biens publiés (24 par page)
+  • Filtres URL : type, catégorie, ville
+  • Grille de cartes avec photo, prix, surface, ville, statut neuf/pro
+
+
+════════════════════════════════════════════════════════════════
+  4. FICHE BIEN  (/annonce/[id])
+════════════════════════════════════════════════════════════════
+
+  • Galerie photos avec miniatures et compteur
+  • Prix, surface, pièces, SDB, DPE, étage, année construction
+  • Options (parking, terrasse, cave…)
+  • Description complète
+  • Adresse / localisation
+  • Formulaire de contact vendeur (avec anti-spam honeypot)
+    → Notification email au vendeur via Resend
+  • Biens similaires en bas de page
+  • Bouton partage (URL)
+  • SEO : title/description/og dynamiques par bien
+  • Skeleton de chargement (loading.tsx)
+
+
+════════════════════════════════════════════════════════════════
+  5. ESPACE VENDEUR PUBLIC  (/vendeur/[id])
+════════════════════════════════════════════════════════════════
+
+  • Profil public de l'annonceur (nom, agence, avatar, bio)
+  • Toutes ses annonces publiées
+
+
+════════════════════════════════════════════════════════════════
+  6. AUTHENTIFICATION  (/auth/…)
+════════════════════════════════════════════════════════════════
+
+  • Inscription multi-étapes :
+    1. Choix du type (particulier / professionnel)
+    2. Infos de contact (nom, prénom, téléphone, agence si pro)
+    3. Email + mot de passe
+    4. Vérification email (callback Supabase)
+  • Connexion email / mot de passe
+  • Mot de passe oublié → email de réinitialisation
+  • Réinitialisation du mot de passe (lien sécurisé)
+  • Middleware de session : toutes les pages /compte/* protégées
+
+
+════════════════════════════════════════════════════════════════
+  7. ESPACE COMPTE  (/compte/…)
+════════════════════════════════════════════════════════════════
+
+  Tableau de bord
+  ---------------
+  • Statistiques : annonces publiées, vues totales,
+    contacts reçus, messages non lus
+  • Liste des 5 dernières annonces avec statut
+  • CTA rapide "Publier un bien"
+
+  Mes annonces
+  ------------
+  • Liste complète des biens avec photos, statuts, vues, contacts
+  • Actions : modifier, archiver, supprimer
+  • Badge de statut : brouillon / en attente / publié / archivé / refusé
+
+  Modifier une annonce
+  --------------------
+  • Formulaire pré-rempli avec toutes les données du bien
+  • Modification des photos, caractéristiques, prix, localisation
+
+  Favoris
+  -------
+  • Liste des biens mis en favori
+  • Persistance en base de données (synchronisée entre sessions)
+  • Synchronisation store Zustand ↔ Supabase au chargement
+
+  Messages
+  --------
+  • Liste des contacts reçus (nom, email, téléphone, message)
+  • Statut lu / non lu
+  • Marquer comme lu, répondre par email
+
+  Mon abonnement (/compte/plan)
+  ------------------------------
+  • Plan actuel affiché avec badge (Gratuit / Pro Mensuel / Pro Annuel)
+  • Date de renouvellement / expiration
+  • Barre d'utilisation : annonces actives / limite du plan
+  • Cartes comparatives des 3 plans avec prix et fonctionnalités
+  • Bouton "Choisir ce plan" → redirection vers Stripe Checkout
+  • Bouton "Gérer mon abonnement" → portail de facturation Stripe
+  • Notification succès / annulation de paiement
+  • Auto-dégradation au plan gratuit si abonnement expiré
+
+  Mon profil
+  ----------
+  • Modification : prénom, nom, téléphone, agence, SIRET, site web, bio
+  • Upload d'avatar
+
+
+════════════════════════════════════════════════════════════════
+  8. PUBLICATION  (/publier)
+════════════════════════════════════════════════════════════════
+
+  • Vérification préalable côté serveur : limite d'annonces du plan
+    (si limite atteinte → page de blocage avec CTA "Passer Pro")
+  • Formulaire 3 étapes :
+    1. Informations : type (vente/location), catégorie, titre,
+       description, prix, surface, pièces, SDB, étage, DPE,
+       options, meublé, neuf/VEFA, référence agence (si pro)
+    2. Localisation : adresse, ville, code postal + géocodage
+       automatique (Nominatim/OpenStreetMap), option position
+       approximative (cercle plutôt qu'épingle exacte)
+    3. Photos : upload multiple (JPG/PNG/WebP), limite selon le plan,
+       réordonnancement, désignation de la photo principale
+  • Soumission en brouillon ou directement en attente de modération
+  • Page de confirmation après publication
+
+
+════════════════════════════════════════════════════════════════
+  9. PAIEMENT / ABONNEMENTS  (Stripe)
+════════════════════════════════════════════════════════════════
+
+  Plans disponibles
+  -----------------
+  • Gratuit     : 3 annonces, 5 photos/bien, visible 30 jours
+  • Pro Mensuel : 50 annonces, 20 photos/bien, visible 30 jours
+  • Pro Annuel  : illimité, 20 photos/bien, visible 365 jours
+
+  Flux Stripe
+  -----------
+  • Checkout Session (mode subscription) avec locale française
+  • Codes promo acceptés
+  • Webhook sécurisé :
+    - checkout.session.completed → activation du plan
+    - invoice.payment_succeeded  → renouvellement
+    - invoice.payment_failed     → log (Stripe réessaie auto)
+    - customer.subscription.deleted → retour au plan gratuit
+    - customer.subscription.updated → mise à jour expiration
+  • Portail client Stripe (gestion, annulation, factures)
+  • Expiration automatique : plan dégradé à "gratuit" si plan_expire_at
+    est dépassé (vérifié à chaque visite de /compte/*)
+
+
+════════════════════════════════════════════════════════════════
+  10. ADMINISTRATION  (/admin/…)
+════════════════════════════════════════════════════════════════
+
+  Accès réservé aux comptes avec role "admin" dans Supabase
+  (app_metadata.role = 'admin' ou email dans ADMIN_EMAILS)
+
+  Modération des annonces
+  -----------------------
+  • Liste des biens "en attente" avec photo, vendeur, prix, ville
+  • Actions : Approuver → statut "publié" / Refuser → statut "refusé"
+
+  Toutes les annonces
+  -------------------
+  • Vue complète de tous les biens toutes statuts confondus
+  • Informations vendeur associées
+
+  Paramètres des plans
+  --------------------
+  • Configuration des limites par plan : annonces, photos, durée, prix
+  • Saisie des Stripe Price ID pour chaque plan payant
+  • Instructions SQL pour initialiser la table plan_config
+  • Instructions pour les variables d'environnement Stripe
+  • Enregistrement via Server Action (client admin Supabase)
+
+
+════════════════════════════════════════════════════════════════
+  11. SEO & TECHNIQUE
+════════════════════════════════════════════════════════════════
+
+  • Sitemap XML dynamique : pages statiques + toutes annonces publiées
+  • robots.txt : indexation publique, blocage /admin/ /compte/ /api/
+  • Métadonnées Open Graph dynamiques sur chaque fiche bien
+  • Images optimisées via Next.js Image (Supabase Storage + Unsplash)
+  • Middleware Supabase pour rafraîchissement de session côté serveur
+
+
+════════════════════════════════════════════════════════════════
+  12. PAGES LÉGALES  (/legal/…)
+════════════════════════════════════════════════════════════════
+
+  • Mentions légales
+  • Politique de confidentialité (RGPD)
+  • Conditions Générales d'Utilisation
+
+
+════════════════════════════════════════════════════════════════
+  CE QUI N'EST PAS ENCORE FAIT (pistes)
+════════════════════════════════════════════════════════════════
+
+  • Notifications push / email pour les nouvelles annonces
+  • Recherche par rayon géographique (km) depuis une adresse
+  • Page agence dédiée avec portfolio et branding
+  • Annonces "coup de cœur" / mise en avant sur la carte
+  • Export des statistiques vendeur (CSV/PDF)
+  • Messagerie interne complète (fil de conversation, pièces jointes)
+  • Application mobile (PWA ou React Native)
+  • Passerelle d'import d'annonces (XML/CSV pour agences)
+  • Alertes email pour les acheteurs (nouveaux biens selon critères)
+  • Estimation de valeur d'un bien (IA / données marché)
+
+════════════════════════════════════════════════════════════════

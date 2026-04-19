@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary:      #4F46E5;
+  --color-primary-dark: #4338CA;
+  --color-primary-soft: #818CF8;
+  --color-navy:         #0F172A;
+  --color-surface:      #F8FAFC;
+  --color-location:     #0891B2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── Typographie ─────────────────────────────────────────────── */
+.font-serif { font-family: 'DM Serif Display', serif; }
+
+/* ── Couleurs sémantiques ────────────────────────────────────── */
+
+/* bg- */
+.bg-primary       { background-color: var(--color-primary); }
+.bg-primary-dark  { background-color: var(--color-primary-dark); }
+.bg-primary-soft  { background-color: var(--color-primary-soft); }
+.bg-navy          { background-color: var(--color-navy); }
+.bg-surface       { background-color: var(--color-surface); }
+.bg-location      { background-color: var(--color-location); }
+
+/* bg- avec opacité */
+.bg-navy\/02  { background-color: color-mix(in srgb, var(--color-navy)  2%,  transparent); }
+.bg-navy\/03  { background-color: color-mix(in srgb, var(--color-navy)  3%,  transparent); }
+.bg-navy\/04  { background-color: color-mix(in srgb, var(--color-navy)  4%,  transparent); }
+.bg-navy\/05  { background-color: color-mix(in srgb, var(--color-navy)  5%,  transparent); }
+.bg-navy\/06  { background-color: color-mix(in srgb, var(--color-navy)  6%,  transparent); }
+.bg-navy\/07  { background-color: color-mix(in srgb, var(--color-navy)  7%,  transparent); }
+.bg-navy\/08  { background-color: color-mix(in srgb, var(--color-navy)  8%,  transparent); }
+.bg-navy\/10  { background-color: color-mix(in srgb, var(--color-navy) 10%,  transparent); }
+.bg-navy\/12  { background-color: color-mix(in srgb, var(--color-navy) 12%,  transparent); }
+.bg-navy\/15  { background-color: color-mix(in srgb, var(--color-navy) 15%,  transparent); }
+.bg-navy\/20  { background-color: color-mix(in srgb, var(--color-navy) 20%,  transparent); }
+.bg-navy\/25  { background-color: color-mix(in srgb, var(--color-navy) 25%,  transparent); }
+.bg-navy\/30  { background-color: color-mix(in srgb, var(--color-navy) 30%,  transparent); }
+.bg-navy\/40  { background-color: color-mix(in srgb, var(--color-navy) 40%,  transparent); }
+.bg-navy\/50  { background-color: color-mix(in srgb, var(--color-navy) 50%,  transparent); }
+.bg-navy\/55  { background-color: color-mix(in srgb, var(--color-navy) 55%,  transparent); }
+.bg-navy\/60  { background-color: color-mix(in srgb, var(--color-navy) 60%,  transparent); }
+.bg-navy\/70  { background-color: color-mix(in srgb, var(--color-navy) 70%,  transparent); }
+.bg-navy\/80  { background-color: color-mix(in srgb, var(--color-navy) 80%,  transparent); }
+
+.bg-primary\/05 { background-color: color-mix(in srgb, var(--color-primary) 5%,  transparent); }
+.bg-primary\/08 { background-color: color-mix(in srgb, var(--color-primary) 8%,  transparent); }
+.bg-primary\/10 { background-color: color-mix(in srgb, var(--color-primary) 10%, transparent); }
+.bg-primary\/15 { background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); }
+.bg-primary\/20 { background-color: color-mix(in srgb, var(--color-primary) 20%, transparent); }
+
+.bg-location\/08 { background-color: color-mix(in srgb, var(--color-location) 8%,  transparent); }
+.bg-location\/10 { background-color: color-mix(in srgb, var(--color-location) 10%, transparent); }
+.bg-location\/20 { background-color: color-mix(in srgb, var(--color-location) 20%, transparent); }
+
+/* text- */
+.text-primary      { color: var(--color-primary); }
+.text-primary-dark { color: var(--color-primary-dark); }
+.text-navy         { color: var(--color-navy); }
+.text-surface      { color: var(--color-surface); }
+.text-location     { color: var(--color-location); }
+
+.text-navy\/25 { color: color-mix(in srgb, var(--color-navy) 25%, transparent); }
+.text-navy\/30 { color: color-mix(in srgb, var(--color-navy) 30%, transparent); }
+.text-navy\/35 { color: color-mix(in srgb, var(--color-navy) 35%, transparent); }
+.text-navy\/38 { color: color-mix(in srgb, var(--color-navy) 38%, transparent); }
+.text-navy\/40 { color: color-mix(in srgb, var(--color-navy) 40%, transparent); }
+.text-navy\/45 { color: color-mix(in srgb, var(--color-navy) 45%, transparent); }
+.text-navy\/50 { color: color-mix(in srgb, var(--color-navy) 50%, transparent); }
+.text-navy\/55 { color: color-mix(in srgb, var(--color-navy) 55%, transparent); }
+.text-navy\/60 { color: color-mix(in srgb, var(--color-navy) 60%, transparent); }
+.text-navy\/70 { color: color-mix(in srgb, var(--color-navy) 70%, transparent); }
+.text-navy\/80 { color: color-mix(in srgb, var(--color-navy) 80%, transparent); }
+
+.text-primary\/60 { color: color-mix(in srgb, var(--color-primary) 60%, transparent); }
+.text-primary\/80 { color: color-mix(in srgb, var(--color-primary) 80%, transparent); }
+
+/* border- */
+.border-primary      { border-color: var(--color-primary); }
+.border-primary-dark { border-color: var(--color-primary-dark); }
+.border-navy         { border-color: var(--color-navy); }
+.border-location     { border-color: var(--color-location); }
+
+.border-navy\/06  { border-color: color-mix(in srgb, var(--color-navy) 6%,  transparent); }
+.border-navy\/08  { border-color: color-mix(in srgb, var(--color-navy) 8%,  transparent); }
+.border-navy\/10  { border-color: color-mix(in srgb, var(--color-navy) 10%, transparent); }
+.border-navy\/12  { border-color: color-mix(in srgb, var(--color-navy) 12%, transparent); }
+.border-navy\/15  { border-color: color-mix(in srgb, var(--color-navy) 15%, transparent); }
+.border-navy\/20  { border-color: color-mix(in srgb, var(--color-navy) 20%, transparent); }
+.border-navy\/30  { border-color: color-mix(in srgb, var(--color-navy) 30%, transparent); }
+
+.border-primary\/30 { border-color: color-mix(in srgb, var(--color-primary) 30%, transparent); }
+.border-primary\/40 { border-color: color-mix(in srgb, var(--color-primary) 40%, transparent); }
+.border-primary\/50 { border-color: color-mix(in srgb, var(--color-primary) 50%, transparent); }
+.border-location\/30 { border-color: color-mix(in srgb, var(--color-location) 30%, transparent); }
+
+/* ring- */
+.ring-primary { --tw-ring-color: var(--color-primary); }
+
+/* hover: */
+.hover\:bg-primary:hover      { background-color: var(--color-primary); }
+.hover\:bg-primary-dark:hover { background-color: var(--color-primary-dark); }
+.hover\:bg-navy:hover         { background-color: var(--color-navy); }
+.hover\:text-primary:hover    { color: var(--color-primary); }
+.hover\:text-navy:hover       { color: var(--color-navy); }
+.hover\:border-primary:hover  { border-color: var(--color-primary); }
+.hover\:border-navy:hover     { border-color: var(--color-navy); }
+
+.hover\:border-primary\/30:hover { border-color: color-mix(in srgb, var(--color-primary) 30%, transparent); }
+.hover\:border-primary\/40:hover { border-color: color-mix(in srgb, var(--color-primary) 40%, transparent); }
+.hover\:border-navy\/15:hover    { border-color: color-mix(in srgb, var(--color-navy) 15%, transparent); }
+.hover\:border-navy\/30:hover    { border-color: color-mix(in srgb, var(--color-navy) 30%, transparent); }
+.hover\:border-navy\/40:hover    { border-color: color-mix(in srgb, var(--color-navy) 40%, transparent); }
+.hover\:text-navy\/70:hover      { color: color-mix(in srgb, var(--color-navy) 70%, transparent); }
+.hover\:text-navy\/80:hover      { color: color-mix(in srgb, var(--color-navy) 80%, transparent); }
+.hover\:bg-navy\/02:hover  { background-color: color-mix(in srgb, var(--color-navy)  2%, transparent); }
+.hover\:bg-navy\/03:hover  { background-color: color-mix(in srgb, var(--color-navy)  3%, transparent); }
+.hover\:bg-navy\/04:hover  { background-color: color-mix(in srgb, var(--color-navy)  4%, transparent); }
+.hover\:bg-navy\/05:hover  { background-color: color-mix(in srgb, var(--color-navy)  5%, transparent); }
+.hover\:bg-navy\/15:hover  { background-color: color-mix(in srgb, var(--color-navy) 15%, transparent); }
+.hover\:bg-location\/08:hover { background-color: color-mix(in srgb, var(--color-location) 8%, transparent); }
+
+/* text- opacités manquantes */
+.text-navy\/08 { color: color-mix(in srgb, var(--color-navy) 8%, transparent); }
+
+/* focus: */
+.focus\:border-primary:focus { border-color: var(--color-primary); }
+.focus\:ring-primary:focus   { --tw-ring-color: var(--color-primary); }
+
+/* placeholder: */
+.placeholder-navy\/25::placeholder { color: color-mix(in srgb, var(--color-navy) 25%, transparent); }
+.placeholder-navy\/35::placeholder { color: color-mix(in srgb, var(--color-navy) 35%, transparent); }
+
+/* ── Groupes hover (sidebar cards etc.) ─────────────────────── */
+.group:hover .group-hover\:scale-105 { transform: scale(1.05); }
