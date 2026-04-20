@@ -207,13 +207,33 @@ async function getVillePriceRef(ville: string, categorie: string, type: 'vente' 
   return { pricePerM2: prix, source: 'national' }
 }
 
+const VALID_TYPES       = ['vente', 'location'] as const
+const VALID_CATEGORIES  = ['appartement', 'maison', 'bureau', 'terrain', 'parking', 'local'] as const
+const VALID_ETATS       = ['neuf', 'bon', 'travaux'] as const
+
 export async function POST(req: NextRequest) {
   try {
     const body: EstimationRequest = await req.json()
     const { ville, surface, pieces, categorie, type, etat } = body
 
-    if (!ville || !surface || surface <= 0) {
-      return NextResponse.json({ error: 'Données insuffisantes' }, { status: 400 })
+    // ── Validation stricte des inputs ─────────────────────
+    if (!ville || typeof ville !== 'string' || ville.trim().length < 2 || ville.length > 100) {
+      return NextResponse.json({ error: 'Ville invalide' }, { status: 400 })
+    }
+    if (!surface || typeof surface !== 'number' || surface <= 0 || surface > 100_000) {
+      return NextResponse.json({ error: 'Surface invalide' }, { status: 400 })
+    }
+    if (pieces !== undefined && (typeof pieces !== 'number' || pieces < 0 || pieces > 100)) {
+      return NextResponse.json({ error: 'Nombre de pièces invalide' }, { status: 400 })
+    }
+    if (!VALID_TYPES.includes(type as any)) {
+      return NextResponse.json({ error: 'Type invalide' }, { status: 400 })
+    }
+    if (!VALID_CATEGORIES.includes(categorie as any)) {
+      return NextResponse.json({ error: 'Catégorie invalide' }, { status: 400 })
+    }
+    if (etat && !VALID_ETATS.includes(etat as any)) {
+      return NextResponse.json({ error: 'État invalide' }, { status: 400 })
     }
 
     const supabase = await createClient()

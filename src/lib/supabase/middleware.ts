@@ -26,17 +26,42 @@ export async function updateSession(request: NextRequest) {
   // Rafraîchir la session
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Protéger les routes authentifiées
+  const pathname = request.nextUrl.pathname
+
+  // ── Routes nécessitant une connexion ─────────────────────
   const protectedRoutes = ['/compte', '/publier']
-  const isProtected = protectedRoutes.some(route =>
-    request.nextUrl.pathname.startsWith(route)
-  )
+  const isProtected = protectedRoutes.some(r => pathname.startsWith(r))
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
-    url.searchParams.set('redirect', request.nextUrl.pathname)
+    url.searchParams.set('redirect', pathname)
     return NextResponse.redirect(url)
+  }
+
+  // ── Routes admin : connexion obligatoire + rôle vérifié ──
+  // (double protection — le layout AdminLayout re-vérifie côté serveur)
+  if (pathname.startsWith('/admin')) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/auth/login'
+      url.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(url)
+    }
+
+    const adminEmails = (process.env.ADMIN_EMAILS ?? '')
+      .split(',').map(e => e.trim()).filter(Boolean)
+
+    const isAdmin =
+      user.user_metadata?.role === 'admin' ||
+      user.app_metadata?.role  === 'admin' ||
+      adminEmails.includes(user.email ?? '')
+
+    if (!isAdmin) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/'
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse
