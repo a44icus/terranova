@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile, BienType, BienCategorie, DpeClasse } from '@/lib/types'
 import { LIMITES_PLAN } from '@/lib/types'
+import LocationPicker from '@/components/LocationPicker'
 
 interface Props {
   profile: Profile
@@ -597,58 +598,24 @@ export default function PublierForm({ profile }: Props) {
         {step === 2 && (
           <div className="space-y-6">
             <div className="bg-white rounded-2xl p-6 border border-navy/10">
-              <h2 className="font-medium text-sm text-navy/50 uppercase tracking-wider mb-4">Adresse du bien</h2>
+              <h2 className="font-medium text-sm text-navy/50 uppercase tracking-wider mb-4">Localisation</h2>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-navy/60 mb-2">Adresse</label>
-                  <input
-                    type="text"
-                    value={form.adresse}
-                    onChange={e => update('adresse', e.target.value)}
-                    onBlur={geocodeAdresse}
-                    placeholder="12 rue de la Paix"
-                    className="w-full border border-navy/15 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors"
-                  />
-                </div>
+              <LocationPicker
+                adresse={form.adresse}
+                ville={form.ville}
+                codePostal={form.code_postal}
+                lat={form.lat}
+                lng={form.lng}
+                onChange={fields => {
+                  if (fields.adresse    !== undefined) update('adresse',    fields.adresse)
+                  if (fields.ville      !== undefined) update('ville',      fields.ville)
+                  if (fields.code_postal !== undefined) update('code_postal', fields.code_postal)
+                  if (fields.lat        !== undefined) update('lat',        fields.lat)
+                  if (fields.lng        !== undefined) update('lng',        fields.lng)
+                }}
+              />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-navy/60 mb-2">Ville *</label>
-                    <input
-                      type="text"
-                      value={form.ville}
-                      onChange={e => update('ville', e.target.value)}
-                      onBlur={geocodeAdresse}
-                      placeholder="Paris"
-                      className="w-full border border-navy/15 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-navy/60 mb-2">Code postal *</label>
-                    <input
-                      type="text"
-                      value={form.code_postal}
-                      onChange={e => update('code_postal', e.target.value)}
-                      placeholder="75001"
-                      maxLength={5}
-                      className="w-full border border-navy/15 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors"
-                    />
-                  </div>
-                </div>
-
-                {/* Géocodage status */}
-                {geocoding && (
-                  <p className="text-xs text-navy/40 flex items-center gap-2">
-                    <span className="animate-spin">⟳</span> Localisation en cours…
-                  </p>
-                )}
-                {form.lat !== 0 && !geocoding && (
-                  <p className="text-xs text-green-600">
-                    ✓ Position trouvée : {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
-                  </p>
-                )}
-
+              <div className="mt-4 space-y-4">
                 {/* Position approximative */}
                 <label className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl cursor-pointer">
                   <input
@@ -661,7 +628,6 @@ export default function PublierForm({ profile }: Props) {
                     <p className="text-sm font-medium text-amber-900">Position approximative</p>
                     <p className="text-xs text-amber-700 mt-0.5">
                       L'adresse exacte ne sera pas affichée sur la carte. Un cercle indiquera la zone approximative.
-                      Recommandé pour les particuliers.
                     </p>
                   </div>
                 </label>

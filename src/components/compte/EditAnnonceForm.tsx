@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { BienType, BienCategorie, DpeClasse, Profile } from '@/lib/types'
 import { LIMITES_PLAN } from '@/lib/types'
+import LocationPicker from '@/components/LocationPicker'
 
 interface Photo { id: string; url: string; storage_path: string; ordre: number; principale: boolean }
 
@@ -431,24 +432,20 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
           <div className="bg-white rounded-2xl p-5 border border-navy/08 space-y-4">
             <h3 className="text-xs font-medium text-navy/50 uppercase tracking-wider">Localisation</h3>
 
-            <div>
-              <label className={labelCls}>Adresse</label>
-              <input type="text" value={form.adresse} onChange={e => update('adresse', e.target.value)} onBlur={geocodeAdresse} placeholder="12 rue de la Paix" className={inputCls} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelCls}>Ville *</label>
-                <input type="text" value={form.ville} onChange={e => update('ville', e.target.value)} onBlur={geocodeAdresse} className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>Code postal *</label>
-                <input type="text" value={form.code_postal} onChange={e => update('code_postal', e.target.value)} maxLength={5} className={inputCls} />
-              </div>
-            </div>
-
-            {geocoding && <p className="text-xs text-navy/40 flex items-center gap-2"><span className="animate-spin">⟳</span> Localisation…</p>}
-            {form.lat !== 0 && !geocoding && <p className="text-xs text-green-600">✓ Position : {form.lat.toFixed(5)}, {form.lng.toFixed(5)}</p>}
+            <LocationPicker
+              adresse={form.adresse}
+              ville={form.ville}
+              codePostal={form.code_postal}
+              lat={form.lat}
+              lng={form.lng}
+              onChange={fields => {
+                if (fields.adresse     !== undefined) update('adresse',     fields.adresse)
+                if (fields.ville       !== undefined) update('ville',       fields.ville)
+                if (fields.code_postal !== undefined) update('code_postal', fields.code_postal)
+                if (fields.lat         !== undefined) update('lat',         fields.lat)
+                if (fields.lng         !== undefined) update('lng',         fields.lng)
+              }}
+            />
 
             <label className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl cursor-pointer">
               <input type="checkbox" checked={form.approx} onChange={e => update('approx', e.target.checked)} className="accent-primary mt-0.5" />

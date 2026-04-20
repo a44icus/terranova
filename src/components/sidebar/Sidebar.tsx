@@ -6,6 +6,7 @@ import { useFiltersUrlSync } from '@/hooks/useFiltersUrlSync'
 import { useBiensFiltres } from '@/hooks/useBiens'
 import Filters from './Filters'
 import BienList from './BienList'
+import SaveSearchButton from './SaveSearchButton'
 
 interface SidebarContentProps {
   filtersOpen: boolean
@@ -75,6 +76,9 @@ function SidebarContent({ filtersOpen, setFiltersOpen }: SidebarContentProps) {
           <Filters hideReset hideTabs />
         </div>
       </div>
+
+      {/* Alerte e-mail */}
+      <SaveSearchButton />
 
       {/* Liste des biens */}
       <BienList />

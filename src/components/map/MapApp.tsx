@@ -18,7 +18,7 @@ interface Props {
 }
 
 export default function MapApp({ biens, user, initialBienId }: Props) {
-  const { setBiens, setActiveBienId, compareSet, favsPanelOpen, setFavsPanelOpen } = useMapStore()
+  const { setBiens, setActiveBienId, compareSet, favsPanelOpen, setFavsPanelOpen, activeBienId } = useMapStore()
   const [showCompare, setShowCompare] = useState(false)
   const [mounted, setMounted] = useState(false)
   const cmpCount = compareSet.size
@@ -31,6 +31,18 @@ export default function MapApp({ biens, user, initialBienId }: Props) {
       setActiveBienId(initialBienId)
     }
   }, [biens])
+
+  // ── Sync activeBienId → URL (?bien=id) ────────────────────
+  useEffect(() => {
+    if (!mounted) return
+    const url = new URL(window.location.href)
+    if (activeBienId) {
+      url.searchParams.set('bien', activeBienId)
+    } else {
+      url.searchParams.delete('bien')
+    }
+    window.history.replaceState({}, '', url.toString())
+  }, [activeBienId, mounted])
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">

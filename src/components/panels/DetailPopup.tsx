@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 import { useMapStore } from '@/store/mapStore'
 import { formatPrix } from '@/lib/geo'
 import type { BienPublic } from '@/lib/types'
@@ -31,6 +32,14 @@ export default function DetailPopup({ bien, insightsHtml, onClose, onRoute }: Pr
   const isCmp = compareSet.has(bien.id)
   const prix = formatPrix(bien.prix, bien.type)
   const icon = CAT_ICON[bien.categorie] ?? '🏠'
+  const [copied, setCopied] = useState(false)
+
+  function handleShare() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   return (
     <>
@@ -97,26 +106,99 @@ export default function DetailPopup({ bien, insightsHtml, onClose, onRoute }: Pr
               {bien.dpe && <span style={{ background:DPE_COLORS[bien.dpe], color:'white', fontWeight:700, padding:'1px 6px', borderRadius:3, fontSize:10 }}>DPE {bien.dpe}</span>}
             </div>
 
-            <div style={{ display:'flex', gap:6 }}>
-              <Link href={`/annonce/${bien.id}`} style={{ flex:1, background:'#0F172A', color:'white', border:'none', borderRadius:7, padding:'7px 0', fontSize:12, fontWeight:500, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', textDecoration:'none' }}
-                onMouseEnter={e=>(e.currentTarget.style.background='#4F46E5')}
-                onMouseLeave={e=>(e.currentTarget.style.background='#0F172A')}>
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              <Link href={`/annonce/${bien.id}`} style={{ background:'#4F46E5', color:'white', border:'none', borderRadius:8, padding:'9px 0', fontSize:12, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6, textDecoration:'none', boxShadow:'0 2px 8px rgba(79,70,229,0.35)' }}
+                onMouseEnter={e=>(e.currentTarget.style.background='#4338CA')}
+                onMouseLeave={e=>(e.currentTarget.style.background='#4F46E5')}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 Voir la fiche
               </Link>
+              <div style={{ display:'flex', gap:5 }}>
               {[
-                { label: isFav?'♥':'♡', active: isFav, color:'#e05a5a', onClick:()=>toggleFavorite(bien.id) },
-                { label: '⚖', active: isCmp, color:'#0891B2', onClick:()=>toggleCompare(bien.id) },
-                { label: '🗺', active: false, color:'#2980b9', onClick:onRoute },
-              ].map((btn,i) => (
+                {
+                  icon: isFav
+                    ? <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
+                  label: 'Favori',
+                  active: isFav,
+                  color: '#e05a5a',
+                  bg: 'rgba(224,90,90,0.08)',
+                  border: 'rgba(224,90,90,0.22)',
+                  shadow: 'rgba(224,90,90,0.35)',
+                  onClick: ()=>toggleFavorite(bien.id),
+                },
+                {
+                  icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>,
+                  label: 'Comparer',
+                  active: isCmp,
+                  color: '#0891B2',
+                  bg: 'rgba(8,145,178,0.08)',
+                  border: 'rgba(8,145,178,0.22)',
+                  shadow: 'rgba(8,145,178,0.35)',
+                  onClick: ()=>toggleCompare(bien.id),
+                },
+                {
+                  icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a6 6 0 0 1 6-6"/><path d="M18 7v8a6 6 0 0 1-6 6"/></svg>,
+                  label: 'Itinéraire',
+                  active: false,
+                  color: '#4F46E5',
+                  bg: 'rgba(79,70,229,0.08)',
+                  border: 'rgba(79,70,229,0.22)',
+                  shadow: 'rgba(79,70,229,0.35)',
+                  onClick: onRoute,
+                },
+                {
+                  icon: copied
+                    ? <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                    : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
+                  label: copied ? 'Copié !' : 'Partager',
+                  active: copied,
+                  color: '#059669',
+                  bg: 'rgba(5,150,105,0.08)',
+                  border: 'rgba(5,150,105,0.22)',
+                  shadow: 'rgba(5,150,105,0.35)',
+                  onClick: handleShare,
+                },
+              ].map((btn, i) => (
                 <button key={i} onClick={btn.onClick} style={{
-                  width:34, height:34, borderRadius:7,
-                  border:`0.5px solid ${btn.active?btn.color:'rgba(26,26,24,0.15)'}`,
-                  background: btn.active?btn.color:'none',
-                  color: btn.active?'white':'rgba(26,26,24,0.4)',
-                  cursor:'pointer', fontSize:14,
-                  display:'flex', alignItems:'center', justifyContent:'center',
-                }}>{btn.label}</button>
+                  flex: 1,
+                  height: 40,
+                  borderRadius: 9,
+                  border: `1.5px solid ${btn.active ? btn.color : btn.border}`,
+                  background: btn.active ? btn.color : btn.bg,
+                  color: btn.active ? 'white' : btn.color,
+                  cursor: 'pointer',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
+                  transition: 'all 0.15s',
+                  boxShadow: btn.active ? `0 3px 10px ${btn.shadow}` : 'none',
+                  padding: '4px 2px',
+                }}
+                onMouseEnter={e => {
+                  if (!btn.active) {
+                    e.currentTarget.style.background = btn.color
+                    e.currentTarget.style.color = 'white'
+                    e.currentTarget.style.borderColor = btn.color
+                    e.currentTarget.style.boxShadow = `0 3px 10px ${btn.shadow}`
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!btn.active) {
+                    e.currentTarget.style.background = btn.bg
+                    e.currentTarget.style.color = btn.color
+                    e.currentTarget.style.borderColor = btn.border
+                    e.currentTarget.style.boxShadow = 'none'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }
+                }}
+                >
+                  {btn.icon}
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.01em', lineHeight: 1 }}>
+                    {btn.label}
+                  </span>
+                </button>
               ))}
+              </div>
             </div>
           </div>
         </div>

@@ -47,6 +47,7 @@ export default function MapCanvas() {
     sidebarOpen, toggleSidebar,
     geoPosition, setGeoPosition,
     nearbyRadius, showToast,
+    biens: allBiens,
   } = useMapStore()
 
   const biens = useBiensFiltres()
@@ -61,6 +62,8 @@ export default function MapCanvas() {
   const [poiData, setPoiData] = useState<{pois: any[], best: Record<string, any>} | null>(null)
   const [activeBien, setActiveBien] = useState<BienPublic | null>(null)
   const [insightsHtml, setInsightsHtml] = useState('')
+  const [showHeatmap, setShowHeatmap] = useState(false)
+  const showHeatmapRef = useRef(false)
 
   const maplibreRef = useRef<any>(null)
 
@@ -392,7 +395,6 @@ export default function MapCanvas() {
       `
       badgeEl.innerHTML = `
         <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:${color};">${dist >= 1000 ? (dist/1000).toFixed(1)+'km' : dist+'m'}</span>
-        <span style="font-family:'DM Sans',sans-serif;font-size:9px;color:rgba(15,23,42,0.45);">${catDef?.label ?? ''}</span>
       `
 
       // Stem (petit trait + dot qui touche exactement le sol)
@@ -647,6 +649,74 @@ export default function MapCanvas() {
     }
   }
 
+  // ── HEATMAP PRIX ─────────────────────────────────────────
+  function applyHeatmap(map: MapLibreMap) {
+    const features = allBiens
+      .filter(b => b.lat != null && b.lng != null)
+      .map(b => ({
+        type: 'Feature' as const,
+        geometry: { type: 'Point' as const, coordinates: [b.lng!, b.lat!] },
+        properties: { prix: b.prix },
+      }))
+
+    const data = { type: 'FeatureCollection' as const, features }
+    const src = map.getSource('heatmap-src') as any
+    if (src) {
+      src.setData(data)
+    } else {
+      map.addSource('heatmap-src', { type: 'geojson', data })
+      map.addLayer({
+        id: 'heatmap-layer',
+        type: 'heatmap',
+        source: 'heatmap-src',
+        paint: {
+          // Plus le bien est cher, plus il "pèse" sur la heatmap
+          'heatmap-weight': [
+            'interpolate', ['linear'], ['get', 'prix'],
+            0, 0,
+            300000, 0.4,
+            800000, 0.7,
+            2000000, 1,
+          ],
+          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 0.6, 15, 2],
+          'heatmap-color': [
+            'interpolate', ['linear'], ['heatmap-density'],
+            0,   'rgba(79,70,229,0)',
+            0.2, 'rgba(56,189,248,0.6)',
+            0.4, 'rgba(52,211,153,0.7)',
+            0.6, 'rgba(250,204,21,0.8)',
+            0.8, 'rgba(251,146,60,0.9)',
+            1,   'rgba(239,68,68,1)',
+          ],
+          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 18, 15, 55],
+          'heatmap-opacity': 0.72,
+        },
+      })
+    }
+  }
+
+  function removeHeatmap(map: MapLibreMap) {
+    try { if (map.getLayer('heatmap-layer')) map.removeLayer('heatmap-layer') } catch {}
+    try { if (map.getSource('heatmap-src')) map.removeSource('heatmap-src') } catch {}
+  }
+
+  function toggleHeatmap() {
+    const map = mapRef.current
+    if (!map) return
+    const next = !showHeatmapRef.current
+    showHeatmapRef.current = next
+    setShowHeatmap(next)
+    if (next) applyHeatmap(map)
+    else removeHeatmap(map)
+  }
+
+  // Mise à jour de la heatmap quand les biens changent (sans re-toggle)
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !showHeatmapRef.current) return
+    applyHeatmap(map)
+  }, [allBiens])
+
   // ── STYLE CARTE ───────────────────────────────────────────
   const MAX_ZOOM: Record<MapStyleKey, number> = { street: 19, satellite: 18.5, topo: 17 }
 
@@ -661,7 +731,10 @@ export default function MapCanvas() {
     if (map.getZoom() > MAX_ZOOM[style]) {
       map.easeTo({ zoom: MAX_ZOOM[style], duration: 400 })
     }
-    map.once('style.load', () => updateMarkers())
+    map.once('style.load', () => {
+      updateMarkers()
+      if (showHeatmapRef.current) applyHeatmap(map)
+    })
   }
 
   // ── RENDER ────────────────────────────────────────────────
@@ -693,6 +766,8 @@ export default function MapCanvas() {
           picking={routePickingDest}
           onPlaceDest={placeRouteDestMarker}
           onCancel={cancelRoute}
+          biens={biens}
+          originBienId={activeBienId ?? undefined}
         />
       )}
 
@@ -739,6 +814,18 @@ export default function MapCanvas() {
             {btn.label}
           </button>
         ))}
+        {/* Heatmap prix */}
+        <button
+          onClick={toggleHeatmap}
+          title="Heatmap des prix"
+          className={`w-9 h-9 border rounded-lg flex items-center justify-center text-sm shadow-sm transition-all font-medium ${
+            showHeatmap
+              ? 'bg-[#4F46E5] border-[#4F46E5] text-white'
+              : 'bg-white border-navy/12 hover:bg-navy hover:text-white'
+          }`}
+        >
+          🌡
+        </button>
         {/* Géoloc */}
         <button onClick={toggleGeoloc}
           className={`w-9 h-9 border rounded-lg flex items-center justify-center shadow-sm transition-all ${geoActive ? 'bg-[#2980b9] border-[#2980b9] text-white' : 'bg-white border-navy/12 hover:bg-navy hover:text-white'}`}>
@@ -753,6 +840,22 @@ export default function MapCanvas() {
           {zoom}
         </div>
       </div>
+
+      {/* Légende heatmap */}
+      {showHeatmap && (
+        <div className="absolute bottom-20 right-4 bg-white border border-navy/12 rounded-lg px-3 py-2.5 shadow-sm z-10 min-w-[130px]">
+          <div className="text-[10px] font-semibold text-navy/40 uppercase tracking-wider mb-2">Prix au m²</div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <div className="flex-1 h-2 rounded-full" style={{
+              background: 'linear-gradient(to right, rgba(56,189,248,0.8), rgba(52,211,153,0.8), rgba(250,204,21,0.9), rgba(251,146,60,0.9), rgba(239,68,68,1))'
+            }} />
+          </div>
+          <div className="flex justify-between text-[9px] text-navy/35">
+            <span>Abordable</span>
+            <span>Élevé</span>
+          </div>
+        </div>
+      )}
 
       {/* Style carte */}
       <div className="absolute bottom-10 right-4 flex bg-white border border-navy/12 rounded-lg overflow-hidden shadow-sm z-10">
