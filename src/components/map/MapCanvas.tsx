@@ -13,7 +13,6 @@ import type { BienPublic } from '@/lib/types'
 import DetailPopup from '@/components/panels/DetailPopup'
 import RoutePanel from '@/components/panels/RoutePanel'
 import NearbyPanel from '@/components/panels/NearbyPanel'
-import SearchBar from './SearchBar'
 import LassoCanvas from './LassoCanvas'
 
 let mapInstance: MapLibreMap | null = null
@@ -674,8 +673,6 @@ export default function MapCanvas() {
       {/* Lasso canvas */}
       <LassoCanvas mapRef={mapRef} containerRef={containerRef} />
 
-      {/* Barre de recherche */}
-      <SearchBar mapRef={mapRef} />
 
       {/* Popup détail bien */}
       {activeBien && (

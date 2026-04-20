@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useMapStore } from '@/store/mapStore'
 import Sidebar from '@/components/sidebar/Sidebar'
 import MapCanvas from '@/components/map/MapCanvas'
+import SearchBar from '@/components/map/SearchBar'
 import Toast from '@/components/ui/Toast'
 import FavoritesPanel from '@/components/panels/FavoritesPanel'
 import ComparePanel from '@/components/panels/ComparePanel'
@@ -32,7 +33,9 @@ export default function MapApp({ biens, user, initialBienId }: Props) {
   }, [biens])
 
   return (
-    <div className="flex flex-1 overflow-hidden relative">
+    <div className="flex flex-col flex-1 overflow-hidden">
+      <SearchBar />
+      <div className="flex flex-1 overflow-hidden relative">
       <Sidebar />
       <MapCanvas />
       <Toast />
@@ -67,6 +70,7 @@ export default function MapApp({ biens, user, initialBienId }: Props) {
       {/* Panels */}
       {favsPanelOpen && <FavoritesPanel onClose={() => setFavsPanelOpen(false)} />}
       {showCompare && <ComparePanel onClose={() => setShowCompare(false)} />}
+      </div>
     </div>
   )
 }
