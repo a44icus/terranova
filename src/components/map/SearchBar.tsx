@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { getGlobalMap } from '@/hooks/useMap'
+import { getMap } from '@/components/map/MapCanvas'
 
 interface Suggestion {
   display_name: string
@@ -43,15 +43,43 @@ export default function SearchBar() {
     setValue(s.display_name.split(',').slice(0, 2).join(','))
     setOpen(false)
     setSuggestions([])
-    getGlobalMap()?.flyTo({ center: [parseFloat(s.lon), parseFloat(s.lat)], zoom: 14, speed: 1.3 })
+    getMap()?.flyTo({ center: [parseFloat(s.lon), parseFloat(s.lat)], zoom: 14, speed: 1.3 })
+  }
+
+  async function search(query: string) {
+    if (query.length < 2) return
+    setLoading(true)
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=fr`,
+        { headers: { 'Accept-Language': 'fr' } }
+      )
+      const data: Suggestion[] = await res.json()
+      if (data.length > 0) {
+        selectSuggestion(data[0])
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
-    if (!open) return
-    if (e.key === 'ArrowDown') { setSelectedIdx(i => Math.min(i + 1, suggestions.length - 1)); e.preventDefault() }
-    else if (e.key === 'ArrowUp') { setSelectedIdx(i => Math.max(i - 1, 0)); e.preventDefault() }
-    else if (e.key === 'Enter' && selectedIdx >= 0) selectSuggestion(suggestions[selectedIdx])
-    else if (e.key === 'Escape') setOpen(false)
+    if (e.key === 'ArrowDown') { setSelectedIdx(i => Math.min(i + 1, suggestions.length - 1)); e.preventDefault(); return }
+    if (e.key === 'ArrowUp')   { setSelectedIdx(i => Math.max(i - 1, 0)); e.preventDefault(); return }
+    if (e.key === 'Escape')    { setOpen(false); return }
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      if (selectedIdx >= 0 && suggestions[selectedIdx]) {
+        // Suggestion sélectionnée au clavier → l'utiliser
+        selectSuggestion(suggestions[selectedIdx])
+      } else if (suggestions.length > 0) {
+        // Suggestions disponibles mais aucune sélectionnée → prendre la première
+        selectSuggestion(suggestions[0])
+      } else {
+        // Pas encore de suggestions → lancer la recherche directement
+        search(value)
+      }
+    }
   }
 
   function clear() {
@@ -63,11 +91,15 @@ export default function SearchBar() {
   return (
     <div className="relative flex-shrink-0 z-30 border-b border-navy/10 bg-white">
       <div className={`flex items-center transition-colors ${open ? 'ring-1 ring-inset ring-primary' : ''}`}>
-        <span className="pl-4 text-navy/35 text-sm flex-shrink-0">
+        <button
+          onClick={() => suggestions.length > 0 ? selectSuggestion(suggestions[0]) : search(value)}
+          className="pl-4 pr-1 text-navy/35 hover:text-primary transition-colors flex-shrink-0"
+          tabIndex={-1}
+        >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
             <circle cx="11" cy="11" r="8"/><path strokeLinecap="round" d="M21 21l-4.35-4.35"/>
           </svg>
-        </span>
+        </button>
         <input
           type="text"
           value={value}

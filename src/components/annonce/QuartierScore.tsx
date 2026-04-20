@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { POI_CATEGORIES, OVERPASS_QUERY, OVERPASS_SERVERS, detectCategory, computeNeighborhoodScore } from '@/lib/poi'
+import { POI_CATEGORIES, OVERPASS_QUERY, OVERPASS_SERVERS, SEARCH_RADII, detectCategory, computeNeighborhoodScore, scoreLabel, DEFAULT_SCORE_SEUILS, type ScoreSeuils } from '@/lib/poi'
 
 interface Props {
   lat: number
   lng: number
+  poiWeights?: Record<string, number>
+  seuils?: ScoreSeuils
 }
 
 type POIResult = { name: string; distance: number; emoji: string }
@@ -18,18 +20,6 @@ function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): num
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-const SCORE_COLOR = (s: number) =>
-  s >= 8 ? '#16A34A' : s >= 6 ? '#65A30D' : s >= 4 ? '#D97706' : '#DC2626'
-
-const SCORE_LABEL = (s: number) =>
-  s >= 8 ? 'Excellent' : s >= 6 ? 'Bon' : s >= 4 ? 'Moyen' : 'Faible'
-
-// Rayons testés successivement (degrés ≈ km / 111)
-const SEARCH_RADII = [
-  { km: 1, deg: 0.009 },
-  { km: 3, deg: 0.027 },
-  { km: 5, deg: 0.045 },
-]
 
 async function fetchAtRadius(
   lat: number, lng: number, deg: number, maxDistM: number
@@ -73,7 +63,7 @@ async function fetchAtRadius(
   return null
 }
 
-export default function QuartierScore({ lat, lng }: Props) {
+export default function QuartierScore({ lat, lng, poiWeights, seuils = DEFAULT_SCORE_SEUILS }: Props) {
   const [score, setScore]                 = useState<number | null>(null)
   const [bestByCategory, setBestByCategory] = useState<Record<string, POIResult>>({})
   const [radiusKm, setRadiusKm]           = useState(1)
@@ -87,7 +77,7 @@ export default function QuartierScore({ lat, lng }: Props) {
         const best = await fetchAtRadius(lat, lng, deg, km * 1000)
         if (best) {
           setBestByCategory(best)
-          setScore(computeNeighborhoodScore(best))
+          setScore(computeNeighborhoodScore(best, poiWeights))
           setRadiusKm(km)
           setLoading(false)
           return
@@ -112,8 +102,7 @@ export default function QuartierScore({ lat, lng }: Props) {
   if (score === null) return null
 
   const isFallback = radiusKm > 1
-  const color = SCORE_COLOR(score)
-  const label = SCORE_LABEL(score)
+  const { color, text: label } = scoreLabel(score, seuils)
 
   function fmtDist(m: number) {
     return m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`

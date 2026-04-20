@@ -12,6 +12,7 @@ import ShareButton from './ShareButton'
 import QuartierScore from '@/components/annonce/QuartierScore'
 import RapportBien from '@/components/annonce/RapportBien'
 import { genererRapport } from '@/lib/profils'
+import { getSiteSettings, getPoiWeights, getScoreSeuils } from '@/lib/siteSettings'
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
 
@@ -107,9 +108,9 @@ export default async function AnnoncePage({ params }: Props) {
     ])
   })().catch(() => {})
 
-  // Fetch vendeur + biens similaires + email vendeur en parallèle
+  // Fetch settings + vendeur + biens similaires + email vendeur en parallèle
   const adminClient = createAdminClient()
-  const [{ data: vendeur }, { data: similaires }, { data: vendeurAuthData }] = await Promise.all([
+  const [{ data: vendeur }, { data: similaires }, { data: vendeurAuthData }, siteSettings] = await Promise.all([
     supabase
       .from('profiles')
       .select('prenom, nom, type, agence, avatar_url, logo_url')
@@ -124,6 +125,7 @@ export default async function AnnoncePage({ params }: Props) {
       .order('featured', { ascending: false })
       .limit(4),
     adminClient.auth.admin.getUserById(bien.user_id),
+    getSiteSettings(),
   ])
 
   const vendeurEmail = vendeurAuthData?.user?.email
@@ -365,7 +367,12 @@ export default async function AnnoncePage({ params }: Props) {
 
             {/* Score quartier */}
             {bien.lat && bien.lng && (
-              <QuartierScore lat={bien.lat} lng={bien.lng} />
+              <QuartierScore
+                lat={bien.lat}
+                lng={bien.lng}
+                poiWeights={getPoiWeights(siteSettings)}
+                seuils={getScoreSeuils(siteSettings)}
+              />
             )}
 
             {/* Meta */}
@@ -391,6 +398,8 @@ export default async function AnnoncePage({ params }: Props) {
                   bienTitre={bien.titre}
                   vendeurEmail={vendeurEmail}
                   vendeurNom={vendeurNom}
+                  delaiReponse={siteSettings.contact_delai_reponse}
+                  antispamMinutes={siteSettings.contact_antispam_minutes}
                 />
 
                 {/* Vendor */}

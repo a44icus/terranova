@@ -64,6 +64,8 @@ export default function MapCanvas() {
   const [insightsHtml, setInsightsHtml] = useState('')
   const [showHeatmap, setShowHeatmap] = useState(false)
   const showHeatmapRef = useRef(false)
+  const [legendOpen, setLegendOpen] = useState(false)
+  const [controlsOpen, setControlsOpen] = useState(true)
 
   const maplibreRef = useRef<any>(null)
 
@@ -802,42 +804,149 @@ export default function MapCanvas() {
 
       {/* Contrôles droite */}
       <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-10">
-        {[
-          { label: '+', action: () => mapRef.current?.zoomIn() },
-          { label: '−', action: () => mapRef.current?.zoomOut() },
-          { label: '⌖', action: () => mapRef.current?.flyTo({ center: [2.3522, 48.8566], zoom: 11, pitch: 0, bearing: 0 }) },
-          { label: '3D', action: toggle3D },
-          { label: '🏢', action: toggleBuildings },
-        ].map(btn => (
-          <button key={btn.label} onClick={btn.action}
-            className="w-9 h-9 bg-white border border-navy/12 rounded-lg flex items-center justify-center text-sm shadow-sm hover:bg-navy hover:text-white transition-all font-medium">
-            {btn.label}
-          </button>
-        ))}
-        {/* Heatmap prix */}
+
+        {/* ── Bouton toggle — toujours visible ── */}
         <button
-          onClick={toggleHeatmap}
-          title="Heatmap des prix"
-          className={`w-9 h-9 border rounded-lg flex items-center justify-center text-sm shadow-sm transition-all font-medium ${
-            showHeatmap
-              ? 'bg-[#4F46E5] border-[#4F46E5] text-white'
-              : 'bg-white border-navy/12 hover:bg-navy hover:text-white'
+          onClick={() => setControlsOpen(v => !v)}
+          title={controlsOpen ? 'Masquer les contrôles' : 'Afficher les contrôles'}
+          className={`w-9 h-9 border-2 rounded-lg flex items-center justify-center shadow-sm transition-all ${
+            controlsOpen ? 'bg-slate-100 border-[#4F46E5] text-navy' : 'bg-white border-navy/12 hover:bg-slate-50 hover:border-navy/30 text-navy/60'
           }`}
         >
-          🌡
-        </button>
-        {/* Géoloc */}
-        <button onClick={toggleGeoloc}
-          className={`w-9 h-9 border rounded-lg flex items-center justify-center shadow-sm transition-all ${geoActive ? 'bg-[#2980b9] border-[#2980b9] text-white' : 'bg-white border-navy/12 hover:bg-navy hover:text-white'}`}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/>
-            <line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/>
-            <line x1="18" y1="12" x2="22" y2="12"/>
+          {/* Icône sliders */}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="4" y1="6" x2="20" y2="6"/>
+            <line x1="4" y1="12" x2="20" y2="12"/>
+            <line x1="4" y1="18" x2="20" y2="18"/>
+            <circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/>
+            <circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"/>
+            <circle cx="9" cy="18" r="2" fill="currentColor" stroke="none"/>
           </svg>
         </button>
-        {/* Zoom display */}
-        <div className="w-9 h-9 bg-white border border-navy/12 rounded-lg flex items-center justify-center text-[11px] font-semibold shadow-sm cursor-default">
-          {zoom}
+
+        {/* ── Panel contrôles — animé ── */}
+        <div style={{
+          display: 'flex', flexDirection: 'column', gap: 6,
+          overflow: 'hidden',
+          maxHeight: controlsOpen ? 500 : 0,
+          opacity: controlsOpen ? 1 : 0,
+          transform: controlsOpen ? 'translateY(0)' : 'translateY(-6px)',
+          transition: 'max-height 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease, transform 0.2s ease',
+          pointerEvents: controlsOpen ? 'auto' : 'none',
+        }}>
+
+          {/* Zoom +/− — desktop uniquement, texte → fond sombre lisible */}
+          {[
+            { label: '+', action: () => mapRef.current?.zoomIn() },
+            { label: '−', action: () => mapRef.current?.zoomOut() },
+          ].map(btn => (
+            <button key={btn.label} onClick={btn.action}
+              className="hidden lg:flex w-9 h-9 bg-white border border-navy/12 rounded-lg items-center justify-center text-sm shadow-sm hover:bg-navy hover:text-white transition-all font-medium">
+              {btn.label}
+            </button>
+          ))}
+
+          {/* Centrer ⌖ et 3D — texte/symbole → fond sombre OK */}
+          {[
+            { label: '⌖', action: () => mapRef.current?.flyTo({ center: [2.3522, 48.8566], zoom: 11, pitch: 0, bearing: 0 }) },
+            { label: '3D', action: toggle3D },
+          ].map(btn => (
+            <button key={btn.label} onClick={btn.action}
+              className="w-9 h-9 bg-white border border-navy/12 rounded-lg flex items-center justify-center text-sm shadow-sm hover:bg-navy hover:text-white transition-all font-medium">
+              {btn.label}
+            </button>
+          ))}
+
+          {/* 🏢 Bâtiments — emoji → fond clair uniquement */}
+          <button onClick={toggleBuildings}
+            className="w-9 h-9 bg-white border border-navy/12 rounded-lg flex items-center justify-center text-sm shadow-sm transition-all hover:border-navy/40 hover:bg-slate-50 active:bg-slate-100">
+            🏢
+          </button>
+
+          {/* Layers Plan/Satellite/Topo — mobile uniquement */}
+          {([
+            {
+              key: 'street',
+              title: 'Plan',
+              icon: (
+                /* Carte dépliée — universellement reconnu comme "vue plan" */
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="3,6 9,3 15,6 21,3 21,18 15,21 9,18 3,21"/>
+                  <line x1="9" y1="3" x2="9" y2="18"/>
+                  <line x1="15" y1="6" x2="15" y2="21"/>
+                </svg>
+              ),
+            },
+            {
+              key: 'satellite',
+              title: 'Satellite',
+              icon: (
+                /* Couches empilées — même icône que Google Maps / Mapbox pour le satellite */
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="12,2 22,8.5 12,15 2,8.5"/>
+                  <polyline points="2,12 12,18.5 22,12"/>
+                  <polyline points="2,15.5 12,22 22,15.5"/>
+                </svg>
+              ),
+            },
+            {
+              key: 'topo',
+              title: 'Topo',
+              icon: (
+                /* Sommets de montagne avec ligne de niveau */
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 20 L9 8 L15 16 L18 11 L21 20"/>
+                  <path d="M1 20 H23"/>
+                  <path d="M7 16 Q9 13 11 16"/>
+                </svg>
+              ),
+            },
+          ] as { key: MapStyleKey; title: string; icon: React.ReactNode }[]).map(({ key, title, icon }) => (
+            <button
+              key={key}
+              onClick={() => setMapStyle(key)}
+              title={title}
+              className={`lg:hidden w-9 h-9 border-2 rounded-lg flex items-center justify-center shadow-sm transition-all ${
+                mapStyle === key
+                  ? 'bg-slate-100 border-[#4F46E5] text-[#4F46E5]'
+                  : 'bg-white border-navy/12 text-navy/50 hover:bg-slate-50 hover:border-navy/30 hover:text-navy'
+              }`}
+            >
+              {icon}
+            </button>
+          ))}
+
+          {/* 🌡 Heatmap — emoji → actif en indigo clair */}
+          <button
+            onClick={toggleHeatmap}
+            title="Heatmap des prix"
+            className={`w-9 h-9 border-2 rounded-lg flex items-center justify-center text-sm shadow-sm transition-all ${
+              showHeatmap
+                ? 'bg-indigo-50 border-[#4F46E5]'
+                : 'bg-white border-navy/12 hover:bg-slate-50 hover:border-navy/30'
+            }`}
+          >
+            🌡
+          </button>
+
+          {/* Géoloc — SVG currentColor → fond coloré OK */}
+          <button onClick={toggleGeoloc}
+            className={`w-9 h-9 border-2 rounded-lg flex items-center justify-center shadow-sm transition-all ${
+              geoActive
+                ? 'bg-[#2980b9] border-[#2980b9] text-white'
+                : 'bg-white border-navy/12 hover:bg-slate-50 hover:border-navy/30 text-navy/60'
+            }`}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/>
+              <line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/>
+              <line x1="18" y1="12" x2="22" y2="12"/>
+            </svg>
+          </button>
+
+          {/* Zoom display — desktop uniquement */}
+          <div className="hidden lg:flex w-9 h-9 bg-white border border-navy/12 rounded-lg items-center justify-center text-[11px] font-semibold shadow-sm cursor-default">
+            {zoom}
+          </div>
         </div>
       </div>
 
@@ -857,8 +966,8 @@ export default function MapCanvas() {
         </div>
       )}
 
-      {/* Style carte */}
-      <div className="absolute bottom-10 right-4 flex bg-white border border-navy/12 rounded-lg overflow-hidden shadow-sm z-10">
+      {/* Style carte — desktop uniquement (mobile : dans le panel contrôles) */}
+      <div className="hidden lg:flex absolute bottom-10 right-4 bg-white border border-navy/12 rounded-lg overflow-hidden shadow-sm z-10">
         {(['street', 'satellite', 'topo'] as MapStyleKey[]).map(s => (
           <button key={s} onClick={() => setMapStyle(s)}
             className={`px-3 py-2 text-xs font-medium border-r last:border-r-0 border-navy/10 transition-all ${mapStyle === s ? 'bg-navy text-white' : 'text-navy/50 hover:text-navy'}`}>
@@ -867,19 +976,66 @@ export default function MapCanvas() {
         ))}
       </div>
 
-      {/* Lasso controls */}
-      <LassoControls />
+      {/* Lasso controls — décalé vers le haut si légende active */}
+      <LassoControls offset={activeBien && poiData && poiData.pois.length > 0} />
 
-      {/* Légende POI */}
+      {/* Légende POI — desktop uniquement, collapsible */}
       {activeBien && poiData && poiData.pois.length > 0 && (
-        <div className="absolute bottom-10 left-4 bg-white rounded-xl p-3 shadow-md border border-navy/10 z-10 text-xs font-['DM_Sans']">
-          <div className="text-[10px] font-medium text-navy/40 uppercase tracking-wider mb-2">Commodités</div>
-          {POI_CATEGORIES.map(cat => (
-            <div key={cat.key} className="flex items-center gap-2 mb-1.5 last:mb-0">
-              <div className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] border-2 border-white shadow-sm flex-shrink-0" style={{ background: cat.color }}>{cat.emoji}</div>
-              <span className="text-navy">{cat.label}</span>
+        <div className="hidden lg:flex flex-col absolute bottom-10 left-4 z-10" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+          {/* Panel ouvert */}
+          {legendOpen && (
+            <div style={{
+              background: 'white', borderRadius: 12, padding: '10px 12px 8px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+              border: '0.5px solid rgba(15,23,42,0.1)',
+              marginBottom: 6,
+            }}>
+              <div style={{ fontSize: 9, fontWeight: 600, color: 'rgba(15,23,42,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+                Commodités sur la carte
+              </div>
+              {POI_CATEGORIES.map(cat => (
+                <div key={cat.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <div style={{
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: 'white', border: `2.5px solid ${cat.color}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, flexShrink: 0,
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                  }}>
+                    {cat.emoji}
+                  </div>
+                  <span style={{ fontSize: 12, color: '#0F172A' }}>{cat.label}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+          {/* Bouton toggle */}
+          <button
+            onClick={() => setLegendOpen(v => !v)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: legendOpen ? '#0F172A' : 'white',
+              color: legendOpen ? 'white' : '#0F172A',
+              border: '0.5px solid rgba(15,23,42,0.12)',
+              borderRadius: 9, padding: '6px 10px',
+              fontSize: 11, fontWeight: 500, cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              transition: 'all 0.15s',
+            }}
+          >
+            {/* icône map-pin */}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            Légende
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              {legendOpen
+                ? <polyline points="18 15 12 9 6 15"/>
+                : <polyline points="6 9 12 15 18 9"/>
+              }
+            </svg>
+          </button>
         </div>
       )}
 
@@ -895,10 +1051,16 @@ export default function MapCanvas() {
   )
 }
 
-function LassoControls() {
+function LassoControls({ offset }: { offset?: boolean | null }) {
   const { setLassoPolygon, lassoPolygon } = useMapStore()
   return (
-    <div className="absolute bottom-10 left-4 z-10" style={{ display: lassoPolygon ? 'block' : 'none' }}>
+    <div
+      className="absolute left-4 z-10 transition-all duration-200"
+      style={{
+        bottom: offset ? '72px' : '40px',   /* décalé vers le haut si légende visible */
+        display: lassoPolygon ? 'block' : 'none',
+      }}
+    >
       <button onClick={() => setLassoPolygon(null)}
         className="bg-white border border-navy/12 rounded-lg px-3 py-2 text-xs font-medium text-navy/60 shadow-sm hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all">
         ✕ Annuler la zone

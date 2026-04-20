@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useMapStore } from '@/store/mapStore'
 import { useFiltersUrlSync } from '@/hooks/useFiltersUrlSync'
 import { useBiensFiltres } from '@/hooks/useBiens'
@@ -8,12 +8,26 @@ import Filters from './Filters'
 import BienList from './BienList'
 import SaveSearchButton from './SaveSearchButton'
 
+// ─── Snap points ──────────────────────────────────────────────
+// 0 = fermé   (60px  — juste le handle)
+// 1 = aperçu  (40vh  — ~3 cartes visibles)
+// 2 = plein   (74vh  — quasi plein écran)
+type SnapIdx = 0 | 1 | 2
+const SNAP_CSS: Record<SnapIdx, string> = { 0: '60px', 1: '40vh', 2: '74vh' }
+const SNAP_FRACTION = [0, 0.40, 0.74] as const
+
+function snapPx(idx: SnapIdx): number {
+  return SNAP_FRACTION[idx] > 0
+    ? window.innerHeight * SNAP_FRACTION[idx]
+    : 60
+}
+
+// ─── Contenu partagé desktop / mobile ─────────────────────────
 interface SidebarContentProps {
   filtersOpen: boolean
   setFiltersOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-// Contenu partagé entre desktop et mobile
 function SidebarContent({ filtersOpen, setFiltersOpen }: SidebarContentProps) {
   const { filtres, setFiltreType, resetFiltres } = useMapStore()
 
@@ -86,12 +100,24 @@ function SidebarContent({ filtersOpen, setFiltersOpen }: SidebarContentProps) {
   )
 }
 
+// ─── Sidebar principale ────────────────────────────────────────
 export default function Sidebar() {
   const { sidebarOpen, filtres } = useMapStore()
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [snapIdx, setSnapIdx] = useState<SnapIdx>(0)
   const biens = useBiensFiltres()
   useFiltersUrlSync()
+
+  // Refs pour le drag
+  const sheetRef = useRef<HTMLDivElement>(null)
+  const drag = useRef({
+    active: false,
+    startY: 0,
+    startH: 0,
+    lastY: 0,
+    lastT: 0,
+    velY: 0,   // px/ms, positif = vers le haut
+  })
 
   const activeCount = [
     !!filtres.categorie,
@@ -102,6 +128,86 @@ export default function Sidebar() {
     !!filtres.ville,
     !!filtres.departement,
   ].filter(Boolean).length
+
+  // ── Snap helpers ──────────────────────────────────────────
+  const applySnap = useCallback((idx: SnapIdx) => {
+    const el = sheetRef.current
+    if (!el) return
+    el.style.transition = 'height 0.32s cubic-bezier(0.34,1.2,0.64,1)'
+    el.style.height = SNAP_CSS[idx]
+    setSnapIdx(idx)
+  }, [])
+
+  // ── Touch handlers (handle uniquement) ───────────────────
+  function onTouchStart(e: React.TouchEvent) {
+    const el = sheetRef.current
+    if (!el) return
+    const now = performance.now()
+    drag.current = {
+      active: true,
+      startY: e.touches[0].clientY,
+      startH: el.getBoundingClientRect().height,
+      lastY: e.touches[0].clientY,
+      lastT: now,
+      velY: 0,
+    }
+    // Couper la transition pendant le drag pour un suivi direct
+    el.style.transition = 'none'
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    const el = sheetRef.current
+    if (!drag.current.active || !el) return
+
+    const touch = e.touches[0]
+    const now = performance.now()
+    const dt = Math.max(1, now - drag.current.lastT)
+
+    // Vélocité instantanée (vers le haut = positif)
+    drag.current.velY = (drag.current.lastY - touch.clientY) / dt
+    drag.current.lastY = touch.clientY
+    drag.current.lastT = now
+
+    const dy = drag.current.startY - touch.clientY
+    const newH = Math.max(44, Math.min(window.innerHeight * 0.90, drag.current.startH + dy))
+    el.style.height = `${newH}px`
+  }
+
+  function onTouchEnd(e: React.TouchEvent) {
+    const el = sheetRef.current
+    if (!drag.current.active || !el) return
+    drag.current.active = false
+
+    const totalDy = Math.abs(drag.current.startY - (e.changedTouches[0]?.clientY ?? drag.current.lastY))
+
+    // ── Tap court (< 10px) → cycle des snaps ──
+    if (totalDy < 10) {
+      const next: SnapIdx = snapIdx === 0 ? 1 : snapIdx === 1 ? 2 : 0
+      applySnap(next)
+      return
+    }
+
+    // ── Drag → snapper au plus proche, corrigé par la vélocité ──
+    const currentH = el.getBoundingClientRect().height
+    const snaps: [number, number, number] = [
+      snapPx(0), snapPx(1), snapPx(2),
+    ]
+
+    // Trouver le snap le plus proche
+    let nearest: SnapIdx = 0
+    let minDist = Infinity
+    snaps.forEach((s, i) => {
+      const d = Math.abs(s - currentH)
+      if (d < minDist) { minDist = d; nearest = i as SnapIdx }
+    })
+
+    // Correction vélocité : swipe rapide → snap suivant/précédent
+    const vel = drag.current.velY
+    if (vel > 0.5 && nearest < 2) nearest = (nearest + 1) as SnapIdx
+    else if (vel < -0.5 && nearest > 0) nearest = (nearest - 1) as SnapIdx
+
+    applySnap(nearest)
+  }
 
   return (
     <>
@@ -121,23 +227,33 @@ export default function Sidebar() {
           Mobile bottom sheet (< lg)
       ════════════════════════════════════════ */}
       <div
+        ref={sheetRef}
         className="lg:hidden fixed bottom-0 left-0 right-0 z-[200] flex flex-col"
         style={{
-          height: mobileOpen ? '72vh' : 'auto',
-          transition: 'height 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+          height: SNAP_CSS[snapIdx],
+          transition: 'height 0.32s cubic-bezier(0.34,1.2,0.64,1)',
+          overflow: 'hidden',
+          /* Ombre portée sur la carte en-dessous */
+          filter: 'drop-shadow(0 -6px 24px rgba(15,23,42,0.12))',
+          willChange: 'height',
         }}
       >
-        {/* ── Handle / drag pill ── */}
-        <button
-          onClick={() => setMobileOpen(o => !o)}
-          className="relative flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-t border-navy/10"
+        {/* ── Handle draggable ── */}
+        <div
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          className="relative flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-t border-navy/10 select-none"
           style={{
-            borderRadius: mobileOpen ? '0' : '14px 14px 0 0',
-            boxShadow: '0 -4px 20px rgba(15,23,42,0.10)',
+            borderRadius: snapIdx === 0 ? '14px 14px 0 0' : '0',
+            touchAction: 'none',   /* bloque le scroll navigateur sur le handle */
+            cursor: 'grab',
           }}
         >
-          {/* Indicateur de glissement */}
-          <span className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 bg-navy/15 rounded-full" />
+          {/* Pill drag visuel */}
+          <span className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full transition-colors"
+            style={{ background: snapIdx === 0 ? 'rgba(15,23,42,0.18)' : 'rgba(15,23,42,0.12)' }}
+          />
 
           {/* Gauche : compteur + filtres actifs */}
           <div className="flex items-center gap-2 mt-1">
@@ -151,7 +267,7 @@ export default function Sidebar() {
             )}
           </div>
 
-          {/* Droite : badge type + chevron */}
+          {/* Droite : badge type + indicateur de snap */}
           <div className="flex items-center gap-2 mt-1">
             {filtres.type !== 'all' && (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full text-white"
@@ -159,21 +275,25 @@ export default function Sidebar() {
                 {filtres.type === 'vente' ? 'Vente' : 'Location'}
               </span>
             )}
-            <svg
-              className={`w-4 h-4 text-navy/40 transition-transform duration-300 ${mobileOpen ? 'rotate-180' : ''}`}
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-            </svg>
+            {/* Indicateur de position (3 dots) */}
+            <div className="flex gap-1 items-center">
+              {([0, 1, 2] as SnapIdx[]).map(i => (
+                <div key={i} style={{
+                  width: i === snapIdx ? 14 : 5,
+                  height: 5, borderRadius: 3,
+                  background: i === snapIdx ? '#4F46E5' : 'rgba(15,23,42,0.18)',
+                  transition: 'all 0.25s',
+                }} />
+              ))}
+            </div>
           </div>
-        </button>
+        </div>
 
         {/* ── Corps du sheet ── */}
-        {mobileOpen && (
-          <div className="flex-1 bg-white overflow-hidden flex flex-col">
-            <SidebarContent filtersOpen={filtersOpen} setFiltersOpen={setFiltersOpen} />
-          </div>
-        )}
+        {/* Toujours monté, visibility contrôlée par l'overflow du parent */}
+        <div className="flex-1 bg-white overflow-hidden flex flex-col">
+          <SidebarContent filtersOpen={filtersOpen} setFiltersOpen={setFiltersOpen} />
+        </div>
       </div>
     </>
   )

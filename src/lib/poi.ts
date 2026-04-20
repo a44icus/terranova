@@ -141,15 +141,41 @@ export function poiSubtype(tags: Tags): string | null {
   return null
 }
 
-export function computeNeighborhoodScore(bestByCategory: Record<string, any>): number {
+export function computeNeighborhoodScore(
+  bestByCategory: Record<string, any>,
+  customWeights?: Record<string, number>,
+): number {
   let score = 0
   for (const [key, poi] of Object.entries(bestByCategory)) {
     const cat = POI_CATEGORIES.find(c => c.key === key)
     if (!cat) continue
+    const weight = customWeights?.[key] ?? cat.scoreWeight
     const boost = poi.distance < 250 ? 1.5 : poi.distance < 500 ? 1.2 : 1.0
-    score += cat.scoreWeight * boost
+    score += weight * boost
   }
   return Math.min(Math.round(score), 10)
+}
+
+export interface ScoreSeuils {
+  excellent: number
+  bon: number
+  moyen: number
+}
+
+export const DEFAULT_SCORE_SEUILS: ScoreSeuils = {
+  excellent: 8,
+  bon: 6,
+  moyen: 4,
+}
+
+export function scoreLabel(
+  score: number,
+  seuils: ScoreSeuils = DEFAULT_SCORE_SEUILS,
+): { text: string; color: string } {
+  if (score >= seuils.excellent) return { text: 'Excellent',  color: '#16A34A' }
+  if (score >= seuils.bon)       return { text: 'Bon',        color: '#65A30D' }
+  if (score >= seuils.moyen)     return { text: 'Moyen',      color: '#D97706' }
+  return                                { text: 'Faible',     color: '#DC2626' }
 }
 
 export const OVERPASS_QUERY = (bbox: string) => `
@@ -164,9 +190,15 @@ export const OVERPASS_QUERY = (bbox: string) => `
   out qt;
 `
 
-export const MAX_POI_DISTANCE = 1000
 export const OVERPASS_SERVERS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.openstreetmap.ru/api/interpreter',
+]
+
+// Rayons testés successivement — partagés par usePOI et QuartierScore
+export const SEARCH_RADII = [
+  { km: 1, deg: 0.009 },
+  { km: 3, deg: 0.027 },
+  { km: 5, deg: 0.045 },
 ]

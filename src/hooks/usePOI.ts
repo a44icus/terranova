@@ -4,7 +4,7 @@ import { useRef, useCallback } from 'react'
 import { haversineM } from '@/lib/geo'
 import {
   detectCategory, poiEmoji, poiSubtype,
-  OVERPASS_QUERY, OVERPASS_SERVERS, MAX_POI_DISTANCE,
+  OVERPASS_QUERY, OVERPASS_SERVERS, SEARCH_RADII,
   POI_CATEGORIES,
 } from '@/lib/poi'
 
@@ -23,6 +23,59 @@ export interface POIItem {
 interface POICache {
   pois: POIItem[]
   best: Record<string, POIItem>
+  radiusKm: number
+}
+
+async function fetchRadiusRound(
+  lat: number, lng: number, deg: number, maxDistM: number,
+  signal: AbortSignal,
+): Promise<Record<string, POIItem> | null> {
+  const bbox = `${lat - deg},${lng - deg},${lat + deg},${lng + deg}`
+  const query = OVERPASS_QUERY(bbox)
+
+  for (const server of OVERPASS_SERVERS) {
+    if (signal.aborted) return null
+    try {
+      const res = await fetch(server, {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent(query),
+        signal,
+      })
+      if (!res.ok) continue
+      const data = await res.json()
+      if (!data?.elements?.length) continue
+
+      const bestByCategory: Record<string, POIItem> = {}
+      for (const el of data.elements) {
+        if (!el.lat || !el.lon) continue
+        const distance = haversineM(lat, lng, el.lat, el.lon)
+        if (distance > maxDistM) continue
+        const tags = el.tags || {}
+        const categoryKey = detectCategory(tags)
+        if (!categoryKey) continue
+        if (!bestByCategory[categoryKey] || distance < bestByCategory[categoryKey].distance) {
+          const cat = POI_CATEGORIES.find(c => c.key === categoryKey)
+          bestByCategory[categoryKey] = {
+            id: el.id,
+            lat: el.lat,
+            lon: el.lon,
+            tags,
+            distance,
+            categoryKey,
+            name: tags.name || cat?.label || categoryKey,
+            emoji: poiEmoji(tags),
+            subtype: poiSubtype(tags),
+          }
+        }
+      }
+
+      return Object.keys(bestByCategory).length > 0 ? bestByCategory : null
+    } catch (e: any) {
+      if (e.name === 'AbortError') return null
+      continue
+    }
+  }
+  return null
 }
 
 export function usePOI() {
@@ -34,7 +87,7 @@ export function usePOI() {
     lat: number,
     lng: number,
   ): Promise<POICache | null> => {
-    // Annuler UNIQUEMENT la requête précédente en vol
+    // Annuler la requête précédente en vol
     abortController.current?.abort()
     const controller = new AbortController()
     abortController.current = controller
@@ -43,73 +96,29 @@ export function usePOI() {
     // Servir depuis le cache
     if (cache.current[bienId]) return cache.current[bienId]
 
-    const r = 0.005
-    const bbox = `${lat - r},${lng - r},${lat + r},${lng + r}`
-    const query = OVERPASS_QUERY(bbox)
-
-    let elements: any[] = []
-    for (const server of OVERPASS_SERVERS) {
+    // Même logique de rayons progressifs que QuartierScore
+    for (const { km, deg } of SEARCH_RADII) {
       if (signal.aborted) return null
-      try {
-        const res = await fetch(server, {
-          method: 'POST',
-          body: 'data=' + encodeURIComponent(query),
-          signal,
-        })
-        if (!res.ok) continue
-        const data = await res.json()
-        if (data?.elements?.length > 0) {
-          elements = data.elements
-          break
-        }
-      } catch (e: any) {
-        if (e.name === 'AbortError') return null
-        // Essayer le prochain serveur si erreur réseau
-        continue
+      const best = await fetchRadiusRound(lat, lng, deg, km * 1000, signal)
+      if (signal.aborted) return null
+      if (best) {
+        const pois = Object.values(best).sort((a, b) => a.distance - b.distance)
+        const result: POICache = { pois, best, radiusKm: km }
+        cache.current[bienId] = result
+        return result
       }
     }
 
-    if (signal.aborted) return null
-
-    const bestByCategory: Record<string, POIItem> = {}
-    elements.forEach(el => {
-      if (!el.lat || !el.lon) return
-      const distance = haversineM(lat, lng, el.lat, el.lon)
-      if (distance > MAX_POI_DISTANCE) return
-      const tags = el.tags || {}
-      const categoryKey = detectCategory(tags)
-      if (!categoryKey) return
-      if (!bestByCategory[categoryKey] || distance < bestByCategory[categoryKey].distance) {
-        const cat = POI_CATEGORIES.find(c => c.key === categoryKey)
-        bestByCategory[categoryKey] = {
-          id: el.id,
-          lat: el.lat,
-          lon: el.lon,
-          tags,
-          distance,
-          categoryKey,
-          name: tags.name || cat?.label || categoryKey,
-          emoji: poiEmoji(tags),
-          subtype: poiSubtype(tags),
-        }
-      }
-    })
-
-    const pois = Object.values(bestByCategory).sort((a, b) => a.distance - b.distance)
-    const result: POICache = { pois, best: bestByCategory }
-
-    if (!signal.aborted) {
-      cache.current[bienId] = result
-    }
-
-    return result
+    // Aucun POI trouvé même à 5 km
+    const empty: POICache = { pois: [], best: {}, radiusKm: SEARCH_RADII[SEARCH_RADII.length - 1].km }
+    cache.current[bienId] = empty
+    return empty
   }, [])
 
   const clearCache = useCallback(() => {
     cache.current = {}
   }, [])
 
-  // N'appeler abort QUE pour annuler une requête en vol quand on ferme le panneau
   const abort = useCallback(() => {
     abortController.current?.abort()
     abortController.current = null
