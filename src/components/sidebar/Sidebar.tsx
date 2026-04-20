@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useMapStore } from '@/store/mapStore'
 import { useFiltersUrlSync } from '@/hooks/useFiltersUrlSync'
 import { useBiensFiltres } from '@/hooks/useBiens'
@@ -137,6 +137,12 @@ export default function Sidebar() {
     el.style.height = SNAP_CSS[idx]
     setSnapIdx(idx)
   }, [])
+
+  // ── Replier quand un bien est sélectionné ─────────────────
+  const activeBienId = useMapStore(s => s.activeBienId)
+  useEffect(() => {
+    if (activeBienId) applySnap(0)
+  }, [activeBienId, applySnap])
 
   // ── Touch handlers (handle uniquement) ───────────────────
   function onTouchStart(e: React.TouchEvent) {

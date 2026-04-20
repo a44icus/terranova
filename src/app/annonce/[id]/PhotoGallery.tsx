@@ -26,8 +26,7 @@ export default function PhotoGallery({ photos, icon, titre }: Props) {
 
   if (photos.length === 0) {
     return (
-      <div className="w-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#e0ddd8] to-[#c8c4bc] flex items-center justify-center"
-        style={{ height: 380 }}>
+      <div className="w-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#e0ddd8] to-[#c8c4bc] flex items-center justify-center h-[220px] sm:h-[340px] lg:h-[380px]">
         <span style={{ fontSize: 80, opacity: 0.25 }}>{icon}</span>
       </div>
     )
@@ -78,7 +77,7 @@ export default function PhotoGallery({ photos, icon, titre }: Props) {
       <div className="space-y-2">
 
         {/* ── Slider principal ──────────────────────────────── */}
-        <div className="rounded-2xl overflow-hidden relative" style={{ height: 420 }}>
+        <div className="rounded-2xl overflow-hidden relative h-[220px] sm:h-[340px] lg:h-[420px]">
           <Swiper
             modules={[Navigation, Pagination, Thumbs, Keyboard]}
             navigation
