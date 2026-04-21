@@ -5,6 +5,7 @@ import Link from 'next/link'
 const ADMIN_NAV = [
   { href: '/admin/annonces',         label: 'Annonces en attente', icon: '⏳' },
   { href: '/admin/annonces/toutes',  label: 'Toutes les annonces', icon: '🏠' },
+  { href: '/admin/map-ads',          label: 'Pubs sur la carte',   icon: '📍' },  // ← NOUVEAU
   { href: '/admin/reglages',         label: 'Réglages du site',    icon: '🔧' },
   { href: '/admin/parametres',       label: 'Plans & Stripe',      icon: '💳' },
 ]

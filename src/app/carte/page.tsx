@@ -1,9 +1,42 @@
+// ════════════════════════════════════════════════════════════════════
+//  MODIFICATIONS À APPLIQUER — src/app/carte/page.tsx
+// ════════════════════════════════════════════════════════════════════
+//
+// 1. Ajouter l'import du type MapAd après les autres imports :
+//
+//    import type { MapAd } from '@/lib/mapAds'
+//
+//
+// 2. Dans la fonction CartePage, après la récupération de `biens`,
+//    ajouter la requête pour les pubs :
+//
+//    const { data: ads } = await supabase
+//      .from('map_ads')
+//      .select('*')
+//      .eq('actif', true)
+//
+//
+// 3. Passer les ads à MapApp :
+//
+//    <MapApp
+//      biens={biens ?? []}
+//      user={user}
+//      initialBienId={initialBienId}
+//      carteSettings={carteSettings}
+//      ads={ads ?? []}          // ← AJOUTER
+//    />
+//
+// ════════════════════════════════════════════════════════════════════
+//  VERSION COMPLÈTE DU FICHIER MODIFIÉ
+// ════════════════════════════════════════════════════════════════════
+
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import MapApp from '@/components/map/MapApp'
 import Header from '@/components/Header'
 import { getSiteSettings } from '@/lib/siteSettings'
 import type { MapStyleKey } from '@/lib/mapStyles'
+import type { MapAd } from '@/lib/mapAds'   // ← NOUVEAU
 
 interface Props {
   searchParams: Promise<{ bien?: string }>
@@ -16,15 +49,19 @@ export default async function CartePage({ searchParams }: Props) {
     getSiteSettings(),
   ])
 
-  // Marché désactivé → redirection accueil
   if (!settings.marche_active) redirect('/')
 
-  const [{ data: { user } }, { data: biens }] = await Promise.all([
+  const [
+    { data: { user } },
+    { data: biens },
+    { data: ads },             // ← NOUVEAU
+  ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from('biens_publics').select('*')
       .order('featured', { ascending: false })
       .order('publie_at', { ascending: false })
       .limit(settings.carte_biens_max),
+    supabase.from('map_ads').select('*').eq('actif', true),  // ← NOUVEAU
   ])
 
   let unreadCount = 0
@@ -59,6 +96,7 @@ export default async function CartePage({ searchParams }: Props) {
         user={user}
         initialBienId={initialBienId}
         carteSettings={carteSettings}
+        ads={(ads ?? []) as MapAd[]}   // ← NOUVEAU
       />
     </div>
   )

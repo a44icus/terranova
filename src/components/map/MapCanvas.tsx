@@ -15,6 +15,8 @@ import DetailPopup from '@/components/panels/DetailPopup'
 import RoutePanel from '@/components/panels/RoutePanel'
 import NearbyPanel from '@/components/panels/NearbyPanel'
 import LassoCanvas from './LassoCanvas'
+import { useMapAds } from '@/hooks/useMapAds'
+import type { MapAd } from '@/lib/mapAds'
 
 let mapInstance: MapLibreMap | null = null
 export function getMap() { return mapInstance }
@@ -24,7 +26,7 @@ const CAT_ICON: Record<string, string> = {
   terrain: '🌱', parking: '🅿️', local: '🏪',
 }
 
-export default function MapCanvas({ carteSettings }: { carteSettings: CarteSettings }) {
+export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: CarteSettings; ads?: MapAd[] }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const markersRef = useRef<Map<string, Marker>>(new Map())
@@ -73,6 +75,9 @@ export default function MapCanvas({ carteSettings }: { carteSettings: CarteSetti
 
   const updateMarkersRef = useRef<() => void>(() => {})
 
+  // ── PUBLICITÉS SUR LA CARTE ───────────────────────────────
+  const { renderAdMarkers } = useMapAds(mapRef, maplibreRef, ads)
+
   // ── INIT MAP ──────────────────────────────────────────────
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
@@ -90,6 +95,7 @@ export default function MapCanvas({ carteSettings }: { carteSettings: CarteSetti
       mapInstance = map
       map.on('load', () => {
         updateMarkersRef.current()
+        if (map.getZoom() >= 13) renderAdMarkers()
         // Si un bien était déjà actif (venant de l'URL), on centre la carte
         const activeId = useMapStore.getState().activeBienId
         if (activeId) {

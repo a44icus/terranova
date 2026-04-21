@@ -11,6 +11,7 @@ import ComparePanel from '@/components/panels/ComparePanel'
 import type { BienPublic } from '@/lib/types'
 import type { User } from '@supabase/supabase-js'
 import type { MapStyleKey } from '@/lib/mapStyles'
+import type { MapAd } from '@/lib/mapAds'   // ← NOUVEAU
 
 export interface CarteSettings {
   lat: number
@@ -31,9 +32,10 @@ interface Props {
   user: User | null
   initialBienId?: string
   carteSettings: CarteSettings
+  ads?: MapAd[]   // ← NOUVEAU
 }
 
-export default function MapApp({ biens, user, initialBienId, carteSettings }: Props) {
+export default function MapApp({ biens, user, initialBienId, carteSettings, ads = [] }: Props) {
   const { setBiens, setActiveBienId, compareSet, favsPanelOpen, setFavsPanelOpen, activeBienId } = useMapStore()
   const [showCompare, setShowCompare] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -59,7 +61,7 @@ export default function MapApp({ biens, user, initialBienId, carteSettings }: Pr
       <SearchBar />
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar />
-        <MapCanvas carteSettings={carteSettings} />
+        <MapCanvas carteSettings={carteSettings} ads={ads} />  {/* ← ads passé ici */}
         <Toast />
 
         {mounted && cmpCount > 0 && (

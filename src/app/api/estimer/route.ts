@@ -3,242 +3,407 @@ import { createClient } from '@/lib/supabase/server'
 
 interface EstimationRequest {
   ville: string
+  codeInsee?: string
   surface: number
   pieces: number
   categorie: string
   type: 'vente' | 'location'
   etat: 'neuf' | 'bon' | 'travaux'
+  etage?: number
+  nb_etages?: number
+  annee_construction?: number
+  dpe?: string
+  options?: string[]
+  meuble?: boolean
+  surface_terrain?: number
 }
 
-// ─── Prix de référence réalistes par département (€/m² vente & €/m²/mois location) ───
-const PRIX_DEPT: Record<string, { vente: Record<string, number>; location: Record<string, number> }> = {
-  '75': { vente: { appartement: 10200, maison: 11000, bureau: 8500, terrain: 4000, local: 6000 }, location: { appartement: 32, maison: 28, bureau: 30, terrain: 4, local: 22 } },
-  '92': { vente: { appartement: 7200, maison: 7800, bureau: 6000, terrain: 2500, local: 5000 }, location: { appartement: 24, maison: 20, bureau: 22, terrain: 3, local: 16 } },
-  '94': { vente: { appartement: 5600, maison: 5800, bureau: 4500, terrain: 1800, local: 3500 }, location: { appartement: 19, maison: 16, bureau: 18, terrain: 2, local: 12 } },
-  '93': { vente: { appartement: 3800, maison: 3600, bureau: 3000, terrain: 800,  local: 2500 }, location: { appartement: 14, maison: 12, bureau: 13, terrain: 1, local: 9  } },
-  '77': { vente: { appartement: 3000, maison: 2900, bureau: 2500, terrain: 250,  local: 2000 }, location: { appartement: 12, maison: 10, bureau: 12, terrain: 1, local: 8  } },
-  '78': { vente: { appartement: 3600, maison: 3800, bureau: 3000, terrain: 350,  local: 2500 }, location: { appartement: 14, maison: 13, bureau: 14, terrain: 1, local: 9  } },
-  '91': { vente: { appartement: 2900, maison: 2800, bureau: 2400, terrain: 200,  local: 1900 }, location: { appartement: 12, maison: 10, bureau: 11, terrain: 1, local: 7  } },
-  '95': { vente: { appartement: 2900, maison: 2800, bureau: 2400, terrain: 200,  local: 1900 }, location: { appartement: 12, maison: 10, bureau: 11, terrain: 1, local: 7  } },
-  '06': { vente: { appartement: 4800, maison: 5200, bureau: 4000, terrain: 600,  local: 3500 }, location: { appartement: 17, maison: 15, bureau: 18, terrain: 2, local: 12 } },
-  '13': { vente: { appartement: 3600, maison: 3800, bureau: 3000, terrain: 300,  local: 2500 }, location: { appartement: 14, maison: 12, bureau: 14, terrain: 1, local: 9  } },
-  '69': { vente: { appartement: 4200, maison: 4400, bureau: 3500, terrain: 400,  local: 3000 }, location: { appartement: 15, maison: 14, bureau: 16, terrain: 2, local: 11 } },
-  '31': { vente: { appartement: 3400, maison: 3300, bureau: 2800, terrain: 250,  local: 2500 }, location: { appartement: 13, maison: 11, bureau: 13, terrain: 1, local: 9  } },
-  '33': { vente: { appartement: 3800, maison: 3600, bureau: 3000, terrain: 350,  local: 2800 }, location: { appartement: 14, maison: 12, bureau: 14, terrain: 1, local: 10 } },
-  '44': { vente: { appartement: 3500, maison: 3300, bureau: 2800, terrain: 280,  local: 2500 }, location: { appartement: 13, maison: 11, bureau: 13, terrain: 1, local: 9  } },
-  '35': { vente: { appartement: 3000, maison: 2900, bureau: 2400, terrain: 200,  local: 2000 }, location: { appartement: 12, maison: 10, bureau: 12, terrain: 1, local: 8  } },
-  '34': { vente: { appartement: 3200, maison: 3000, bureau: 2600, terrain: 250,  local: 2400 }, location: { appartement: 13, maison: 11, bureau: 13, terrain: 1, local: 9  } },
-  '67': { vente: { appartement: 3100, maison: 3000, bureau: 2600, terrain: 250,  local: 2200 }, location: { appartement: 12, maison: 11, bureau: 13, terrain: 1, local: 8  } },
-  '59': { vente: { appartement: 2200, maison: 2100, bureau: 1800, terrain: 120,  local: 1500 }, location: { appartement: 10, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '76': { vente: { appartement: 2400, maison: 2200, bureau: 1900, terrain: 150,  local: 1600 }, location: { appartement: 11, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '57': { vente: { appartement: 1900, maison: 1800, bureau: 1600, terrain: 100,  local: 1300 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '54': { vente: { appartement: 1900, maison: 1800, bureau: 1600, terrain: 100,  local: 1300 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '63': { vente: { appartement: 2200, maison: 2000, bureau: 1800, terrain: 120,  local: 1500 }, location: { appartement: 10, maison: 8,  bureau: 10, terrain: 1, local: 7  } },
-  '38': { vente: { appartement: 2800, maison: 2900, bureau: 2400, terrain: 200,  local: 2000 }, location: { appartement: 12, maison: 11, bureau: 12, terrain: 1, local: 8  } },
-  '74': { vente: { appartement: 4500, maison: 4800, bureau: 3800, terrain: 500,  local: 3000 }, location: { appartement: 16, maison: 15, bureau: 17, terrain: 2, local: 11 } },
-  '73': { vente: { appartement: 3500, maison: 3200, bureau: 2800, terrain: 300,  local: 2200 }, location: { appartement: 13, maison: 11, bureau: 13, terrain: 1, local: 8  } },
-  '83': { vente: { appartement: 4000, maison: 4200, bureau: 3300, terrain: 450,  local: 2800 }, location: { appartement: 15, maison: 13, bureau: 15, terrain: 2, local: 10 } },
-  '84': { vente: { appartement: 2800, maison: 3000, bureau: 2300, terrain: 280,  local: 2000 }, location: { appartement: 12, maison: 11, bureau: 12, terrain: 1, local: 8  } },
-  '30': { vente: { appartement: 2400, maison: 2200, bureau: 1900, terrain: 160,  local: 1700 }, location: { appartement: 11, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '11': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 90,   local: 1200 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '66': { vente: { appartement: 2400, maison: 2300, bureau: 1900, terrain: 150,  local: 1700 }, location: { appartement: 11, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '64': { vente: { appartement: 3200, maison: 3400, bureau: 2700, terrain: 280,  local: 2300 }, location: { appartement: 13, maison: 12, bureau: 13, terrain: 1, local: 9  } },
-  '40': { vente: { appartement: 3000, maison: 3200, bureau: 2500, terrain: 250,  local: 2200 }, location: { appartement: 12, maison: 11, bureau: 12, terrain: 1, local: 8  } },
-  '47': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 90,   local: 1200 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  '24': { vente: { appartement: 1700, maison: 1600, bureau: 1400, terrain: 80,   local: 1100 }, location: { appartement: 8,  maison: 7,  bureau: 8,  terrain: 1, local: 5  } },
-  '87': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 90,   local: 1200 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  '86': { vente: { appartement: 1900, maison: 1800, bureau: 1600, terrain: 100,  local: 1300 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '79': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 90,   local: 1200 }, location: { appartement: 8,  maison: 7,  bureau: 8,  terrain: 1, local: 5  } },
-  '37': { vente: { appartement: 2600, maison: 2500, bureau: 2100, terrain: 170,  local: 1800 }, location: { appartement: 11, maison: 10, bureau: 11, terrain: 1, local: 7  } },
-  '49': { vente: { appartement: 2400, maison: 2300, bureau: 1900, terrain: 150,  local: 1700 }, location: { appartement: 11, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '72': { vente: { appartement: 2000, maison: 1900, bureau: 1600, terrain: 110,  local: 1400 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '53': { vente: { appartement: 1700, maison: 1600, bureau: 1400, terrain: 80,   local: 1100 }, location: { appartement: 8,  maison: 7,  bureau: 8,  terrain: 1, local: 5  } },
-  '61': { vente: { appartement: 1600, maison: 1500, bureau: 1300, terrain: 70,   local: 1000 }, location: { appartement: 8,  maison: 7,  bureau: 7,  terrain: 1, local: 5  } },
-  '14': { vente: { appartement: 2800, maison: 2600, bureau: 2200, terrain: 180,  local: 1900 }, location: { appartement: 12, maison: 10, bureau: 11, terrain: 1, local: 8  } },
-  '50': { vente: { appartement: 1900, maison: 1800, bureau: 1500, terrain: 100,  local: 1300 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  '22': { vente: { appartement: 2200, maison: 2100, bureau: 1800, terrain: 130,  local: 1500 }, location: { appartement: 10, maison: 9,  bureau: 9,  terrain: 1, local: 6  } },
-  '29': { vente: { appartement: 2100, maison: 2000, bureau: 1700, terrain: 120,  local: 1400 }, location: { appartement: 10, maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '56': { vente: { appartement: 2600, maison: 2700, bureau: 2100, terrain: 200,  local: 1800 }, location: { appartement: 11, maison: 10, bureau: 11, terrain: 1, local: 7  } },
-  '21': { vente: { appartement: 2400, maison: 2200, bureau: 1900, terrain: 150,  local: 1700 }, location: { appartement: 11, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '51': { vente: { appartement: 2100, maison: 2000, bureau: 1700, terrain: 120,  local: 1400 }, location: { appartement: 10, maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '08': { vente: { appartement: 1200, maison: 1100, bureau: 1000, terrain: 50,   local: 800  }, location: { appartement: 7,  maison: 6,  bureau: 7,  terrain: 1, local: 4  } },
-  '68': { vente: { appartement: 2600, maison: 2500, bureau: 2100, terrain: 180,  local: 1900 }, location: { appartement: 11, maison: 10, bureau: 11, terrain: 1, local: 7  } },
-  '25': { vente: { appartement: 2300, maison: 2200, bureau: 1900, terrain: 150,  local: 1600 }, location: { appartement: 11, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '39': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 100,  local: 1200 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  '70': { vente: { appartement: 1500, maison: 1400, bureau: 1200, terrain: 65,   local: 1000 }, location: { appartement: 8,  maison: 7,  bureau: 7,  terrain: 1, local: 5  } },
-  '90': { vente: { appartement: 1900, maison: 1800, bureau: 1600, terrain: 110,  local: 1300 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '01': { vente: { appartement: 2600, maison: 2800, bureau: 2200, terrain: 200,  local: 1900 }, location: { appartement: 11, maison: 10, bureau: 12, terrain: 1, local: 8  } },
-  '26': { vente: { appartement: 2200, maison: 2100, bureau: 1800, terrain: 130,  local: 1600 }, location: { appartement: 10, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '07': { vente: { appartement: 1900, maison: 2000, bureau: 1600, terrain: 120,  local: 1400 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '42': { vente: { appartement: 2000, maison: 1900, bureau: 1700, terrain: 110,  local: 1400 }, location: { appartement: 10, maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '43': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 95,   local: 1200 }, location: { appartement: 9,  maison: 7,  bureau: 8,  terrain: 1, local: 6  } },
-  '15': { vente: { appartement: 1500, maison: 1400, bureau: 1200, terrain: 65,   local: 1000 }, location: { appartement: 8,  maison: 7,  bureau: 7,  terrain: 1, local: 5  } },
-  '03': { vente: { appartement: 1400, maison: 1300, bureau: 1100, terrain: 60,   local: 900  }, location: { appartement: 7,  maison: 6,  bureau: 7,  terrain: 1, local: 5  } },
-  '18': { vente: { appartement: 1600, maison: 1500, bureau: 1300, terrain: 75,   local: 1100 }, location: { appartement: 8,  maison: 7,  bureau: 8,  terrain: 1, local: 5  } },
-  '45': { vente: { appartement: 2000, maison: 1900, bureau: 1600, terrain: 115,  local: 1400 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '28': { vente: { appartement: 2200, maison: 2100, bureau: 1800, terrain: 140,  local: 1500 }, location: { appartement: 10, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '41': { vente: { appartement: 1900, maison: 1800, bureau: 1500, terrain: 100,  local: 1300 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  '71': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 90,   local: 1200 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  '58': { vente: { appartement: 1400, maison: 1300, bureau: 1100, terrain: 60,   local: 900  }, location: { appartement: 7,  maison: 6,  bureau: 7,  terrain: 1, local: 5  } },
-  '89': { vente: { appartement: 1600, maison: 1500, bureau: 1300, terrain: 75,   local: 1100 }, location: { appartement: 8,  maison: 7,  bureau: 7,  terrain: 1, local: 5  } },
-  '36': { vente: { appartement: 1200, maison: 1100, bureau: 1000, terrain: 50,   local: 800  }, location: { appartement: 7,  maison: 6,  bureau: 6,  terrain: 1, local: 4  } },
-  '23': { vente: { appartement: 1100, maison: 1000, bureau: 900,  terrain: 40,   local: 700  }, location: { appartement: 6,  maison: 5,  bureau: 6,  terrain: 1, local: 4  } },
-  '19': { vente: { appartement: 1500, maison: 1400, bureau: 1200, terrain: 70,   local: 1000 }, location: { appartement: 8,  maison: 7,  bureau: 7,  terrain: 1, local: 5  } },
-  '46': { vente: { appartement: 1600, maison: 1600, bureau: 1300, terrain: 80,   local: 1100 }, location: { appartement: 8,  maison: 7,  bureau: 8,  terrain: 1, local: 5  } },
-  '12': { vente: { appartement: 1600, maison: 1500, bureau: 1300, terrain: 75,   local: 1100 }, location: { appartement: 8,  maison: 7,  bureau: 8,  terrain: 1, local: 5  } },
-  '48': { vente: { appartement: 1400, maison: 1400, bureau: 1200, terrain: 65,   local: 1000 }, location: { appartement: 7,  maison: 7,  bureau: 7,  terrain: 1, local: 5  } },
-  '81': { vente: { appartement: 1900, maison: 1800, bureau: 1600, terrain: 100,  local: 1300 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  '82': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 90,   local: 1200 }, location: { appartement: 9,  maison: 7,  bureau: 8,  terrain: 1, local: 6  } },
-  '32': { vente: { appartement: 1700, maison: 1700, bureau: 1400, terrain: 90,   local: 1200 }, location: { appartement: 8,  maison: 7,  bureau: 8,  terrain: 1, local: 5  } },
-  '65': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 95,   local: 1200 }, location: { appartement: 9,  maison: 7,  bureau: 8,  terrain: 1, local: 6  } },
-  '09': { vente: { appartement: 1300, maison: 1200, bureau: 1100, terrain: 55,   local: 900  }, location: { appartement: 7,  maison: 6,  bureau: 7,  terrain: 1, local: 4  } },
-  '02': { vente: { appartement: 1600, maison: 1500, bureau: 1300, terrain: 75,   local: 1100 }, location: { appartement: 8,  maison: 7,  bureau: 8,  terrain: 1, local: 5  } },
-  '60': { vente: { appartement: 2200, maison: 2200, bureau: 1800, terrain: 140,  local: 1600 }, location: { appartement: 10, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '80': { vente: { appartement: 1900, maison: 1800, bureau: 1600, terrain: 100,  local: 1300 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  '62': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 90,   local: 1200 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  '10': { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 90,   local: 1200 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  '52': { vente: { appartement: 1200, maison: 1100, bureau: 1000, terrain: 50,   local: 800  }, location: { appartement: 7,  maison: 6,  bureau: 6,  terrain: 1, local: 4  } },
-  '55': { vente: { appartement: 1200, maison: 1100, bureau: 1000, terrain: 50,   local: 800  }, location: { appartement: 7,  maison: 6,  bureau: 6,  terrain: 1, local: 4  } },
-  '88': { vente: { appartement: 1400, maison: 1300, bureau: 1100, terrain: 60,   local: 900  }, location: { appartement: 7,  maison: 6,  bureau: 7,  terrain: 1, local: 5  } },
-  '04': { vente: { appartement: 2200, maison: 2300, bureau: 1800, terrain: 150,  local: 1600 }, location: { appartement: 10, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  '05': { vente: { appartement: 2800, maison: 2900, bureau: 2300, terrain: 220,  local: 2000 }, location: { appartement: 12, maison: 11, bureau: 11, terrain: 1, local: 8  } },
-  '2A': { vente: { appartement: 3200, maison: 3400, bureau: 2700, terrain: 280,  local: 2300 }, location: { appartement: 13, maison: 12, bureau: 13, terrain: 1, local: 9  } },
-  '2B': { vente: { appartement: 2800, maison: 3000, bureau: 2400, terrain: 220,  local: 2000 }, location: { appartement: 12, maison: 11, bureau: 12, terrain: 1, local: 8  } },
-  '971': { vente: { appartement: 2600, maison: 2800, bureau: 2200, terrain: 200, local: 1900 }, location: { appartement: 11, maison: 10, bureau: 11, terrain: 1, local: 8  } },
-  '972': { vente: { appartement: 2500, maison: 2700, bureau: 2100, terrain: 190, local: 1800 }, location: { appartement: 11, maison: 10, bureau: 11, terrain: 1, local: 7  } },
-  '973': { vente: { appartement: 2000, maison: 2200, bureau: 1700, terrain: 130, local: 1500 }, location: { appartement: 9,  maison: 9,  bureau: 9,  terrain: 1, local: 6  } },
-  '974': { vente: { appartement: 2800, maison: 3000, bureau: 2400, terrain: 220, local: 2000 }, location: { appartement: 12, maison: 11, bureau: 12, terrain: 1, local: 8  } },
-  '976': { vente: { appartement: 1800, maison: 1900, bureau: 1500, terrain: 100, local: 1300 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
+const DVF_INDIC_FIELD: Record<string, string> = {
+  appartement: 'pxm2_median_cod121',
+  maison:      'pxm2_median_cod111',
+  local:       'pxm2_median_cod14',
+  bureau:      'pxm2_median_cod14',
+  terrain:     'pxm2_median_cod2',
 }
 
-// Prix overrides pour les grandes villes (plus précis)
-const PRIX_VILLE: Record<string, { vente: Record<string, number>; location: Record<string, number> }> = {
-  'paris':        { vente: { appartement: 10200, maison: 12000, bureau: 9000, terrain: 5000, local: 6500 }, location: { appartement: 33, maison: 30, bureau: 32, terrain: 5, local: 24 } },
-  'lyon':         { vente: { appartement: 4400, maison: 4600, bureau: 3600, terrain: 450,  local: 3100 }, location: { appartement: 15, maison: 14, bureau: 16, terrain: 2, local: 11 } },
-  'marseille':    { vente: { appartement: 3500, maison: 3700, bureau: 2900, terrain: 320,  local: 2500 }, location: { appartement: 13, maison: 12, bureau: 13, terrain: 1, local: 9  } },
-  'toulouse':     { vente: { appartement: 3500, maison: 3400, bureau: 2800, terrain: 280,  local: 2500 }, location: { appartement: 14, maison: 12, bureau: 13, terrain: 1, local: 9  } },
-  'bordeaux':     { vente: { appartement: 4000, maison: 4100, bureau: 3300, terrain: 400,  local: 2900 }, location: { appartement: 15, maison: 13, bureau: 14, terrain: 1, local: 10 } },
-  'nantes':       { vente: { appartement: 3700, maison: 3500, bureau: 2900, terrain: 310,  local: 2600 }, location: { appartement: 14, maison: 12, bureau: 13, terrain: 1, local: 9  } },
-  'strasbourg':   { vente: { appartement: 3300, maison: 3200, bureau: 2700, terrain: 270,  local: 2300 }, location: { appartement: 13, maison: 11, bureau: 13, terrain: 1, local: 9  } },
-  'montpellier':  { vente: { appartement: 3300, maison: 3100, bureau: 2700, terrain: 260,  local: 2400 }, location: { appartement: 13, maison: 11, bureau: 13, terrain: 1, local: 9  } },
-  'rennes':       { vente: { appartement: 3400, maison: 3200, bureau: 2700, terrain: 270,  local: 2400 }, location: { appartement: 13, maison: 11, bureau: 13, terrain: 1, local: 9  } },
-  'lille':        { vente: { appartement: 3100, maison: 2900, bureau: 2500, terrain: 230,  local: 2100 }, location: { appartement: 13, maison: 11, bureau: 12, terrain: 1, local: 8  } },
-  'nice':         { vente: { appartement: 5200, maison: 5600, bureau: 4200, terrain: 700,  local: 3800 }, location: { appartement: 18, maison: 16, bureau: 19, terrain: 2, local: 13 } },
-  'grenoble':     { vente: { appartement: 2900, maison: 3000, bureau: 2400, terrain: 210,  local: 2000 }, location: { appartement: 12, maison: 11, bureau: 12, terrain: 1, local: 8  } },
-  'reims':        { vente: { appartement: 2200, maison: 2100, bureau: 1800, terrain: 130,  local: 1500 }, location: { appartement: 10, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  'dijon':        { vente: { appartement: 2600, maison: 2400, bureau: 2100, terrain: 170,  local: 1800 }, location: { appartement: 11, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  'angers':       { vente: { appartement: 2700, maison: 2600, bureau: 2200, terrain: 190,  local: 1900 }, location: { appartement: 12, maison: 10, bureau: 11, terrain: 1, local: 8  } },
-  'tours':        { vente: { appartement: 2700, maison: 2600, bureau: 2200, terrain: 185,  local: 1900 }, location: { appartement: 11, maison: 10, bureau: 11, terrain: 1, local: 7  } },
-  'clermont-ferrand': { vente: { appartement: 2200, maison: 2100, bureau: 1800, terrain: 130, local: 1500 }, location: { appartement: 10, maison: 8, bureau: 10, terrain: 1, local: 7 } },
-  'le mans':      { vente: { appartement: 2100, maison: 2000, bureau: 1700, terrain: 115,  local: 1400 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  'caen':         { vente: { appartement: 2900, maison: 2700, bureau: 2300, terrain: 200,  local: 2000 }, location: { appartement: 12, maison: 10, bureau: 11, terrain: 1, local: 8  } },
-  'rouen':        { vente: { appartement: 2600, maison: 2400, bureau: 2100, terrain: 165,  local: 1800 }, location: { appartement: 11, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  'metz':         { vente: { appartement: 2100, maison: 2000, bureau: 1700, terrain: 115,  local: 1400 }, location: { appartement: 10, maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  'nancy':        { vente: { appartement: 2000, maison: 1900, bureau: 1600, terrain: 110,  local: 1400 }, location: { appartement: 10, maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  'mulhouse':     { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 90,   local: 1200 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  'brest':        { vente: { appartement: 2200, maison: 2100, bureau: 1800, terrain: 130,  local: 1500 }, location: { appartement: 10, maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  'le havre':     { vente: { appartement: 2100, maison: 2000, bureau: 1700, terrain: 115,  local: 1400 }, location: { appartement: 10, maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  'toulon':       { vente: { appartement: 3200, maison: 3400, bureau: 2700, terrain: 280,  local: 2300 }, location: { appartement: 13, maison: 12, bureau: 13, terrain: 1, local: 9  } },
-  'aix-en-provence': { vente: { appartement: 4500, maison: 5000, bureau: 3800, terrain: 600, local: 3300 }, location: { appartement: 16, maison: 14, bureau: 16, terrain: 2, local: 11 } },
-  'saint-etienne': { vente: { appartement: 1500, maison: 1400, bureau: 1200, terrain: 65,  local: 1000 }, location: { appartement: 8,  maison: 7,  bureau: 7,  terrain: 1, local: 5  } },
-  'pau':          { vente: { appartement: 2200, maison: 2300, bureau: 1900, terrain: 145,  local: 1600 }, location: { appartement: 10, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  'perpignan':    { vente: { appartement: 2100, maison: 2000, bureau: 1700, terrain: 120,  local: 1500 }, location: { appartement: 10, maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  'besancon':     { vente: { appartement: 2400, maison: 2300, bureau: 1900, terrain: 155,  local: 1700 }, location: { appartement: 11, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  'avignon':      { vente: { appartement: 2700, maison: 2900, bureau: 2200, terrain: 210,  local: 1900 }, location: { appartement: 12, maison: 10, bureau: 11, terrain: 1, local: 8  } },
-  'limoges':      { vente: { appartement: 1800, maison: 1700, bureau: 1500, terrain: 90,   local: 1200 }, location: { appartement: 9,  maison: 8,  bureau: 8,  terrain: 1, local: 6  } },
-  'poitiers':     { vente: { appartement: 2000, maison: 1900, bureau: 1600, terrain: 110,  local: 1400 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  'amiens':       { vente: { appartement: 2000, maison: 1900, bureau: 1600, terrain: 110,  local: 1400 }, location: { appartement: 9,  maison: 8,  bureau: 9,  terrain: 1, local: 6  } },
-  'villeurbanne': { vente: { appartement: 3800, maison: 3900, bureau: 3100, terrain: 380,  local: 2700 }, location: { appartement: 14, maison: 13, bureau: 14, terrain: 1, local: 10 } },
-  'nimes':        { vente: { appartement: 2300, maison: 2200, bureau: 1900, terrain: 145,  local: 1700 }, location: { appartement: 11, maison: 9,  bureau: 10, terrain: 1, local: 7  } },
-  'annecy':       { vente: { appartement: 5000, maison: 5200, bureau: 4100, terrain: 650,  local: 3500 }, location: { appartement: 17, maison: 16, bureau: 18, terrain: 2, local: 12 } },
-  'chambery':     { vente: { appartement: 3200, maison: 3000, bureau: 2600, terrain: 260,  local: 2300 }, location: { appartement: 13, maison: 11, bureau: 12, terrain: 1, local: 8  } },
-  'bayonne':      { vente: { appartement: 4000, maison: 4200, bureau: 3300, terrain: 430,  local: 2900 }, location: { appartement: 15, maison: 14, bureau: 15, terrain: 2, local: 10 } },
-  'biarritz':     { vente: { appartement: 6000, maison: 6500, bureau: 5000, terrain: 900,  local: 4500 }, location: { appartement: 22, maison: 20, bureau: 22, terrain: 3, local: 15 } },
-  'saint-malo':   { vente: { appartement: 4500, maison: 4800, bureau: 3600, terrain: 550,  local: 3200 }, location: { appartement: 16, maison: 15, bureau: 16, terrain: 2, local: 11 } },
-  'la rochelle':  { vente: { appartement: 3800, maison: 4000, bureau: 3100, terrain: 390,  local: 2700 }, location: { appartement: 14, maison: 13, bureau: 14, terrain: 1, local: 10 } },
-  'antibes':      { vente: { appartement: 5500, maison: 6000, bureau: 4500, terrain: 800,  local: 4000 }, location: { appartement: 19, maison: 18, bureau: 20, terrain: 2, local: 14 } },
-  'cannes':       { vente: { appartement: 6500, maison: 7500, bureau: 5500, terrain: 1000, local: 5000 }, location: { appartement: 24, maison: 22, bureau: 25, terrain: 3, local: 17 } },
-  'monaco':       { vente: { appartement: 50000, maison: 60000, bureau: 40000, terrain: 20000, local: 30000 }, location: { appartement: 120, maison: 100, bureau: 100, terrain: 10, local: 80 } },
+const DVF_LIBTYPBIEN: Record<string, string> = {
+  appartement: 'Appartement',
+  maison:      'Maison',
+  local:       'Local industriel. commercial ou assimilé',
 }
 
-// Fallback national
-const FALLBACK_NATIONAL = {
-  vente:    { appartement: 2800, maison: 2600, bureau: 2300, terrain: 120, local: 1900, parking: 15000 },
-  location: { appartement: 11,   maison: 9,    bureau: 10,   terrain: 1,   local: 7,    parking: 80    },
+const CEREMA_BASE = 'https://apidf-preprod.cerema.fr'
+const DVF_EXCLUDED_DEPTS = ['57', '67', '68', '976']
+
+function getLocatifRatio(codeDept: string): number {
+  if (codeDept === '75') return 0.032
+  if (['92', '93', '94'].includes(codeDept)) return 0.038
+  const bigMetros = ['69', '33', '44', '31', '13', '06', '34', '59', '38']
+  if (bigMetros.includes(codeDept)) return 0.043
+  return 0.052
 }
 
-async function getVillePriceRef(ville: string, categorie: string, type: 'vente' | 'location'): Promise<{ pricePerM2: number; source: string }> {
-  const villeNorm = ville.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '').trim()
-
-  // 1. Chercher dans les overrides par ville
-  for (const [key, data] of Object.entries(PRIX_VILLE)) {
-    if (villeNorm.includes(key) || key.includes(villeNorm)) {
-      const prix = data[type][categorie]
-      if (prix) return { pricePerM2: prix, source: 'ville' }
-    }
+async function resolveCommune(
+  ville: string,
+  codeInsee?: string
+): Promise<{ codeCommune: string; codeDept: string } | null> {
+  if (codeInsee && /^\d{5}$|^[0-9][AB]\d{3}$/.test(codeInsee)) {
+    const codeDept = codeInsee.startsWith('97')
+      ? codeInsee.slice(0, 3)
+      : codeInsee.slice(0, 2)
+    return { codeCommune: codeInsee, codeDept }
   }
-
-  // 2. Géocoder la ville pour obtenir le département
   try {
-    const geoRes = await fetch(
-      `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(ville)}&fields=codeDepartement&boost=population&limit=1`,
+    const res = await fetch(
+      `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(ville)}&fields=code,codeDepartement&boost=population&limit=1`,
       { signal: AbortSignal.timeout(3000) }
     )
-    if (geoRes.ok) {
-      const geoData = await geoRes.json()
-      if (geoData.length > 0) {
-        const dept = geoData[0].codeDepartement as string
-        const deptData = PRIX_DEPT[dept]
-        if (deptData) {
-          const prix = deptData[type][categorie]
-          if (prix) return { pricePerM2: prix, source: `dept-${dept}` }
-        }
-      }
-    }
+    if (!res.ok) return null
+    const data = await res.json()
+    if (!data.length) return null
+    return { codeCommune: data[0].code, codeDept: data[0].codeDepartement }
   } catch {
-    // silently ignore timeout/network errors
+    return null
   }
-
-  // 3. Fallback national
-  const cat = categorie as keyof typeof FALLBACK_NATIONAL.vente
-  const prix = FALLBACK_NATIONAL[type][cat] ?? (type === 'location' ? 11 : 2800)
-  return { pricePerM2: prix, source: 'national' }
 }
 
-const VALID_TYPES       = ['vente', 'location'] as const
-const VALID_CATEGORIES  = ['appartement', 'maison', 'bureau', 'terrain', 'parking', 'local'] as const
-const VALID_ETATS       = ['neuf', 'bon', 'travaux'] as const
+async function getDVFPrice(
+  ville: string,
+  categorie: string,
+  codeInsee?: string
+): Promise<{ pricePerM2: number; nbMutations: number } | null> {
+  if (categorie === 'parking') return null
+  try {
+    const commune = await resolveCommune(ville, codeInsee)
+    if (!commune) return null
+    if (DVF_EXCLUDED_DEPTS.includes(commune.codeDept)) return null
+
+    const libtypbien = DVF_LIBTYPBIEN[categorie]
+    const params = new URLSearchParams({ code_commune: commune.codeCommune, page_size: '500' })
+    if (libtypbien) params.set('libtypbien', libtypbien)
+
+    const res = await fetch(
+      `${CEREMA_BASE}/dvf_opendata/mutations/?${params}`,
+      { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'Terranova/1.0' } }
+    )
+    if (!res.ok) return null
+
+    const data = await res.json()
+    const mutations: Array<{
+      valeurfonc: number
+      sbati: number | null
+      sterr: number | null
+      datemut?: string
+    }> = data.results ?? []
+    if (mutations.length < 3) return null
+
+    const isTerrain = categorie === 'terrain'
+    const now = new Date()
+
+    const prices = mutations
+      .map(m => {
+        const surface = isTerrain ? (m.sterr ?? 0) : (m.sbati ?? 0)
+        if (!surface || surface < 5 || !m.valeurfonc || m.valeurfonc < 1000) return null
+        const moisAncien = m.datemut
+          ? (now.getTime() - new Date(m.datemut).getTime()) / (1000 * 60 * 60 * 24 * 30)
+          : 24
+        const weight = Math.exp(-moisAncien / 18)
+        return { ppm2: m.valeurfonc / surface, weight }
+      })
+      .filter((p): p is { ppm2: number; weight: number } => p !== null)
+
+    if (prices.length < 3) return null
+
+    const sorted = [...prices].sort((a, b) => a.ppm2 - b.ppm2)
+    const start   = Math.floor(sorted.length * 0.1)
+    const end     = Math.ceil(sorted.length * 0.9)
+    const trimmed = sorted.slice(start, end)
+
+    const totalWeight = trimmed.reduce((s, p) => s + p.weight, 0)
+    const weightedSum = trimmed.reduce((s, p) => s + p.ppm2 * p.weight, 0)
+    const median = Math.round(weightedSum / totalWeight)
+
+    return { pricePerM2: median, nbMutations: trimmed.length }
+  } catch {
+    return null
+  }
+}
+
+async function getVillePriceRef(
+  ville: string,
+  categorie: string,
+  type: 'vente' | 'location',
+  codeInsee?: string
+): Promise<{ pricePerM2: number; source: string; codeDept?: string }> {
+  const indicField = DVF_INDIC_FIELD[categorie]
+
+  if (categorie === 'parking') {
+    return { pricePerM2: type === 'location' ? 120 : 18000, source: 'forfait-parking' }
+  }
+
+  if (indicField) {
+    try {
+      const commune = await resolveCommune(ville, codeInsee)
+      if (commune && !DVF_EXCLUDED_DEPTS.includes(commune.codeDept)) {
+        const res = await fetch(
+          `${CEREMA_BASE}/indicateurs_dv3f/communes/?code_commune=${commune.codeCommune}`,
+          { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'Terranova/1.0' } }
+        )
+        if (res.ok) {
+          const data = await res.json()
+          const results: any[] = data.results ?? data
+          if (results.length > 0) {
+            const sorted = results.sort((a, b) => (b.annee ?? 0) - (a.annee ?? 0))
+            const px = sorted[0][indicField]
+            if (px && px > 0) {
+              const ratio = getLocatifRatio(commune.codeDept)
+              const pricePerM2 = type === 'location'
+                ? Math.round((px * ratio) / 12)
+                : Math.round(px)
+              return { pricePerM2, source: `dv3f-commune-${commune.codeCommune}`, codeDept: commune.codeDept }
+            }
+          }
+        }
+      }
+    } catch { /* next */ }
+
+    try {
+      const commune = await resolveCommune(ville, codeInsee)
+      if (commune && !DVF_EXCLUDED_DEPTS.includes(commune.codeDept)) {
+        const res = await fetch(
+          `${CEREMA_BASE}/indicateurs_dv3f/departements/?code_departement=${commune.codeDept}`,
+          { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'Terranova/1.0' } }
+        )
+        if (res.ok) {
+          const data = await res.json()
+          const results: any[] = data.results ?? data
+          if (results.length > 0) {
+            const sorted = results.sort((a, b) => (b.annee ?? 0) - (a.annee ?? 0))
+            const px = sorted[0][indicField]
+            if (px && px > 0) {
+              const ratio = getLocatifRatio(commune.codeDept)
+              const pricePerM2 = type === 'location'
+                ? Math.round((px * ratio) / 12)
+                : Math.round(px)
+              return { pricePerM2, source: `dv3f-dept-${commune.codeDept}`, codeDept: commune.codeDept }
+            }
+          }
+        }
+      }
+    } catch { /* next */ }
+
+    try {
+      const res = await fetch(
+        `${CEREMA_BASE}/indicateurs_dv3f/france/`,
+        { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'Terranova/1.0' } }
+      )
+      if (res.ok) {
+        const data = await res.json()
+        const results: any[] = data.results ?? data
+        if (results.length > 0) {
+          const sorted = results.sort((a, b) => (b.annee ?? 0) - (a.annee ?? 0))
+          const px = sorted[0][indicField]
+          if (px && px > 0) {
+            const pricePerM2 = type === 'location'
+              ? Math.round((px * 0.042) / 12)
+              : Math.round(px)
+            return { pricePerM2, source: 'dv3f-national' }
+          }
+        }
+      }
+    } catch { /* last resort */ }
+  }
+
+  // ── Fallback par département ───────────────────────────────────────────────
+  // Médianes €/m² maison (vente) par département — baromètres LPI-SeLoger /
+  // MeilleursAgents / DVF nationaux (T4 2024). Bien plus précis qu'une valeur
+  // nationale uniforme qui sur-estime fortement les zones rurales.
+  const commune = await resolveCommune(ville, codeInsee)
+  const dept = commune?.codeDept ?? '00'
+
+  const MAISON_DEPT: Record<string, number> = {
+    '01':1950,'02':1400,'03':1200,'04':2200,'05':2400,'06':4800,'07':1800,
+    '08':1150,'09':1400,'10':1450,'11':1700,'12':1350,'13':3200,'14':2400,
+    '15':1100,'16':1350,'17':2200,'18':1200,'19':1400,'21':2000,'22':1800,
+    '23':950, '24':1450,'25':2100,'26':2000,'27':1900,'28':1800,'29':1900,
+    '2A':2600,'2B':2800,'30':2200,'31':2800,'32':1400,'33':3300,'34':2900,
+    '35':2600,'36':1100,'37':1900,'38':2500,'39':1600,'40':2800,'41':1600,
+    '42':1700,'43':1200,'44':2700,'45':1800,'46':1400,'47':1500,'48':1200,
+    '49':2000,'50':1900,'51':1400,'52':1050,'53':1450,'54':1700,'55':1100,
+    '56':2400,'57':1700,'58':1100,'59':2000,'60':2200,'61':1400,'62':1700,
+    '63':1600,'64':2500,'65':1400,'66':2200,'67':2500,'68':2300,'69':3200,
+    '70':1150,'71':1550,'72':1750,'73':2800,'74':4200,'75':10000,'76':2100,
+    '77':2800,'78':3800,'79':1350,'80':1700,'81':1600,'82':1350,'83':3500,
+    '84':2600,'85':2300,'86':1450,'87':1450,'88':1200,'89':1300,'90':1700,
+    '91':2800,'92':6200,'93':3500,'94':4500,'95':3000,
+    '971':2000,'972':2100,'973':1500,'974':2500,'976':1200,
+  }
+
+  const maisonPx = MAISON_DEPT[dept] ?? 1800  // 1800 = médiane nationale hors Paris
+  // Ratios par catégorie (appt légèrement < maison en province, > en grande ville)
+  const isMetro = ['75','92','93','94','69','13','33','06','31','34','44','67','59'].includes(dept)
+  const RATIOS: Record<string, number> = {
+    appartement: isMetro ? 1.05 : 0.92,
+    maison:      1.0,
+    bureau:      0.80,
+    local:       0.65,
+    terrain:     0.045,
+  }
+  const basePx = Math.round(maisonPx * (RATIOS[categorie] ?? 1.0))
+
+  const LOCATION_RATIO: Record<string, number> = {
+    '75':0.032,'92':0.038,'93':0.040,'94':0.038,
+    '69':0.043,'13':0.044,'33':0.044,'06':0.040,
+  }
+  const locRatio = LOCATION_RATIO[dept] ?? 0.050
+
+  const px = type === 'location'
+    ? Math.round(basePx * locRatio / 12)
+    : basePx
+
+  return { pricePerM2: px, source: `fallback-dept-${dept}`, codeDept: dept }
+}
+
+function surfaceAdjustment(surface: number, categorie: string): number {
+  if (['terrain', 'parking', 'bureau', 'local'].includes(categorie)) return 1.0
+  if (categorie === 'appartement') {
+    if (surface < 20) return 1.18
+    if (surface < 30) return 1.10
+    if (surface < 40) return 1.05
+    if (surface > 120) return 0.96
+    if (surface > 200) return 0.92
+  }
+  if (categorie === 'maison') {
+    if (surface < 60) return 1.05
+    if (surface > 200) return 0.95
+    if (surface > 300) return 0.90
+  }
+  return 1.0
+}
+
+function computeQualityMultiplier(req: EstimationRequest, codeDept?: string): {
+  multiplier: number
+  details: Record<string, number>
+} {
+  const details: Record<string, number> = {}
+  let multiplier = 1.0
+
+  // État
+  const etatM: Record<string, number> = { neuf: 1.12, bon: 1.0, travaux: 0.82 }
+  const etatV = etatM[req.etat] ?? 1.0
+  details.etat = etatV
+  multiplier *= etatV
+
+  // Pièces (±2,5% par pièce, plafonné ±18%)
+  if (req.pieces > 0 && !['terrain', 'parking', 'bureau', 'local'].includes(req.categorie)) {
+    const piecesRef = req.categorie === 'appartement' ? 2.5 : 4
+    const delta = (req.pieces - piecesRef) * 0.025
+    const adj = 1 + Math.max(-0.18, Math.min(0.18, delta))
+    details.pieces = adj
+    multiplier *= adj
+  }
+
+  // Étage (appartement)
+  if (req.categorie === 'appartement' && req.etage !== undefined) {
+    const nbEtages = req.nb_etages ?? 5
+    let etageAdj = 1.0
+    if (req.etage === 0)              etageAdj = 0.95
+    else if (req.etage === nbEtages)  etageAdj = 1.06
+    else if (req.etage >= nbEtages - 1) etageAdj = 1.04
+    else if (req.etage >= 2)          etageAdj = 1.01
+    details.etage = etageAdj
+    multiplier *= etageAdj
+  }
+
+  // Année de construction
+  if (req.annee_construction) {
+    const age = new Date().getFullYear() - req.annee_construction
+    let ancienAdj = 1.0
+    if (age < 5)        ancienAdj = 1.05
+    else if (age < 15)  ancienAdj = 1.02
+    else if (age > 40 && age < 70) ancienAdj = 0.97
+    else if (age >= 70) ancienAdj = req.etat === 'travaux' ? 0.90 : 0.98
+    details.anciennete = ancienAdj
+    multiplier *= ancienAdj
+  }
+
+  // DPE
+  if (req.dpe) {
+    const dpeAdj: Record<string, number> = { A: 1.06, B: 1.03, C: 1.01, D: 1.0, E: 0.97, F: 0.93, G: 0.89 }
+    const adj = dpeAdj[req.dpe] ?? 1.0
+    details.dpe = adj
+    multiplier *= adj
+  }
+
+  // Options
+  if (req.options && req.options.length > 0) {
+    const optionBonuses: Record<string, number> = {
+      parking: 0.04, cave: 0.015, balcon: 0.025, terrasse: 0.04,
+      jardin: 0.05, piscine: 0.06, ascenseur: 0.02, gardien: 0.015,
+      digicode: 0.005, interphone: 0.005,
+    }
+    let optAdj = 1.0
+    for (const opt of req.options) {
+      optAdj += (optionBonuses[opt.toLowerCase()] ?? 0)
+    }
+    details.options = Math.min(optAdj, 1.20)
+    multiplier *= Math.min(optAdj, 1.20)
+  }
+
+  // Meublé (location)
+  if (req.type === 'location' && req.meuble) {
+    details.meuble = 1.12
+    multiplier *= 1.12
+  }
+
+  // Terrain attenant (maison)
+  if (req.categorie === 'maison' && req.surface_terrain && req.surface_terrain > 0) {
+    const terrainBonus = Math.min(0.08, (req.surface_terrain / 100) * 0.01)
+    details.terrain_attenant = 1 + terrainBonus
+    multiplier *= (1 + terrainBonus)
+  }
+
+  return { multiplier, details }
+}
+
+function computeMargin(
+  confidence: 'high' | 'medium' | 'low',
+  dataSource: string,
+  codeDept?: string
+): number {
+  const liquidDepts = ['75', '92', '93', '94', '69', '13', '33', '44']
+  const isLiquid = codeDept ? liquidDepts.includes(codeDept) : false
+  const baseMargin = confidence === 'high' ? 0.05 : confidence === 'medium' ? 0.09 : 0.14
+  const liquidAdj  = isLiquid ? -0.015 : 0
+  const fallbackAdj = dataSource.startsWith('fallback-dept') ? 0.01 : dataSource === 'last-resort' ? 0.02 : 0
+  return baseMargin + liquidAdj + fallbackAdj
+}
+
+const VALID_TYPES      = ['vente', 'location'] as const
+const VALID_CATEGORIES = ['appartement', 'maison', 'bureau', 'terrain', 'parking', 'local'] as const
+const VALID_ETATS      = ['neuf', 'bon', 'travaux'] as const
 
 export async function POST(req: NextRequest) {
   try {
     const body: EstimationRequest = await req.json()
-    const { ville, surface, pieces, categorie, type, etat } = body
+    const { ville, codeInsee, surface, pieces, categorie, type, etat } = body
 
-    // ── Validation stricte des inputs ─────────────────────
-    if (!ville || typeof ville !== 'string' || ville.trim().length < 2 || ville.length > 100) {
+    if (!ville || typeof ville !== 'string' || ville.trim().length < 2 || ville.length > 100)
       return NextResponse.json({ error: 'Ville invalide' }, { status: 400 })
-    }
-    if (!surface || typeof surface !== 'number' || surface <= 0 || surface > 100_000) {
+    if (!surface || typeof surface !== 'number' || surface <= 0 || surface > 100_000)
       return NextResponse.json({ error: 'Surface invalide' }, { status: 400 })
-    }
-    if (pieces !== undefined && (typeof pieces !== 'number' || pieces < 0 || pieces > 100)) {
+    if (pieces !== undefined && (typeof pieces !== 'number' || pieces < 0 || pieces > 100))
       return NextResponse.json({ error: 'Nombre de pièces invalide' }, { status: 400 })
-    }
-    if (!VALID_TYPES.includes(type as any)) {
+    if (!VALID_TYPES.includes(type as typeof VALID_TYPES[number]))
       return NextResponse.json({ error: 'Type invalide' }, { status: 400 })
-    }
-    if (!VALID_CATEGORIES.includes(categorie as any)) {
+    if (!VALID_CATEGORIES.includes(categorie as typeof VALID_CATEGORIES[number]))
       return NextResponse.json({ error: 'Catégorie invalide' }, { status: 400 })
-    }
-    if (etat && !VALID_ETATS.includes(etat as any)) {
+    if (etat && !VALID_ETATS.includes(etat as typeof VALID_ETATS[number]))
       return NextResponse.json({ error: 'État invalide' }, { status: 400 })
-    }
 
     const supabase = await createClient()
 
-    // ─── 1. Biens comparables sur Terranova ───────────────────────────
+    // ─── 1. Comparables Terranova ─────────────────────────────────────────
     const { data: comparablesVille } = await supabase
       .from('biens_publics')
       .select('prix, surface, categorie, type, ville')
@@ -262,61 +427,66 @@ export async function POST(req: NextRequest) {
         .sort((a, b) => a - b)
 
       if (prices.length >= 2) {
-        const start = Math.floor(prices.length * 0.1)
-        const end = Math.ceil(prices.length * 0.9)
+        const start   = Math.floor(prices.length * 0.1)
+        const end     = Math.ceil(prices.length * 0.9)
         const trimmed = prices.slice(start, end)
-        priceFromDB = trimmed.reduce((s, p) => s + p, 0) / trimmed.length
+        priceFromDB   = trimmed.reduce((s, p) => s + p, 0) / trimmed.length
         nbComparables = filtered.length
       }
     }
 
-    // ─── 2. Prix de référence (ville → dept → national) ───────────────
-    const { pricePerM2: refPrice, source: refSource } = await getVillePriceRef(ville, categorie, type)
+    // ─── 2. DVF + référence ───────────────────────────────────────────────
+    const [dvfResult, refResult] = await Promise.all([
+      type === 'vente' ? getDVFPrice(ville, categorie, codeInsee) : Promise.resolve(null),
+      getVillePriceRef(ville, categorie, type, codeInsee),
+    ])
 
-    // ─── 3. Fusion : les données Terranova pondèrent la référence ──────
+    const { pricePerM2: refPrice, source: refSource, codeDept } = refResult
+
+    // ─── 3. Fusion ────────────────────────────────────────────────────────
     let pricePerM2: number
     let dataSource: string
 
     if (priceFromDB !== null && nbComparables >= 10) {
-      // Beaucoup de données locales → on leur fait confiance
       pricePerM2 = priceFromDB
       dataSource = 'terranova'
+    } else if (priceFromDB !== null && nbComparables >= 3 && dvfResult) {
+      pricePerM2 = priceFromDB * 0.35 + dvfResult.pricePerM2 * 0.45 + refPrice * 0.20
+      dataSource = 'blend-dvf'
     } else if (priceFromDB !== null && nbComparables >= 3) {
-      // Quelques données : on blende 40% Terranova + 60% référence
       pricePerM2 = priceFromDB * 0.40 + refPrice * 0.60
       dataSource = 'blend'
+    } else if (dvfResult) {
+      pricePerM2    = dvfResult.pricePerM2 * 0.70 + refPrice * 0.30
+      dataSource    = 'dvf'
+      nbComparables = dvfResult.nbMutations
     } else {
-      // Pas assez de données locales → référence marché
       pricePerM2 = refPrice
       dataSource = refSource
     }
 
-    // Parking : prix total, pas au m²
+    // ─── 4. Ajustement taille ─────────────────────────────────────────────
+    pricePerM2 *= surfaceAdjustment(surface, categorie)
+
+    // ─── 5. Prix de base ──────────────────────────────────────────────────
     let basePrice: number
     if (categorie === 'parking') {
-      basePrice = type === 'location' ? 120 : 18000
-      if (ville) {
-        const { pricePerM2: parkRef } = await getVillePriceRef(ville, 'parking', type)
-        basePrice = parkRef
-      }
+      const { pricePerM2: parkRef } = await getVillePriceRef(ville, 'parking', type, codeInsee)
+      basePrice = parkRef
     } else {
       basePrice = pricePerM2 * surface
     }
 
-    // ─── 4. Ajustements qualitatifs ───────────────────────────────────
-    const etatMultiplier: Record<string, number> = { neuf: 1.15, bon: 1.0, travaux: 0.82 }
-    basePrice *= etatMultiplier[etat] ?? 1.0
+    // ─── 6. Qualité ───────────────────────────────────────────────────────
+    const { multiplier, details: qualityDetails } = computeQualityMultiplier(body, codeDept)
+    basePrice *= multiplier
 
-    // Bonus/malus pièces
-    if (pieces > 0 && !['terrain', 'parking', 'bureau', 'local'].includes(categorie)) {
-      const piecesRef = categorie === 'appartement' ? 2.5 : 4
-      const delta = (pieces - piecesRef) * 0.015
-      basePrice *= (1 + Math.max(-0.10, Math.min(0.10, delta)))
-    }
+    // ─── 7. Fourchette ────────────────────────────────────────────────────
+    const confidence: 'high' | 'medium' | 'low' =
+      nbComparables >= 10 ? 'high' :
+      (nbComparables >= 3 || dataSource === 'dvf' || dataSource === 'blend-dvf') ? 'medium' : 'low'
 
-    // ─── 5. Fourchette & confiance ────────────────────────────────────
-    const confidence = nbComparables >= 10 ? 'high' : nbComparables >= 3 ? 'medium' : 'low'
-    const margin = confidence === 'high' ? 0.06 : confidence === 'medium' ? 0.10 : 0.15
+    const margin = computeMargin(confidence, dataSource, codeDept)
 
     const low      = Math.round(basePrice * (1 - margin) / 1000) * 1000
     const high     = Math.round(basePrice * (1 + margin) / 1000) * 1000
@@ -333,6 +503,8 @@ export async function POST(req: NextRequest) {
       ville,
       surface,
       type,
+      qualityDetails,
+      marginPercent: Math.round(margin * 100),
     })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Erreur inconnue'
