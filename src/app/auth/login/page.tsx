@@ -1,35 +1,80 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
+/** Valide que le chemin de redirection est interne (pas d'open-redirect) */
+function safeRedirect(raw: string | null): string {
+  if (!raw) return '/'
+  // Doit commencer par '/' mais pas '//' (qui serait interprété comme URL externe)
+  if (raw.startsWith('/') && !raw.startsWith('//')) return raw
+  return '/'
+}
+
+const MAX_ATTEMPTS = 5        // tentatives avant verrouillage
+const LOCKOUT_MS   = 30_000  // 30 secondes
+
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') ?? '/'
+  const redirect = safeRedirect(searchParams.get('redirect'))
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null)
 
+  const attempts = useRef(0)
   const supabase = createClient()
+
+  function remainingSeconds() {
+    if (!lockedUntil) return 0
+    return Math.ceil((lockedUntil - Date.now()) / 1000)
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
+
+    // Vérifier le verrouillage
+    if (lockedUntil && Date.now() < lockedUntil) {
+      setError(`Trop de tentatives. Réessayez dans ${remainingSeconds()} secondes.`)
+      return
+    }
+
     setLoading(true)
     setError('')
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setError('Email ou mot de passe incorrect')
+      attempts.current += 1
+      if (attempts.current >= MAX_ATTEMPTS) {
+        const until = Date.now() + LOCKOUT_MS
+        setLockedUntil(until)
+        attempts.current = 0
+        // Mettre à jour le message après chaque seconde
+        const interval = setInterval(() => {
+          const secs = Math.ceil((until - Date.now()) / 1000)
+          if (secs <= 0) {
+            clearInterval(interval)
+            setLockedUntil(null)
+            setError('')
+          } else {
+            setError(`Trop de tentatives. Réessayez dans ${secs} secondes.`)
+          }
+        }, 1000)
+        setError(`Trop de tentatives. Réessayez dans ${LOCKOUT_MS / 1000} secondes.`)
+      } else {
+        setError('Email ou mot de passe incorrect')
+      }
       setLoading(false)
       return
     }
 
+    attempts.current = 0
     router.push(redirect)
     router.refresh()
   }
@@ -79,7 +124,7 @@ function LoginForm() {
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || (!!lockedUntil && Date.now() < lockedUntil)}
         className="w-full bg-navy text-white rounded-lg py-3 text-sm font-medium hover:bg-primary transition-colors disabled:opacity-50"
       >
         {loading ? 'Connexion…' : 'Se connecter'}

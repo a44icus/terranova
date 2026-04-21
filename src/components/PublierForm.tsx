@@ -98,15 +98,31 @@ export default function PublierForm({ profile }: Props) {
   }
 
   function handlePhotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+    const MAX_SIZE_MB = 10
+
     const files = Array.from(e.target.files ?? [])
+    const valid = files.filter(f => {
+      if (!ALLOWED_TYPES.includes(f.type)) {
+        alert(`"${f.name}" n'est pas un format accepté (JPG, PNG, WebP uniquement).`)
+        return false
+      }
+      if (f.size > MAX_SIZE_MB * 1024 * 1024) {
+        alert(`"${f.name}" dépasse la limite de ${MAX_SIZE_MB} MB.`)
+        return false
+      }
+      return true
+    })
     const max = limite.photos
-    const selected = files.slice(0, max - photos.length)
+    const selected = valid.slice(0, max - photos.length)
     setPhotos(p => [...p, ...selected])
     selected.forEach(f => {
       const reader = new FileReader()
       reader.onload = ev => setPhotosPreviews(p => [...p, ev.target?.result as string])
       reader.readAsDataURL(f)
     })
+    // Réinitialiser pour permettre la re-sélection du même fichier
+    e.target.value = ''
   }
 
   function removePhoto(idx: number) {

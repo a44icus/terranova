@@ -105,16 +105,32 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
   }
 
   function handleNewPhotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+    const MAX_SIZE_MB = 10
+
     const files = Array.from(e.target.files ?? [])
+    const valid = files.filter(f => {
+      if (!ALLOWED_TYPES.includes(f.type)) {
+        alert(`"${f.name}" n'est pas un format accepté (JPG, PNG, WebP uniquement).`)
+        return false
+      }
+      if (f.size > MAX_SIZE_MB * 1024 * 1024) {
+        alert(`"${f.name}" dépasse la limite de ${MAX_SIZE_MB} MB.`)
+        return false
+      }
+      return true
+    })
     const totalExisting = existingPhotos.length - deletedPhotoIds.length
     const canAdd = limite.photos - totalExisting - newPhotos.length
-    const selected = files.slice(0, Math.max(canAdd, 0))
+    const selected = valid.slice(0, Math.max(canAdd, 0))
     setNewPhotos(p => [...p, ...selected])
     selected.forEach(f => {
       const reader = new FileReader()
       reader.onload = ev => setNewPreviews(p => [...p, ev.target?.result as string])
       reader.readAsDataURL(f)
     })
+    // Réinitialiser pour permettre la re-sélection du même fichier
+    e.target.value = ''
   }
 
   function removeNewPhoto(idx: number) {
