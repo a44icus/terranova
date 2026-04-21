@@ -1,7 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react'
 
-export default function CookieBanner() {
+interface Props {
+  texte?: string
+}
+
+export default function CookieBanner({ texte }: Props) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -13,7 +17,7 @@ export default function CookieBanner() {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#0F172A] text-white px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 z-50 text-sm">
       <p className="text-white/80">
-        Ce site utilise des cookies pour améliorer votre expérience.
+        {texte || 'Ce site utilise des cookies pour améliorer votre expérience.'}
       </p>
       <button
         onClick={() => { localStorage.setItem('cookie_consent', '1'); setVisible(false) }}
