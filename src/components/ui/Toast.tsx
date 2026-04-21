@@ -1,12 +1,14 @@
 'use client'
 
 interface Props {
-  message: string
+  message?: string
   type?: 'success' | 'error' | 'info'
   onClose?: () => void
 }
 
 export default function Toast({ message, type = 'info', onClose }: Props) {
+  if (!message) return null
+
   const colors = {
     success: 'bg-green-600',
     error: 'bg-red-600',
