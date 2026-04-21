@@ -7,8 +7,22 @@ import type { Profile, BienType, BienCategorie, DpeClasse } from '@/lib/types'
 import { LIMITES_PLAN } from '@/lib/types'
 import LocationPicker from '@/components/LocationPicker'
 
+interface SiteSettings {
+  moderation: "auto" | "manuelle"
+  expirationJours: number
+  categoriesActives: string[]
+  typesActifs: string[]
+  photosMaxUpload: number
+  notifNouvelleAnnonce: boolean
+  notifAdminEmail: string
+  emailExpediteurNom: string
+  emailExpediteur: string
+  devise: string
+}
+
 interface Props {
   profile: Profile
+  siteSettings: SiteSettings
 }
 
 const CATEGORIES: { value: BienCategorie; label: string; icon: string }[] = [
@@ -37,7 +51,7 @@ const DPE_COLORS: Record<DpeClasse, string> = {
   D:'#F9A825', E:'#EF6C00', F:'#D84315', G:'#B71C1C'
 }
 
-export default function PublierForm({ profile }: Props) {
+export default function PublierForm({ profile, siteSettings }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const limite = LIMITES_PLAN[profile.plan]
@@ -113,7 +127,7 @@ export default function PublierForm({ profile }: Props) {
       }
       return true
     })
-    const max = limite.photos
+    const max = siteSettings.photosMaxUpload
     const selected = valid.slice(0, max - photos.length)
     setPhotos(p => [...p, ...selected])
     selected.forEach(f => {
@@ -688,11 +702,11 @@ export default function PublierForm({ profile }: Props) {
             <div className="bg-white rounded-2xl p-6 border border-navy/10">
               <h2 className="font-medium text-sm text-navy/50 uppercase tracking-wider mb-2">Photos</h2>
               <p className="text-xs text-navy/40 mb-4">
-                {photos.length}/{limite.photos} photos · La première sera la photo principale
+                {photos.length}/{siteSettings.photosMaxUpload} photos · La première sera la photo principale
               </p>
 
               {/* Upload zone */}
-              {photos.length < limite.photos && (
+              {photos.length < siteSettings.photosMaxUpload && (
                 <label className="block border-2 border-dashed border-navy/15 rounded-xl p-8 text-center cursor-pointer hover:border-primary transition-colors mb-4">
                   <div className="text-3xl mb-2">📷</div>
                   <p className="text-sm text-navy/50">
@@ -735,7 +749,7 @@ export default function PublierForm({ profile }: Props) {
             {/* Récap limite */}
             {profile.plan === 'gratuit' && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-                <strong>Plan gratuit</strong> — {limite.annonces} annonces max, {limite.photos} photos/annonce, visible {limite.duree_jours} jours.{' '}
+                <strong>Plan gratuit</strong> — {limite.annonces} annonces max, {siteSettings.photosMaxUpload} photos/annonce, visible {limite.duree_jours} jours.{' '}
                 <a href="/compte/plan" className="underline font-medium">Passer Pro →</a>
               </div>
             )}
