@@ -2,12 +2,13 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import './globals.css'
 import { getSiteSettings } from '@/lib/siteSettings'
+import CookieBanner from '@/components/ui/CookieBanner'
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSiteSettings()
   return {
     title: `${s.nom_site} – Immobilier en France`,
-    description: s.meta_description,
+    description: s.meta_description || s.slogan,
     openGraph: s.og_image_url ? {
       images: [{ url: s.og_image_url, width: 1200, height: 630 }],
     } : undefined,
@@ -83,6 +84,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </noscript>
         )}
         {children}
+        {s.cookies_banniere && (
+          <CookieBanner texte={s.cookies_texte || 'Nous utilisons des cookies pour améliorer votre expérience.'} />
+        )}
       </body>
     </html>
   )

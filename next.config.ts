@@ -5,21 +5,65 @@ import type { NextConfig } from "next";
 // 'unsafe-eval' est requis par MapLibre GL JS (compilation des shaders WebGL)
 const ContentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
-  "style-src 'self' 'unsafe-inline'",
-  // blob: pour les tuiles WebGL de MapLibre ; https: pour les tilesets externes (OSM, IGN…)
+  [
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    // Stripe.js
+    "https://js.stripe.com",
+    // Google Tag Manager + Analytics
+    "https://www.googletagmanager.com",
+    "https://www.google-analytics.com",
+    // Meta Pixel
+    "https://connect.facebook.net",
+  ].join(' '),
+  [
+    "style-src 'self' 'unsafe-inline'",
+    // Google Fonts CSS
+    "https://fonts.googleapis.com",
+    // MapLibre GL CSS (markers, controls, popups)
+    "https://cdn.jsdelivr.net",
+  ].join(' '),
+  // blob: pour les tuiles WebGL de MapLibre ; https: pour les tilesets externes
   "img-src 'self' data: blob: https:",
-  // wss: pour les abonnements Supabase Realtime
+  // MapLibre crée ses web workers via blob: URL
+  "worker-src blob:",
+  "child-src blob:",
+  // Polices Google Fonts
+  "font-src 'self' data: https://fonts.gstatic.com",
   [
     "connect-src 'self'",
+    // Supabase REST + Realtime
     "https://*.supabase.co",
     "wss://*.supabase.co",
+    // Stripe
     "https://api.stripe.com",
+    // Google Analytics
+    "https://www.google-analytics.com",
+    "https://analytics.google.com",
+    // Géocodage (SearchBar)
     "https://nominatim.openstreetmap.org",
+    // Tuiles OSM (Plan)
+    "https://tile.openstreetmap.org",
+    // Tuiles satellite Esri
+    "https://server.arcgisonline.com",
+    // Tuiles OpenTopoMap (Topo)
+    "https://tile.opentopomap.org",
+    // Données vectorielles 3D buildings
+    "https://tiles.openfreemap.org",
+    // Overpass API — données POI (3 serveurs en fallback)
+    "https://overpass-api.de",
+    "https://overpass.kumi.systems",
+    "https://overpass.openstreetmap.ru",
+    // OSRM — calcul d'itinéraires (pied, vélo, voiture)
+    "https://routing.openstreetmap.de",
   ].join(' '),
-  "font-src 'self' data:",
-  // Stripe.js a besoin d'iframes pour le 3DS
-  "frame-src https://js.stripe.com https://hooks.stripe.com",
+  [
+    "frame-src",
+    // Stripe 3DS
+    "https://js.stripe.com",
+    "https://hooks.stripe.com",
+    // GTM noscript iframe
+    "https://www.googletagmanager.com",
+  ].join(' '),
   // Interdit les plugins Flash/PDF embarqués
   "object-src 'none'",
   // Empêche l'injection d'une balise <base> malveillante

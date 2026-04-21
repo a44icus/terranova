@@ -78,7 +78,7 @@ async function fetchRadiusRound(
   return null
 }
 
-export function usePOI() {
+export function usePOI(maxDistM = 1000) {
   const cache = useRef<Record<string, POICache>>({})
   const abortController = useRef<AbortController | null>(null)
 

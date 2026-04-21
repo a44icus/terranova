@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import PublierForm from '@/components/PublierForm'
 import Link from 'next/link'
 import { getPlanConfig, getEffectivePlan } from '@/lib/plan'
+import { getSiteSettings } from '@/lib/siteSettings'
 import type { PlanType } from '@/lib/types'
 
 export default async function PublierPage() {
@@ -11,14 +12,12 @@ export default async function PublierPage() {
 
   if (!user) redirect('/auth/login?redirect=/publier')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const [{ data: profile }, planConfig, settings] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    getPlanConfig(),
+    getSiteSettings(),
+  ])
 
-  // Vérification de la limite côté serveur
-  const planConfig = await getPlanConfig()
   const effectivePlan = getEffectivePlan(
     profile?.plan as PlanType ?? 'gratuit',
     profile?.plan_expire_at
@@ -34,7 +33,6 @@ export default async function PublierPage() {
           <h1 className="font-serif text-xl">Publier un bien</h1>
           <Link href="/compte" className="text-white/50 hover:text-white text-sm">✕ Annuler</Link>
         </div>
-
         <div className="max-w-lg mx-auto px-4 py-16 text-center">
           <div className="text-5xl mb-4">🔒</div>
           <h2 className="font-serif text-2xl text-[#0F172A] mb-2">Limite atteinte</h2>
@@ -47,16 +45,10 @@ export default async function PublierPage() {
             Archivez une annonce existante ou passez à un plan supérieur.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/compte/plan"
-              className="bg-[#4F46E5] text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-[#4338CA] transition-colors"
-            >
+            <Link href="/compte/plan" className="bg-[#4F46E5] text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-[#4338CA] transition-colors">
               ⭐ Passer Pro →
             </Link>
-            <Link
-              href="/compte/mes-annonces"
-              className="border border-[#0F172A]/15 text-[#0F172A]/70 px-6 py-3 rounded-xl text-sm font-medium hover:border-[#0F172A]/30 transition-colors"
-            >
+            <Link href="/compte/mes-annonces" className="border border-[#0F172A]/15 text-[#0F172A]/70 px-6 py-3 rounded-xl text-sm font-medium hover:border-[#0F172A]/30 transition-colors">
               Gérer mes annonces
             </Link>
           </div>
@@ -65,5 +57,18 @@ export default async function PublierPage() {
     )
   }
 
-  return <PublierForm profile={profile} />
+  const siteSettings = {
+    moderation:            settings.moderation,
+    expirationJours:       settings.expiration_defaut_jours,
+    categoriesActives:     settings.categories_actives,
+    typesActifs:           settings.types_actifs,
+    photosMaxUpload:       settings.photos_max_upload,
+    notifNouvelleAnnonce:  settings.notif_nouvelle_annonce,
+    notifAdminEmail:       settings.notif_admin_email,
+    emailExpediteurNom:    settings.email_expediteur_nom,
+    emailExpediteur:       settings.email_expediteur,
+    devise:                settings.marche_devise,
+  }
+
+  return <PublierForm profile={profile} siteSettings={siteSettings} />
 }

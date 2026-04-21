@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useCallback, useState } from 'react'
+import type { CarteSettings } from '@/components/map/MapApp'
 import { useMapStore } from '@/store/mapStore'
 import { useBiensFiltres } from '@/hooks/useBiens'
 import { usePOI } from '@/hooks/usePOI'
@@ -23,7 +24,7 @@ const CAT_ICON: Record<string, string> = {
   terrain: '🌱', parking: '🅿️', local: '🏪',
 }
 
-export default function MapCanvas() {
+export default function MapCanvas({ carteSettings }: { carteSettings: CarteSettings }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const markersRef = useRef<Map<string, Marker>>(new Map())
@@ -31,6 +32,7 @@ export default function MapCanvas() {
   const poiMarkersRef = useRef<Marker[]>([])
   const geoMarkerRef = useRef<Marker | null>(null)
   const routeDestMarkerRef = useRef<Marker | null>(null)
+  const routeCalcRef = useRef<((lng: number, lat: number) => void) | null>(null)
   const tetherSvgRef = useRef<SVGSVGElement | null>(null)
   const poiCleanupRef = useRef<(() => void)[]>([])
   const approxLayersRef = useRef<string[]>([])
@@ -51,19 +53,19 @@ export default function MapCanvas() {
   } = useMapStore()
 
   const biens = useBiensFiltres()
-  const { loadPOI, abort: abortPOI } = usePOI()
+  const { loadPOI, abort: abortPOI } = usePOI(carteSettings.poiDistanceMax)
   const { start: startGeo, stop: stopGeo } = useGeolocation()
 
   const [zoom, setZoom] = useState('—')
-  const [mapStyle, setMapStyleState] = useState<MapStyleKey>('street')
+  const [mapStyle, setMapStyleState] = useState<MapStyleKey>(carteSettings.style)
   const [routeActive, setRouteActive] = useState(false)
   const [routePickingDest, setRoutePickingDest] = useState(false)
   const [geoActive, setGeoActive] = useState(false)
   const [poiData, setPoiData] = useState<{pois: any[], best: Record<string, any>} | null>(null)
   const [activeBien, setActiveBien] = useState<BienPublic | null>(null)
   const [insightsHtml, setInsightsHtml] = useState('')
-  const [showHeatmap, setShowHeatmap] = useState(false)
-  const showHeatmapRef = useRef(false)
+  const [showHeatmap, setShowHeatmap] = useState(carteSettings.heatmapDefaut)
+  const showHeatmapRef = useRef(carteSettings.heatmapDefaut)
   const [legendOpen, setLegendOpen] = useState(false)
   const [controlsOpen, setControlsOpen] = useState(true)
 
@@ -78,10 +80,11 @@ export default function MapCanvas() {
       maplibreRef.current = maplibregl
       const map = new maplibregl.Map({
         container: containerRef.current!,
-        style: MAP_STYLES.street as any,
-        center: [2.3522, 48.8566],
-        zoom: 11,
-        maxZoom: 19,
+        style: MAP_STYLES[carteSettings.style] as any,
+        center: [carteSettings.lng, carteSettings.lat],
+        zoom: carteSettings.zoom,
+        minZoom: carteSettings.zoomMin,
+        maxZoom: carteSettings.zoomMax,
       })
       mapRef.current = map
       mapInstance = map
@@ -118,6 +121,7 @@ export default function MapCanvas() {
           setRoutePickingDest(false)
           const { lng, lat } = e.lngLat
           placeRouteDestMarker(lng, lat)
+          routeCalcRef.current?.(lng, lat)
           e.originalEvent?.stopPropagation()
           return
         }
@@ -203,7 +207,7 @@ export default function MapCanvas() {
     clusterMarkersRef.current.forEach(m => m.remove())
     clusterMarkersRef.current = []
 
-    const sc = new Supercluster({ radius: 60, maxZoom: 14 })
+    const sc = new Supercluster({ radius: carteSettings.clusteringSeuil, maxZoom: 14 })
     sc.load(biens.map(b => ({
       type: 'Feature' as const,
       geometry: { type: 'Point' as const, coordinates: [b.lng, b.lat] },
@@ -691,7 +695,7 @@ export default function MapCanvas() {
             1,   'rgba(239,68,68,1)',
           ],
           'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 18, 15, 55],
-          'heatmap-opacity': 0.72,
+          'heatmap-opacity': carteSettings.heatmapOpacite,
         },
       })
     }
@@ -768,8 +772,7 @@ export default function MapCanvas() {
           picking={routePickingDest}
           onPlaceDest={placeRouteDestMarker}
           onCancel={cancelRoute}
-          biens={biens}
-          originBienId={activeBienId ?? undefined}
+          onRegisterCalc={(fn) => { routeCalcRef.current = fn }}
         />
       )}
 
