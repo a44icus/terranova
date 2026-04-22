@@ -192,31 +192,12 @@ export function useMapAds(
     })
   }
 
-  const AD_MIN_ZOOM = 13
-
-  // Re-render quand les ads changent
+  // Pas de listener zoom ici — géré dans MapCanvas pour éviter les conflits
   useEffect(() => {
     const map = mapRef.current
     if (!map?.loaded()) return
-    if (map.getZoom() >= AD_MIN_ZOOM) renderAdMarkers()
-  }, [ads, mapRef.current])
-
-  // Écoute le zoom : affiche/masque les pubs selon le seuil
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
-
-    function onZoom() {
-      if (map!.getZoom() >= AD_MIN_ZOOM) {
-        renderAdMarkers()
-      } else {
-        clearAdMarkers()
-      }
-    }
-
-    map.on('zoom', onZoom)
-    return () => { map.off('zoom', onZoom) }
-  }, [mapRef.current, ads])
+    // Le zoom est vérifié depuis MapCanvas avant d'appeler renderAdMarkers
+  }, [ads])
 
   return { renderAdMarkers, clearAdMarkers }
 }

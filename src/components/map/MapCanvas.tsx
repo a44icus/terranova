@@ -76,7 +76,7 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
   const updateMarkersRef = useRef<() => void>(() => {})
 
   // ── PUBLICITÉS SUR LA CARTE ───────────────────────────────
-  const { renderAdMarkers } = useMapAds(mapRef, maplibreRef, ads)
+  const { renderAdMarkers, clearAdMarkers } = useMapAds(mapRef, maplibreRef, ads)
 
   // ── INIT MAP ──────────────────────────────────────────────
   useEffect(() => {
@@ -106,9 +106,21 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
       map.on('moveend', () => updateMarkersRef.current())
 
       const AUTO_3D_ZOOM = 15
+      const AD_MIN_ZOOM = 13
+      let adsVisible = false
+
       map.on('zoom', () => {
         const z = map.getZoom()
         setZoom(z.toFixed(1))
+
+        // Affichage/masquage des pubs selon le zoom
+        if (z >= AD_MIN_ZOOM && !adsVisible) {
+          adsVisible = true
+          renderAdMarkers()
+        } else if (z < AD_MIN_ZOOM && adsVisible) {
+          adsVisible = false
+          clearAdMarkers()
+        }
 
         // Scroll manuel uniquement — les flyTo gèrent leur propre pitch
         if (!is3DRef.current && !progAnimRef.current) {
