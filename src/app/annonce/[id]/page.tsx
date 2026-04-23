@@ -7,10 +7,12 @@ import { formatPrix } from '@/lib/geo'
 import type { Metadata } from 'next'
 import type { BienPublic } from '@/lib/types'
 import PhotoGallery from './PhotoGallery'
+import VirtualTour360 from './VirtualTour360'
 import ContactForm from './ContactForm'
 import ShareButton from './ShareButton'
 import QuartierScore from '@/components/annonce/QuartierScore'
 import RapportBien from '@/components/annonce/RapportBien'
+import PrixEvolutionChart from '@/components/annonce/PrixEvolutionChart'
 import { genererRapport } from '@/lib/profils'
 import { getSiteSettings, getPoiWeights, getScoreSeuils } from '@/lib/siteSettings'
 
@@ -133,9 +135,10 @@ export default async function AnnoncePage({ params }: Props) {
 
   const prix = formatPrix(bien.prix, bien.type)
   const icon = CAT_ICON[bien.categorie] ?? '🏠'
-  const photoUrls: string[] = (photos ?? [])
+  const sortedPhotos = (photos ?? [])
     .sort((a: any, b: any) => (b.principale ? 1 : 0) - (a.principale ? 1 : 0) || a.ordre - b.ordre)
-    .map((p: any) => p.url)
+  const photoUrls: string[] = sortedPhotos.filter((p: any) => !p.is_360).map((p: any) => p.url)
+  const tour360Urls: string[] = sortedPhotos.filter((p: any) => p.is_360).map((p: any) => p.url)
 
   const rapport = genererRapport({
     type: bien.type,
@@ -222,6 +225,11 @@ export default async function AnnoncePage({ params }: Props) {
 
         {/* Photo gallery */}
         <PhotoGallery photos={photoUrls} icon={icon} titre={bien.titre} />
+        {tour360Urls.length > 0 && (
+          <div className="mt-3">
+            <VirtualTour360 urls={tour360Urls} titre={bien.titre} />
+          </div>
+        )}
 
         {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
@@ -395,6 +403,20 @@ export default async function AnnoncePage({ params }: Props) {
                 seuils={getScoreSeuils(siteSettings)}
               />
             )}
+
+
+            {/* Graphique évolution prix */}
+            {bien.surface && bien.surface > 0 && (
+              <div className="mt-6">
+                <PrixEvolutionChart
+                  ville={bien.ville}
+                  codePostal={bien.code_postal}
+                  categorie={bien.categorie}
+                  currentPrixM2={Math.round(bien.prix / bien.surface)}
+                />
+              </div>
+            )}
+
 
             {/* Meta */}
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-navy/30 px-1">

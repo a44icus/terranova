@@ -34,6 +34,16 @@ interface Props {
   onChange: (fields: Fields) => void
 }
 
+async function geocodeFromQuery(q: string): Promise<{ lat: number; lng: number } | null> {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&countrycodes=fr`,
+    { headers: { 'Accept-Language': 'fr' } }
+  )
+  const data = await res.json()
+  if (data[0]) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
+  return null
+}
+
 export default function LocationPicker({ adresse, ville, codePostal, lat, lng, onChange }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
@@ -43,6 +53,7 @@ export default function LocationPicker({ adresse, ville, codePostal, lat, lng, o
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [showSugg, setShowSugg] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [geocoding, setGeocoding] = useState(false)
   const timer = useRef<NodeJS.Timeout | undefined>(undefined)
 
   // ── Init MapLibre ──────────────────────────────────────────
@@ -118,6 +129,31 @@ export default function LocationPicker({ adresse, ville, codePostal, lat, lng, o
     }, 350)
   }
 
+  async function handleGeocode() {
+    const q = [inputValue, ville, 'France'].filter(Boolean).join(', ')
+    if (!q.trim() || q === 'France') return
+    setGeocoding(true)
+    try {
+      const pos = await geocodeFromQuery(q)
+      if (pos) onChange({ lat: pos.lat, lng: pos.lng })
+    } finally {
+      setGeocoding(false)
+    }
+  }
+
+  async function handleVilleBlur() {
+    if (lat !== 0) return
+    const q = [inputValue, ville, 'France'].filter(Boolean).join(', ')
+    if (!ville) return
+    setGeocoding(true)
+    try {
+      const pos = await geocodeFromQuery(q)
+      if (pos) onChange({ lat: pos.lat, lng: pos.lng })
+    } finally {
+      setGeocoding(false)
+    }
+  }
+
   function selectSuggestion(s: Suggestion) {
     const a = s.address ?? {}
     const street = [a.house_number, a.road].filter(Boolean).join(' ')
@@ -175,12 +211,13 @@ export default function LocationPicker({ adresse, ville, codePostal, lat, lng, o
         )}
       </div>
 
-      {/* Ville + CP */}
+      {/* Ville + CP + bouton géolocaliser */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-navy/60 mb-2">Ville *</label>
           <input type="text" value={ville}
             onChange={e => onChange({ ville: e.target.value })}
+            onBlur={handleVilleBlur}
             placeholder="Paris"
             className="w-full border border-navy/15 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors" />
         </div>
@@ -192,6 +229,19 @@ export default function LocationPicker({ adresse, ville, codePostal, lat, lng, o
             className="w-full border border-navy/15 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors" />
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={handleGeocode}
+        disabled={geocoding || (!inputValue && !ville)}
+        className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg border border-primary/40 text-primary hover:bg-primary/05 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {geocoding
+          ? <span className="animate-spin text-base leading-none">⟳</span>
+          : <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        }
+        Géolocaliser automatiquement
+      </button>
 
       {/* Carte */}
       <div className="rounded-xl overflow-hidden border border-navy/10 relative" style={{ height: 280 }}>

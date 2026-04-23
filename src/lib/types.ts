@@ -21,6 +21,7 @@ export interface Profile {
   plan_expire_at?: string
   stripe_customer_id?: string
   annonces_actives: number
+  is_admin?: boolean
   created_at: string
   updated_at: string
 }
@@ -84,6 +85,7 @@ export interface Photo {
   storage_path: string
   ordre: number
   principale: boolean
+  is_360: boolean
   created_at: string
 }
 

@@ -17,6 +17,7 @@ const NAV = [
   { href: '/compte/favoris',          label: 'Mes favoris',     icon: '♥' },
   { href: '/compte/messages',         label: 'Messages',        icon: '✉' },
   { href: '/compte/alertes',          label: 'Mes alertes',     icon: '🔔' },
+  { href: '/compte/chercheur',        label: 'Je cherche',      icon: '🔍' },
   { href: '/compte/plan',             label: 'Mon abonnement',  icon: '⭐' },
   { href: '/compte/profil',           label: 'Mon profil',      icon: '👤' },
 ]
@@ -102,6 +103,23 @@ export default function CompteNav({ profile }: Props) {
             </Link>
           )
         })}
+
+        {profile.is_admin && (
+          <div className="mt-3 pt-3 border-t border-navy/08">
+            <p className="text-[10px] font-medium text-navy/30 uppercase tracking-wider px-3 mb-1">Admin</p>
+            <Link
+              href="/compte/admin/email"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm mb-0.5 transition-all ${
+                pathname.startsWith('/compte/admin')
+                  ? 'bg-navy text-white font-medium'
+                  : 'text-navy/60 hover:bg-navy/05 hover:text-navy'
+              }`}
+            >
+              <span className="text-base w-5 text-center">⚙️</span>
+              Config email
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Publier + déconnexion */}

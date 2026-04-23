@@ -48,13 +48,17 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [geocoding, setGeocoding] = useState(false)
 
   // Photos existantes + nouvelles
   const [existingPhotos, setExistingPhotos] = useState<Photo[]>(initialPhotos)
   const [newPhotos, setNewPhotos] = useState<File[]>([])
   const [newPreviews, setNewPreviews] = useState<string[]>([])
   const [deletedPhotoIds, setDeletedPhotoIds] = useState<string[]>([])
+
+  // Photos 360°
+  const [new360Photos, setNew360Photos] = useState<File[]>([])
+  const [new360Previews, setNew360Previews] = useState<string[]>([])
+  const [deleted360Ids, setDeleted360Ids] = useState<string[]>([])
 
   const [form, setForm] = useState({
     type:               bien.type as BienType,
@@ -104,6 +108,38 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
     }))
   }
 
+  function handleNew360Photos(e: React.ChangeEvent<HTMLInputElement>) {
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+    const files = Array.from(e.target.files ?? []).filter(f => {
+      if (!ALLOWED_TYPES.includes(f.type)) {
+        alert(`"${f.name}" doit être JPG, PNG ou WebP.`)
+        return false
+      }
+      if (f.size > 30 * 1024 * 1024) {
+        alert(`"${f.name}" dépasse 30 MB.`)
+        return false
+      }
+      return true
+    })
+    setNew360Photos(p => [...p, ...files])
+    files.forEach(f => {
+      const reader = new FileReader()
+      reader.onload = ev => setNew360Previews(p => [...p, ev.target?.result as string])
+      reader.readAsDataURL(f)
+    })
+    e.target.value = ''
+  }
+
+  function removeNew360Photo(idx: number) {
+    setNew360Photos(p => p.filter((_, i) => i !== idx))
+    setNew360Previews(p => p.filter((_, i) => i !== idx))
+  }
+
+  function removeExisting360Photo(photo: Photo) {
+    setDeleted360Ids(ids => [...ids, photo.id])
+    setExistingPhotos(ps => ps.filter(p => p.id !== photo.id))
+  }
+
   function handleNewPhotos(e: React.ChangeEvent<HTMLInputElement>) {
     const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
     const MAX_SIZE_MB = 10
@@ -145,24 +181,6 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
 
   function setPrincipale(photo: Photo) {
     setExistingPhotos(ps => ps.map(p => ({ ...p, principale: p.id === photo.id })))
-  }
-
-  async function geocodeAdresse() {
-    if (!form.adresse && !form.ville) return
-    setGeocoding(true)
-    try {
-      const q = `${form.adresse}, ${form.ville}, France`
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&countrycodes=fr`
-      )
-      const data = await res.json()
-      if (data[0]) {
-        update('lat', parseFloat(data[0].lat))
-        update('lng', parseFloat(data[0].lon))
-      }
-    } finally {
-      setGeocoding(false)
-    }
   }
 
   async function handleSubmit(statut: 'brouillon' | 'en_attente') {
@@ -244,6 +262,35 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
           storage_path: path,
           ordre: startOrdre + i,
           principale: existingPhotos.length === 0 && i === 0,
+        })
+      }
+
+      // 5. Supprimer les photos 360° marquées
+      for (const photoId of deleted360Ids) {
+        const photo = existingPhotos.find(p => p.id === photoId) ?? initialPhotos.find(p => p.id === photoId)
+        if (photo) {
+          await supabase.storage.from('photos-biens').remove([photo.storage_path])
+          await supabase.from('photos').delete().eq('id', photoId)
+        }
+      }
+
+      // 6. Uploader les nouvelles photos 360°
+      for (let i = 0; i < new360Photos.length; i++) {
+        const photo = new360Photos[i]
+        const ext = photo.name.split('.').pop()
+        const path = `${profile.id}/${bien.id}/360-${Date.now()}-${i}.${ext}`
+        const { error: uploadError } = await supabase.storage
+          .from('photos-biens')
+          .upload(path, photo, { upsert: true })
+        if (uploadError) continue
+        const { data: { publicUrl } } = supabase.storage.from('photos-biens').getPublicUrl(path)
+        await supabase.from('photos').insert({
+          bien_id: bien.id,
+          url: publicUrl,
+          storage_path: path,
+          ordre: 1000 + i,
+          principale: false,
+          is_360: true,
         })
       }
 
@@ -549,6 +596,49 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Section 360° */}
+          <div className="bg-white rounded-2xl p-5 border border-navy/08 space-y-3">
+            <div>
+              <h3 className="text-xs font-medium text-navy/50 uppercase tracking-wider mb-0.5">Visite virtuelle 360°</h3>
+              <p className="text-xs text-navy/40">Uploadez des photos sphériques equirectangulaires (format 2:1).</p>
+            </div>
+
+            {/* Photos 360° existantes */}
+            {existingPhotos.filter(p => (p as any).is_360).length > 0 && (
+              <div className="grid grid-cols-3 gap-3">
+                {existingPhotos.filter(p => (p as any).is_360).map(photo => (
+                  <div key={photo.id} className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 group">
+                    <img src={photo.url} alt="" className="w-full h-full object-cover" />
+                    <span className="absolute top-1.5 left-1.5 bg-indigo-600 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded">360°</span>
+                    <button onClick={() => removeExisting360Photo(photo)}
+                      className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/50 text-white rounded-full text-xs flex items-center justify-center hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Nouvelles photos 360° */}
+            {new360Previews.length > 0 && (
+              <div className="grid grid-cols-3 gap-3">
+                {new360Previews.map((src, i) => (
+                  <div key={i} className="relative aspect-video rounded-xl overflow-hidden bg-gray-100">
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                    <span className="absolute top-1.5 left-1.5 bg-indigo-500 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded">Nouvelle · 360°</span>
+                    <button onClick={() => removeNew360Photo(i)}
+                      className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/50 text-white rounded-full text-xs flex items-center justify-center hover:bg-black/70">✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <label className="block border-2 border-dashed border-indigo-200 rounded-xl p-5 text-center cursor-pointer hover:border-indigo-400 transition-colors">
+              <div className="text-2xl mb-1">🌐</div>
+              <p className="text-xs text-navy/50">Ajouter une photo 360°</p>
+              <p className="text-[10px] text-navy/30 mt-0.5">JPG, PNG, WebP · Max 30 MB · Ratio 2:1 recommandé</p>
+              <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleNew360Photos} className="hidden" />
+            </label>
           </div>
 
           <div className="flex gap-3">

@@ -2,10 +2,16 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import MapAdsClient from './MapAdsClient'
 import type { MapAd } from '@/lib/mapAds'
 
+export interface AdWithStats extends MapAd {
+  impressions: number
+  clicks: number
+  ctr: number
+}
+
 export default async function AdminMapAdsPage() {
   const supabase = createAdminClient()
   const { data } = await supabase
-    .from('map_ads')
+    .from('map_ad_stats')
     .select('*')
     .order('created_at', { ascending: false })
 
@@ -14,10 +20,10 @@ export default async function AdminMapAdsPage() {
       <div className="mb-8">
         <h1 className="font-serif text-3xl text-[#0F172A] mb-1">Publicités sur la carte</h1>
         <p className="text-sm text-[#0F172A]/50">
-          Gérez les emplacements publicitaires affichés sur la carte interactive
+          Gérez les emplacements publicitaires et suivez leurs performances
         </p>
       </div>
-      <MapAdsClient ads={(data ?? []) as MapAd[]} />
+      <MapAdsClient ads={(data ?? []) as AdWithStats[]} />
     </div>
   )
 }

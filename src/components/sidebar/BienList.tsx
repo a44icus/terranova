@@ -3,12 +3,15 @@
 import { useState } from 'react'
 import { useMapStore } from '@/store/mapStore'
 import { useBiensFiltres } from '@/hooks/useBiens'
+import { isAdActive } from '@/lib/mapAds'
 import BienCard from './BienCard'
+import AdCard from './AdCard'
 
 const PAGE_SIZE = 20
+const AD_EVERY = 5  // 1 pub tous les N biens
 
 export default function BienList() {
-  const { listView, setListView, sortMode, setSortMode } = useMapStore()
+  const { listView, setListView, sortMode, setSortMode, ads } = useMapStore()
   const biens = useBiensFiltres()
   const [visible, setVisible] = useState(PAGE_SIZE)
 
@@ -19,6 +22,30 @@ export default function BienList() {
   if (visible > PAGE_SIZE && biens.length <= PAGE_SIZE) {
     setVisible(PAGE_SIZE)
   }
+
+  // Pubs actives mélangées aléatoirement (ordre stable par session)
+  const activeAds = ads.filter(isAdActive)
+
+  // Intercalage : construit la liste finale avec pubs insérées tous les AD_EVERY biens
+  function buildItems() {
+    if (activeAds.length === 0) return shown.map(b => ({ type: 'bien' as const, bien: b }))
+
+    const items: ({ type: 'bien'; bien: (typeof shown)[0] } | { type: 'ad'; ad: (typeof activeAds)[0] })[] = []
+    let adIdx = 0
+
+    shown.forEach((bien, i) => {
+      items.push({ type: 'bien', bien })
+      // Insérer une pub après chaque AD_EVERY-ième bien (pas à la fin)
+      if ((i + 1) % AD_EVERY === 0 && i < shown.length - 1 && activeAds.length > 0) {
+        items.push({ type: 'ad', ad: activeAds[adIdx % activeAds.length] })
+        adIdx++
+      }
+    })
+
+    return items
+  }
+
+  const items = buildItems()
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
@@ -65,9 +92,11 @@ export default function BienList() {
         ) : (
           <>
             <div className={listView === 'grid' ? 'grid grid-cols-2 gap-2' : ''}>
-              {shown.map(bien => (
-                <BienCard key={bien.id} bien={bien} grid={listView === 'grid'} />
-              ))}
+              {items.map((item, i) =>
+                item.type === 'bien'
+                  ? <BienCard key={item.bien.id} bien={item.bien} grid={listView === 'grid'} />
+                  : <AdCard key={`ad-${item.ad.id}-${i}`} ad={item.ad} grid={listView === 'grid'} />
+              )}
             </div>
 
             {remaining > 0 && (
@@ -87,6 +116,7 @@ export default function BienList() {
     </div>
   )
 }
+
 
 
 

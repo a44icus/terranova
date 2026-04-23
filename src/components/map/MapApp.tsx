@@ -36,7 +36,7 @@ interface Props {
 }
 
 export default function MapApp({ biens, user, initialBienId, carteSettings, ads = [] }: Props) {
-  const { setBiens, setActiveBienId, compareSet, favsPanelOpen, setFavsPanelOpen, activeBienId } = useMapStore()
+  const { setBiens, setAds, setActiveBienId, compareSet, favsPanelOpen, setFavsPanelOpen, activeBienId } = useMapStore()
   const [showCompare, setShowCompare] = useState(false)
   const [mounted, setMounted] = useState(false)
   const cmpCount = compareSet.size
@@ -47,6 +47,10 @@ export default function MapApp({ biens, user, initialBienId, carteSettings, ads 
     setBiens(biens)
     if (initialBienId) setActiveBienId(initialBienId)
   }, [biens])
+
+  useEffect(() => {
+    setAds(ads)
+  }, [ads])
 
   useEffect(() => {
     if (!mounted) return

@@ -237,6 +237,22 @@ export default function PublierForm({ profile, siteSettings }: Props) {
         })
       }
 
+      // Notification email admin si statut = en_attente
+       if (statut === 'en_attente') {
+         fetch('/api/email/admin-notify', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({
+             bienId:       bien.id,
+             titre:        bien.titre,
+             ville:        bien.ville,
+             type:         bien.type,
+             prix:         bien.prix,
+             vendeurNom:   `${profile.prenom} ${profile.nom}`,
+             vendeurEmail: user.email ?? '',           }),
+         }).catch(() => {}) // fire-and-forget, ne bloque pas la navigation
+      }
+
       router.push('/compte/mes-annonces')
 
     } catch (err: any) {

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { BienPublic, BienType, BienCategorie, DpeClasse } from '@/lib/types'
+import type { MapAd } from '@/lib/mapAds'
 
 interface Filtres {
   type: 'all' | BienType
@@ -20,6 +21,9 @@ interface Filtres {
 interface MapStore {
   biens: BienPublic[]
   setBiens: (biens: BienPublic[]) => void
+
+  ads: MapAd[]
+  setAds: (ads: MapAd[]) => void
 
   activeBienId: string | null
   setActiveBienId: (id: string | null) => void
@@ -89,6 +93,9 @@ const DEFAULT_FILTRES: Filtres = {
 export const useMapStore = create<MapStore>((set, get) => ({
   biens: [],
   setBiens: (biens) => set({ biens }),
+
+  ads: [],
+  setAds: (ads) => set({ ads }),
 
   activeBienId: null,
   setActiveBienId: (id) => set({ activeBienId: id }),
