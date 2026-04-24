@@ -249,7 +249,7 @@ export default function PublierForm({ profile, siteSettings }: Props) {
              type:         bien.type,
              prix:         bien.prix,
              vendeurNom:   `${profile.prenom} ${profile.nom}`,
-             vendeurEmail: user.email ?? '',           }),
+             vendeurEmail: '',           }),
          }).catch(() => {}) // fire-and-forget, ne bloque pas la navigation
       }
 
