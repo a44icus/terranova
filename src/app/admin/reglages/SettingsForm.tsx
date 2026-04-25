@@ -345,8 +345,8 @@ export default function SettingsForm({ settings }: { settings: SiteSettings }) {
               <Field label="Zoom maximum" hint="20 = bâtiment précis">
                 <Input type="number" min={1} max={20} value={s.carte_zoom_max} onChange={e => set('carte_zoom_max', parseInt(e.target.value) || 20)} />
               </Field>
-              <Field label="Seuil clustering" hint="Nbre de biens au même endroit avant regroupement">
-                <Input type="number" min={2} max={50} value={s.clustering_seuil} onChange={e => set('clustering_seuil', parseInt(e.target.value) || 8)} />
+              <Field label="Rayon clustering (px)" hint="Rayon en pixels pour regrouper les marqueurs — défaut 80, plus élevé = plus agressif">
+                <Input type="number" min={20} max={200} value={s.clustering_seuil} onChange={e => set('clustering_seuil', parseInt(e.target.value) || 80)} />
               </Field>
               <Field label="Biens max chargés" hint="Limite la requête Supabase (perf)">
                 <Input type="number" min={100} max={10000} step={100} value={s.carte_biens_max} onChange={e => set('carte_biens_max', parseInt(e.target.value) || 2000)} />

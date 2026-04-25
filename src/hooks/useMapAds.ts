@@ -151,20 +151,6 @@ export function useMapAds(
           <div style="width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:10px solid ${color};margin:0 auto;margin-top:-1px;"></div>`
       }
 
-      // ── Popup au survol ───────────────────────────────────────────────────
-      if (ad.description || ad.lien_url) {
-        const popup = new maplibregl.Popup({ offset: [0, -8], closeButton: false, anchor: 'bottom' })
-          .setHTML(`
-            <div style="font-family:'DM Sans',sans-serif;padding:2px 0;min-width:140px;">
-              <strong style="color:#0F172A;font-size:13px;">${esc(ad.titre)}</strong>
-              ${ad.description ? `<p style="margin:4px 0 0;font-size:12px;color:rgba(15,23,42,0.55);line-height:1.4;">${esc(ad.description)}</p>` : ''}
-              ${ad.lien_url ? `<a href="${esc(ad.lien_url)}" target="_blank" rel="noopener"
-                style="display:inline-block;margin-top:6px;font-size:11px;color:${color};font-weight:600;text-decoration:none;">En savoir plus →</a>` : ''}
-            </div>`)
-        el.addEventListener('mouseenter', () => popup.setLngLat([lng, lat]).addTo(map as any))
-        el.addEventListener('mouseleave', () => popup.remove())
-      }
-
       // ── Clic → tracking + ouverture lien ─────────────────────────────────
       el.addEventListener('click', (e) => {
         e.stopPropagation()

@@ -1,11 +1,142 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { isAdActive } from '@/lib/mapAds'
 import type { MapAd, AdFormat } from '@/lib/mapAds'
 import type { AdWithStats } from './page'
 import { createAd, updateAd, deleteAd, toggleAdActif } from './actions'
 import StatsChart from './StatsChart'
+import { createClient } from '@/lib/supabase/client'
+
+interface GeoSuggestion { display_name: string; lat: string; lon: string }
+
+function LocationSearch({ onSelect }: { onSelect: (lat: number, lng: number, label: string) => void }) {
+  const [query, setQuery] = useState('')
+  const [suggestions, setSuggestions] = useState<GeoSuggestion[]>([])
+  const [open, setOpen] = useState(false)
+  const timer = useRef<NodeJS.Timeout | undefined>(undefined)
+
+  useEffect(() => {
+    clearTimeout(timer.current)
+    if (query.length < 3) { setSuggestions([]); return }
+    timer.current = setTimeout(async () => {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=fr`,
+        { headers: { 'Accept-Language': 'fr' } }
+      )
+      setSuggestions(await res.json())
+      setOpen(true)
+    }, 350)
+  }, [query])
+
+  return (
+    <div className="relative">
+      <div className="relative flex items-center">
+        <svg className="absolute left-3 w-3.5 h-3.5 text-[#0F172A]/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onFocus={() => suggestions.length > 0 && setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          placeholder="Rechercher une adresse, ville…"
+          className="w-full border border-[#0F172A]/15 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#4F46E5]"
+        />
+      </div>
+      {open && suggestions.length > 0 && (
+        <ul className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-[#0F172A]/10 rounded-xl shadow-lg overflow-hidden">
+          {suggestions.map((s, i) => (
+            <li key={i}>
+              <button
+                type="button"
+                onMouseDown={e => {
+                  e.preventDefault()
+                  onSelect(parseFloat(s.lat), parseFloat(s.lon), s.display_name)
+                  setQuery(s.display_name.split(',')[0])
+                  setOpen(false)
+                }}
+                className="w-full text-left px-3 py-2.5 text-xs text-[#0F172A] hover:bg-[#4F46E5]/05 border-b border-[#0F172A]/06 last:border-0 truncate"
+              >
+                {s.display_name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+interface MiniMapPickerProps {
+  lat: number | null
+  lng: number | null
+  onChange: (lat: number, lng: number) => void
+  flyToSignal?: { lat: number; lng: number; ts: number } | null
+}
+
+function MiniMapPicker({ lat, lng, onChange, flyToSignal }: MiniMapPickerProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<any>(null)
+  const markerRef = useRef<any>(null)
+
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return
+    let map: any, marker: any
+
+    import('maplibre-gl').then(async ({ default: mgl }) => {
+      const { MAP_STYLES } = await import('@/lib/mapStyles')
+      const hasPos = lat != null && lng != null
+
+      map = new mgl.Map({
+        container: containerRef.current!,
+        style: MAP_STYLES.street as any,
+        center: hasPos ? [lng, lat] : [2.3522, 46.8],
+        zoom: hasPos ? 13 : 5,
+        attributionControl: false,
+      })
+      mapRef.current = map
+
+      const el = document.createElement('div')
+      el.style.cssText = `width:24px;height:30px;cursor:grab;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 34'%3E%3Cpath d='M14 2C8.477 2 4 6.477 4 12c0 7.5 10 20 10 20s10-12.5 10-20c0-5.523-4.477-10-10-10z' fill='%234F46E5'/%3E%3Ccircle cx='14' cy='12' r='4' fill='white'/%3E%3C/svg%3E") center/contain no-repeat;`
+
+      marker = new mgl.Marker({ element: el, draggable: true, anchor: 'bottom' })
+      markerRef.current = marker
+
+      if (hasPos) marker.setLngLat([lng, lat]).addTo(map)
+
+      // Clic sur la carte → déplace le marker
+      map.on('click', (e: any) => {
+        const { lat: ly, lng: lx } = e.lngLat
+        marker.setLngLat([lx, ly]).addTo(map)
+        onChange(ly, lx)
+      })
+
+      // Fin de drag → met à jour les coords
+      marker.on('dragend', () => {
+        const pos = marker.getLngLat()
+        onChange(pos.lat, pos.lng)
+      })
+    })
+
+    return () => { mapRef.current?.remove(); mapRef.current = null; markerRef.current = null }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fly to when address is selected from search
+  useEffect(() => {
+    if (!flyToSignal || !mapRef.current || !markerRef.current) return
+    mapRef.current.flyTo({ center: [flyToSignal.lng, flyToSignal.lat], zoom: 13, duration: 800 })
+    markerRef.current.setLngLat([flyToSignal.lng, flyToSignal.lat]).addTo(mapRef.current)
+  }, [flyToSignal])
+
+  return (
+    <div
+      ref={containerRef}
+      style={{ height: 200, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(15,23,42,0.12)' }}
+    />
+  )
+}
 
 const FORMAT_LABELS: Record<AdFormat, { label: string; desc: string; emoji: string }> = {
   pin:    { label: 'Pin',    desc: 'Pastille compacte comme les biens', emoji: '📍' },
@@ -66,9 +197,12 @@ function AdPreview({ form }: { form: Omit<MapAd, 'id'> }) {
           <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ background: 'white', borderRadius: 12, overflow: 'hidden',
               boxShadow: '0 6px 24px rgba(0,0,0,0.15)', border: `2px solid ${color}`, width: 160, fontFamily: 'sans-serif' }}>
-              <div style={{ height: 44, background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, position: 'relative' }}>
-                {form.emoji || '📢'}
-                <span style={{ position: 'absolute', top: 4, right: 6, fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>PUB</span>
+              <div style={{ height: 60, background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, position: 'relative', overflow: 'hidden' }}>
+                {form.image_url
+                  ? <img src={form.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : (form.emoji || '📢')
+                }
+                <span style={{ position: 'absolute', top: 4, right: 6, fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>PUB</span>
               </div>
               <div style={{ padding: '7px 9px 9px' }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#0F172A', marginBottom: 2 }}>{form.titre || 'Titre'}</div>
@@ -102,8 +236,10 @@ export default function MapAdsClient({ ads: initialAds }: { ads: AdWithStats[] }
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const [expandedStats, setExpandedStats] = useState<string | null>(null)
-  // Mode ciblage géographique dans le formulaire
   const [targetMode, setTargetMode] = useState<'none' | 'radius' | 'bbox'>('none')
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [flyToSignal, setFlyToSignal] = useState<{ lat: number; lng: number; ts: number } | null>(null)
 
   const totalImpressions = ads.reduce((s, a) => s + (a.impressions ?? 0), 0)
   const totalClicks      = ads.reduce((s, a) => s + (a.clicks ?? 0), 0)
@@ -197,6 +333,26 @@ export default function MapAdsClient({ ads: initialAds }: { ads: AdWithStats[] }
         setAds(prev => prev.map(a => a.id === ad.id ? { ...a, actif: !a.actif } : a))
       } catch (e: any) { alert(e.message) }
     })
+  }
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop()
+      const path = `map-ads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error: uploadError } = await supabase.storage.from('photos-biens').upload(path, file, { upsert: false })
+      if (uploadError) throw uploadError
+      const { data: { publicUrl } } = supabase.storage.from('photos-biens').getPublicUrl(path)
+      setForm(f => ({ ...f, image_url: publicUrl }))
+    } catch (e: any) {
+      setError(`Erreur upload : ${e.message}`)
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
   }
 
   return (
@@ -389,27 +545,26 @@ export default function MapAdsClient({ ads: initialAds }: { ads: AdWithStats[] }
                       className="w-full border border-[#0F172A]/15 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#4F46E5]" />
                   </div>
 
-                  {/* Coordonnées */}
+                  {/* Position via mini carte */}
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F172A]/50 uppercase tracking-wider mb-1.5">Coordonnées GPS *</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[{ label: 'Lat', key: 'lat', placeholder: '48.8566' }, { label: 'Lng', key: 'lng', placeholder: '2.3522' }].map(f => (
-                        <div key={f.key} className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#0F172A]/35 font-medium">{f.label}</span>
-                          <input type="text" inputMode="decimal" placeholder={f.placeholder}
-                            value={form[f.key as 'lat' | 'lng'] ?? ''}
-                            onChange={e => {
-                              const raw = e.target.value
-                              const parsed = raw === '' ? null : parseFloat(raw.replace(',', '.'))
-                              setForm(prev => ({ ...prev, [f.key]: (parsed != null && !isNaN(parsed)) ? parsed : raw === '' ? null : prev[f.key as 'lat' | 'lng'] }))
-                            }}
-                            className="w-full border border-[#0F172A]/15 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#4F46E5]" />
-                        </div>
-                      ))}
+                    <label className="block text-xs font-semibold text-[#0F172A]/50 uppercase tracking-wider mb-1.5">Position sur la carte *</label>
+                    <LocationSearch onSelect={(lat, lng) => {
+                      setForm(f => ({ ...f, lat, lng }))
+                      setFlyToSignal({ lat, lng, ts: Date.now() })
+                    }} />
+                    <div className="mt-2">
+                      <MiniMapPicker
+                        lat={form.lat}
+                        lng={form.lng}
+                        onChange={(lat, lng) => setForm(f => ({ ...f, lat, lng }))}
+                        flyToSignal={flyToSignal}
+                      />
                     </div>
-                    <p className="text-[11px] text-[#0F172A]/35 mt-1.5">
-                      💡 <a href="https://www.google.com/maps" target="_blank" rel="noopener" className="text-[#4F46E5] hover:underline">Google Maps</a> → clic droit → coordonnées
-                    </p>
+                    {form.lat != null && form.lng != null && (
+                      <p className="text-[10px] text-[#0F172A]/35 mt-1.5 text-center">
+                        {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
+                      </p>
+                    )}
                   </div>
 
                   {/* Couleur */}
@@ -442,15 +597,31 @@ export default function MapAdsClient({ ads: initialAds }: { ads: AdWithStats[] }
                         placeholder="https://example.com"
                         className="w-full border border-[#0F172A]/15 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#4F46E5]" />
                     </div>
-                    {form.format === 'card' && (
-                      <div>
-                        <label className="block text-xs font-semibold text-[#0F172A]/50 uppercase tracking-wider mb-1.5">URL de l'image</label>
-                        <input type="url" value={form.image_url}
-                          onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))}
-                          placeholder="https://example.com/image.jpg"
-                          className="w-full border border-[#0F172A]/15 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#4F46E5]" />
-                      </div>
-                    )}
+
+                    {/* Photo upload */}
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0F172A]/50 uppercase tracking-wider mb-1.5">Photo</label>
+                      <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                      {form.image_url ? (
+                        <div className="relative rounded-xl overflow-hidden border border-[#0F172A]/10">
+                          <img src={form.image_url} alt="" className="w-full h-28 object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setForm(f => ({ ...f, image_url: '' }))}
+                            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 text-white text-xs flex items-center justify-center hover:bg-black/70 transition-colors"
+                          >✕</button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploading}
+                          className="w-full border-2 border-dashed border-[#0F172A]/15 rounded-xl py-4 text-center text-sm text-[#0F172A]/40 hover:border-[#4F46E5]/40 hover:text-[#4F46E5] transition-colors disabled:opacity-50"
+                        >
+                          {uploading ? 'Envoi en cours…' : '+ Ajouter une photo'}
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Ciblage géographique */}

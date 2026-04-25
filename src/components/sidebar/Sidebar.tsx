@@ -60,22 +60,37 @@ function SidebarContent({ filtersOpen, setFiltersOpen }: SidebarContentProps) {
       </div>
 
       {/* Barre filtres */}
-      <div className="flex-shrink-0 flex items-center justify-between px-3 py-2 border-b border-navy/10 bg-white">
+      <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-navy/10 bg-white">
         <button
           onClick={() => setFiltersOpen(o => !o)}
-          className="flex items-center gap-2 text-xs font-medium text-navy/70 hover:text-navy transition-colors"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            filtersOpen || activeCount > 0
+              ? 'bg-primary text-white shadow-sm shadow-primary/25'
+              : 'bg-navy/08 text-navy hover:bg-navy/14'
+          }`}
         >
-          <span>🔍 Filtres avancés</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <line x1="4" y1="6" x2="20" y2="6"/>
+            <line x1="4" y1="12" x2="20" y2="12"/>
+            <line x1="4" y1="18" x2="20" y2="18"/>
+            <circle cx="9" cy="6" r="2.5" fill="currentColor" stroke="none"/>
+            <circle cx="15" cy="12" r="2.5" fill="currentColor" stroke="none"/>
+            <circle cx="9" cy="18" r="2.5" fill="currentColor" stroke="none"/>
+          </svg>
+          Filtres
           {activeCount > 0 && (
-            <span className="bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+            <span className="bg-white/25 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
               {activeCount}
             </span>
           )}
-          <span className="text-navy/40 text-[10px]">{filtersOpen ? '▲' : '▼'}</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className={`transition-transform duration-200 ${filtersOpen ? 'rotate-180' : ''}`}>
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
         </button>
+        <SaveSearchButton compact />
         {hasAny && (
           <button onClick={resetFiltres}
-            className="text-[10px] text-primary hover:underline font-medium">
+            className="ml-auto text-[10px] text-primary hover:underline font-medium">
             Réinitialiser
           </button>
         )}
@@ -90,9 +105,6 @@ function SidebarContent({ filtersOpen, setFiltersOpen }: SidebarContentProps) {
           <Filters hideReset hideTabs />
         </div>
       </div>
-
-      {/* Alerte e-mail */}
-      <SaveSearchButton />
 
       {/* Liste des biens */}
       <BienList />

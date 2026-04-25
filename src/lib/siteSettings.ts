@@ -120,7 +120,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heatmap_defaut:         false,
   carte_zoom_min:         3,
   carte_zoom_max:         20,
-  clustering_seuil:       8,
+  clustering_seuil:       80,
   heatmap_opacite:        0.75,
   carte_biens_max:        2000,
 

@@ -100,7 +100,7 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
         const activeId = useMapStore.getState().activeBienId
         if (activeId) {
           const target = useMapStore.getState().biens.find((b: any) => b.id === activeId)
-          if (target) flyTo3D([target.lng, target.lat], 17.5)
+          if (target) flyTo3D([target.lng, target.lat], 15)
         }
       })
       map.on('moveend', () => updateMarkersRef.current())
@@ -186,7 +186,7 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
 
     if (bien) {
       // Centrer la carte sur le bien
-      flyTo3D([bien.lng, bien.lat], 17.5)
+      flyTo3D([bien.lng, bien.lat], 15)
 
       if (bien.approx) addApproxZone(bien)
       loadPOI(bien.id, bien.lat, bien.lng).then(result => {
@@ -225,14 +225,19 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
     clusterMarkersRef.current.forEach(m => m.remove())
     clusterMarkersRef.current = []
 
-    const sc = new Supercluster({ radius: carteSettings.clusteringSeuil, maxZoom: 14 })
+    const zoom = Math.floor(map.getZoom())
+
+    // Radius progressif : couvre une grande zone aux faibles zooms (tout France en 1 cluster à zoom 3)
+    // zoom 3 → ×64, zoom 5 → ×16, zoom 7 → ×4, zoom 9+ → ×1
+    const baseRadius = carteSettings.clusteringSeuil
+    const adaptiveRadius = Math.min(Math.round(baseRadius * Math.pow(2, Math.max(0, 7 - zoom))), 2000)
+
+    const sc = new Supercluster({ radius: adaptiveRadius, maxZoom: 18 })
     sc.load(biens.map(b => ({
       type: 'Feature' as const,
       geometry: { type: 'Point' as const, coordinates: [b.lng, b.lat] },
       properties: { id: b.id },
     })))
-
-    const zoom = Math.floor(map.getZoom())
     const bounds = map.getBounds()
     const bbox: [number, number, number, number] = [
       bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()
@@ -608,7 +613,7 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
       try { if (map.getLayer('route-layer')) map.removeLayer('route-layer') } catch {}
       try { if (map.getSource('route-source')) map.removeSource('route-source') } catch {}
     }
-    if (bien) flyTo3D([bien.lng, bien.lat], 17.5)
+    if (bien) flyTo3D([bien.lng, bien.lat], 15)
   }
 
   // ── TOGGLE GÉOLOC ─────────────────────────────────────────
@@ -809,7 +814,7 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
           onSelectBien={(id) => {
             setActiveBienId(id)
             const b = biens.find(x => x.id === id)
-            if (b) flyTo3D([b.lng, b.lat], 17.5)
+            if (b) flyTo3D([b.lng, b.lat], 15)
           }}
           onClose={() => { stopGeo(); setGeoActive(false) }}
         />
