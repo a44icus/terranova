@@ -402,10 +402,13 @@ export default function MapAdsClient({ ads: initialAds }: { ads: AdWithStats[] }
             return (
               <div key={ad.id} className="bg-white rounded-2xl border border-[#0F172A]/08 shadow-sm overflow-hidden">
                 <div className="p-5 flex items-center gap-5">
-                  {/* Couleur / emoji */}
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                  {/* Couleur / emoji / photo */}
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden"
                     style={{ background: ad.couleur ?? '#F59E0B' }}>
-                    {ad.emoji || fmt.emoji}
+                    {ad.image_url
+                      ? <img src={ad.image_url} alt="" className="w-full h-full object-cover" />
+                      : (ad.emoji || fmt.emoji)
+                    }
                   </div>
 
                   {/* Infos */}
