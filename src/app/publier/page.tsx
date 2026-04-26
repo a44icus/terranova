@@ -70,5 +70,5 @@ export default async function PublierPage() {
     devise:                settings.marche_devise,
   }
 
-  return <PublierForm profile={profile} siteSettings={siteSettings} />
+  return <PublierForm profile={profile} userEmail={user.email ?? ''} siteSettings={siteSettings} />
 }

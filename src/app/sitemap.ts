@@ -1,33 +1,51 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { MetadataRoute } from 'next'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova-beta.vercel.app'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
-  const { data: biens } = await supabase
-    .from('biens')
-    .select('id, updated_at')
-    .eq('statut', 'publie')
-    .order('updated_at', { ascending: false })
-    .limit(1000)
+  const [{ data: biens }, { data: chercheurs }] = await Promise.all([
+    supabase
+      .from('biens')
+      .select('id, updated_at')
+      .eq('statut', 'publie')
+      .order('updated_at', { ascending: false })
+      .limit(5000),
+    supabase
+      .from('recherches')
+      .select('id, updated_at')
+      .eq('actif', true)
+      .limit(1000),
+  ])
 
   const bienEntries: MetadataRoute.Sitemap = (biens ?? []).map(b => ({
     url: `${BASE_URL}/annonce/${b.id}`,
     lastModified: new Date(b.updated_at),
     changeFrequency: 'weekly',
-    priority: 0.6,
+    priority: 0.8,
+  }))
+
+  const chercheurEntries: MetadataRoute.Sitemap = (chercheurs ?? []).map(c => ({
+    url: `${BASE_URL}/chercheurs/${c.id}`,
+    lastModified: new Date(c.updated_at),
+    changeFrequency: 'weekly',
+    priority: 0.5,
   }))
 
   return [
-    { url: BASE_URL,                                    lastModified: new Date(), changeFrequency: 'daily',   priority: 1   },
-    { url: `${BASE_URL}/annonces`,                      lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
-    { url: `${BASE_URL}/carte`,                         lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
-    { url: `${BASE_URL}/publier`,                       lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${BASE_URL}/legal/mentions-legales`,        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${BASE_URL}/legal/confidentialite`,         lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${BASE_URL}/legal/cgu`,                     lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: BASE_URL,                               lastModified: new Date(), changeFrequency: 'daily',   priority: 1.0 },
+    { url: `${BASE_URL}/carte`,                    lastModified: new Date(), changeFrequency: 'always',  priority: 0.9 },
+    { url: `${BASE_URL}/annonces`,                 lastModified: new Date(), changeFrequency: 'hourly',  priority: 0.9 },
+    { url: `${BASE_URL}/marche`,                   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
+    { url: `${BASE_URL}/estimer`,                  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/chercheurs`,               lastModified: new Date(), changeFrequency: 'daily',   priority: 0.6 },
+    { url: `${BASE_URL}/publicite`,                lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${BASE_URL}/legal/mentions-legales`,   lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${BASE_URL}/legal/confidentialite`,    lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${BASE_URL}/legal/cgu`,                lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     ...bienEntries,
+    ...chercheurEntries,
   ]
 }

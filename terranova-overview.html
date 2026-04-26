@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Terranova — Vue d'ensemble</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary:      #4F46E5;
+    --primary-dark: #4338CA;
+    --primary-soft: #818CF8;
+    --navy:         #0F172A;
+    --surface:      #F8FAFC;
+    --location:     #0891B2;
+    --amber:        #F59E0B;
+    --green:        #16A34A;
+    --red:          #DC2626;
+    --violet:       #7C3AED;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--navy); line-height: 1.6; }
+  h1, h2, h3 { font-family: 'DM Serif Display', serif; }
+
+  /* ── Layout ── */
+  .page { max-width: 1200px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 50%, var(--primary-dark) 100%);
+    color: white; border-radius: 24px; padding: 56px 48px; margin-bottom: 48px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 20px; }
+  .hero h1 { font-size: 52px; line-height: 1.1; margin-bottom: 16px; }
+  .hero h1 span { color: var(--primary-soft); }
+  .hero-sub { font-size: 18px; opacity: 0.7; max-width: 520px; margin-bottom: 32px; }
+  .hero-stats { display: flex; gap: 40px; }
+  .hero-stat-val { font-family: 'DM Serif Display', serif; font-size: 32px; display: block; }
+  .hero-stat-lbl { font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.05em; }
+  .hero-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(79,70,229,0.3); border: 1px solid rgba(129,140,248,0.4); color: var(--primary-soft); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600; position: absolute; top: 32px; right: 48px; }
+
+  /* ── Section titles ── */
+  .section { margin-bottom: 56px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .section-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .section-title { font-size: 26px; }
+  .section-sub { font-size: 14px; color: rgba(15,23,42,0.45); margin-top: 2px; }
+
+  /* ── Grid ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media(max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+  /* ── Cards ── */
+  .card { background: white; border-radius: 16px; border: 1px solid rgba(15,23,42,0.07); padding: 24px; }
+  .card-sm { background: white; border-radius: 12px; border: 1px solid rgba(15,23,42,0.07); padding: 18px; }
+
+  /* ── Charte graphique ── */
+  .color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  @media(max-width: 768px) { .color-grid { grid-template-columns: repeat(3, 1fr); } }
+  .color-swatch { border-radius: 12px; overflow: hidden; border: 1px solid rgba(15,23,42,0.08); }
+  .color-block { height: 64px; }
+  .color-info { background: white; padding: 10px 12px; }
+  .color-name { font-size: 12px; font-weight: 600; color: var(--navy); }
+  .color-hex { font-size: 11px; color: rgba(15,23,42,0.4); font-family: monospace; }
+  .color-role { font-size: 10px; color: rgba(15,23,42,0.35); margin-top: 2px; }
+
+  .typo-sample { background: white; border-radius: 16px; border: 1px solid rgba(15,23,42,0.07); padding: 28px 32px; }
+  .typo-row { display: flex; align-items: baseline; gap: 20px; padding: 14px 0; border-bottom: 1px solid rgba(15,23,42,0.06); }
+  .typo-row:last-child { border-bottom: none; }
+  .typo-meta { width: 140px; flex-shrink: 0; }
+  .typo-tag { font-size: 10px; font-weight: 600; color: rgba(15,23,42,0.35); text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 4px; }
+  .typo-spec { font-size: 11px; color: rgba(15,23,42,0.4); font-family: monospace; }
+
+  /* ── Rôles utilisateurs ── */
+  .role-card { background: white; border-radius: 16px; border: 1px solid rgba(15,23,42,0.07); overflow: hidden; }
+  .role-header { padding: 20px 24px; border-bottom: 1px solid rgba(15,23,42,0.06); }
+  .role-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; margin-bottom: 8px; }
+  .role-name { font-family: 'DM Serif Display', serif; font-size: 18px; }
+  .role-desc { font-size: 12px; color: rgba(15,23,42,0.5); margin-top: 4px; }
+  .role-features { padding: 16px 24px; }
+  .feature-item { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; font-size: 13px; }
+  .feat-yes { color: var(--green); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .feat-no  { color: rgba(15,23,42,0.2); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Fonctionnalités ── */
+  .feat-card { background: white; border-radius: 16px; border: 1px solid rgba(15,23,42,0.07); padding: 24px; }
+  .feat-card-icon { font-size: 28px; margin-bottom: 12px; }
+  .feat-card-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .feat-card-desc { font-size: 13px; color: rgba(15,23,42,0.55); line-height: 1.55; }
+  .feat-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* ── Pages ── */
+  .pages-table { width: 100%; border-collapse: collapse; background: white; border-radius: 16px; overflow: hidden; border: 1px solid rgba(15,23,42,0.07); }
+  .pages-table th { background: var(--surface); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(15,23,42,0.4); padding: 12px 20px; text-align: left; border-bottom: 1px solid rgba(15,23,42,0.07); }
+  .pages-table td { padding: 12px 20px; font-size: 13px; border-bottom: 1px solid rgba(15,23,42,0.05); vertical-align: top; }
+  .pages-table tr:last-child td { border-bottom: none; }
+  .route { font-family: monospace; font-size: 12px; background: rgba(79,70,229,0.07); color: var(--primary); padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+  .access-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+
+  /* ── Stack technique ── */
+  .stack-item { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid rgba(15,23,42,0.06); }
+  .stack-item:last-child { border-bottom: none; }
+  .stack-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .stack-name { font-weight: 600; font-size: 14px; width: 160px; flex-shrink: 0; }
+  .stack-desc { font-size: 13px; color: rgba(15,23,42,0.55); }
+
+  /* ── Stats pub ── */
+  .stat-box { background: white; border-radius: 16px; border: 1px solid rgba(15,23,42,0.07); padding: 24px; text-align: center; }
+  .stat-num { font-family: 'DM Serif Display', serif; font-size: 36px; }
+  .stat-lbl { font-size: 12px; color: rgba(15,23,42,0.4); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: rgba(15,23,42,0.07); margin: 40px 0; }
+
+  /* ── Tags ── */
+  .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .tag-pub  { background: rgba(245,158,11,0.1); color: var(--amber); }
+  .tag-free { background: rgba(22,163,74,0.1);  color: var(--green); }
+  .tag-pro  { background: rgba(79,70,229,0.1);  color: var(--primary); }
+  .tag-adm  { background: rgba(220,38,38,0.1);  color: var(--red); }
+  .tag-all  { background: rgba(8,145,178,0.1);  color: var(--location); }
+
+  /* ── Print ── */
+  @media print {
+    .hero { background: var(--navy) !important; -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ HERO ══════════════════════════════════════════════════════════════ -->
+  <div class="hero">
+    <div class="hero-badge">📋 Vue d'ensemble · Avril 2025</div>
+    <h1>Terra<span>nova</span></h1>
+    <p class="hero-sub">Plateforme immobilière interactive — vente, location, carte dynamique et outils pour acheteurs et professionnels.</p>
+    <div class="hero-stats">
+      <div><span class="hero-stat-val">25+</span><span class="hero-stat-lbl">Pages</span></div>
+      <div><span class="hero-stat-val">4</span><span class="hero-stat-lbl">Rôles</span></div>
+      <div><span class="hero-stat-val">3</span><span class="hero-stat-lbl">Plans tarifaires</span></div>
+      <div><span class="hero-stat-val">12</span><span class="hero-stat-lbl">API routes</span></div>
+    </div>
+    <div class="hero-pill">🌐 terranova-beta.vercel.app</div>
+  </div>
+
+
+  <!-- ══ CHARTE GRAPHIQUE ═══════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(79,70,229,0.1)">🎨</div>
+      <div>
+        <div class="section-title">Charte graphique</div>
+        <div class="section-sub">Couleurs, typographie et style visuel de la plateforme</div>
+      </div>
+    </div>
+
+    <div class="color-grid" style="margin-bottom:20px">
+      <div class="color-swatch">
+        <div class="color-block" style="background:#4F46E5"></div>
+        <div class="color-info"><div class="color-name">Primaire</div><div class="color-hex">#4F46E5</div><div class="color-role">Boutons, liens, accents</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-block" style="background:#4338CA"></div>
+        <div class="color-info"><div class="color-name">Primaire foncé</div><div class="color-hex">#4338CA</div><div class="color-role">Hover, états actifs</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-block" style="background:#818CF8"></div>
+        <div class="color-info"><div class="color-name">Primaire doux</div><div class="color-hex">#818CF8</div><div class="color-role">Textes clairs, badges</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-block" style="background:#0F172A"></div>
+        <div class="color-info"><div class="color-name">Navy</div><div class="color-hex">#0F172A</div><div class="color-role">Textes, fonds sombres</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-block" style="background:#0891B2"></div>
+        <div class="color-info"><div class="color-name">Location</div><div class="color-hex">#0891B2</div><div class="color-role">Tag location, accents</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-block" style="background:#F8FAFC"></div>
+        <div class="color-info"><div class="color-name">Surface</div><div class="color-hex">#F8FAFC</div><div class="color-role">Fond de page, panneaux</div></div>
+      </div>
+    </div>
+
+    <div class="color-grid">
+      <div class="color-swatch">
+        <div class="color-block" style="background:#F59E0B"></div>
+        <div class="color-info"><div class="color-name">Amber</div><div class="color-hex">#F59E0B</div><div class="color-role">Pubs, alertes</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-block" style="background:#16A34A"></div>
+        <div class="color-info"><div class="color-name">Vert</div><div class="color-hex">#16A34A</div><div class="color-role">Succès, validation</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-block" style="background:#DC2626"></div>
+        <div class="color-info"><div class="color-name">Rouge</div><div class="color-hex">#DC2626</div><div class="color-role">Erreurs, suppressions</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-block" style="background:#7C3AED"></div>
+        <div class="color-info"><div class="color-name">Violet</div><div class="color-hex">#7C3AED</div><div class="color-role">DPE, accents pubs</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-block" style="background:linear-gradient(135deg,#0F172A,#1e3a5f,#4338CA)"></div>
+        <div class="color-info"><div class="color-name">Gradient hero</div><div class="color-hex">Navy → Primary</div><div class="color-role">Hero sections, headers</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="color-block" style="background:white;border:1px solid rgba(15,23,42,0.08)"></div>
+        <div class="color-info"><div class="color-name">Blanc</div><div class="color-hex">#FFFFFF</div><div class="color-role">Cartes, modales, input</div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px">
+      <div class="typo-sample">
+        <div class="typo-row">
+          <div class="typo-meta"><span class="typo-tag">Titre principal</span><span class="typo-spec">DM Serif Display · 52px</span></div>
+          <div style="font-family:'DM Serif Display',serif;font-size:36px;color:var(--navy)">Terranova</div>
+        </div>
+        <div class="typo-row">
+          <div class="typo-meta"><span class="typo-tag">Titre section</span><span class="typo-spec">DM Serif Display · 26px</span></div>
+          <div style="font-family:'DM Serif Display',serif;font-size:24px;color:var(--navy)">Nos annonces</div>
+        </div>
+        <div class="typo-row">
+          <div class="typo-meta"><span class="typo-tag">Titre carte</span><span class="typo-spec">DM Sans 700 · 15px</span></div>
+          <div style="font-weight:700;font-size:15px;color:var(--navy)">Appartement 3 pièces — Paris 11e</div>
+        </div>
+        <div class="typo-row">
+          <div class="typo-meta"><span class="typo-tag">Corps de texte</span><span class="typo-spec">DM Sans 400 · 14px</span></div>
+          <div style="font-size:14px;color:rgba(15,23,42,0.7)">Beau T3 lumineux avec balcon au 4ème étage sans ascenseur.</div>
+        </div>
+        <div class="typo-row">
+          <div class="typo-meta"><span class="typo-tag">Petits labels</span><span class="typo-spec">DM Sans 600 · 11px · uppercase</span></div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:rgba(15,23,42,0.4)">Surface · Prix · Ville</div>
+        </div>
+        <div class="typo-row">
+          <div class="typo-meta"><span class="typo-tag">Prix</span><span class="typo-spec">DM Serif Display · 24px</span></div>
+          <div style="font-family:'DM Serif Display',serif;font-size:24px;color:var(--primary)">320 000 €</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ RÔLES UTILISATEURS ═════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(8,145,178,0.1)">👤</div>
+      <div>
+        <div class="section-title">Rôles utilisateurs</div>
+        <div class="section-sub">4 niveaux d'accès avec droits progressifs</div>
+      </div>
+    </div>
+
+    <div class="grid-4">
+      <!-- Visiteur -->
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-badge" style="background:rgba(15,23,42,0.06);color:rgba(15,23,42,0.5)">👁 Visiteur</div>
+          <div class="role-name">Visiteur</div>
+          <div class="role-desc">Non authentifié · Gratuit</div>
+        </div>
+        <div class="role-features">
+          <div class="feature-item"><span class="feat-yes">✓</span> Consulter annonces</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Carte interactive</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Profils vendeurs</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Profils chercheurs</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Estimation gratuite</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Analyse du marché</div>
+          <div class="feature-item"><span class="feat-no">✗</span> Publier une annonce</div>
+          <div class="feature-item"><span class="feat-no">✗</span> Favoris & alertes</div>
+          <div class="feature-item"><span class="feat-no">✗</span> Messagerie</div>
+        </div>
+      </div>
+
+      <!-- Particulier -->
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">🏠 Gratuit</div>
+          <div class="role-name">Particulier</div>
+          <div class="role-desc">Connecté · Plan gratuit</div>
+        </div>
+        <div class="role-features">
+          <div class="feature-item"><span class="feat-yes">✓</span> Tout le contenu visiteur</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> 1 annonce active</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> 5 photos / annonce</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Favoris illimités</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Alertes baisse de prix</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Messagerie acheteurs</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Profil chercheur actif</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Visite virtuelle 360°</div>
+          <div class="feature-item"><span class="feat-no">✗</span> Mise en avant carte</div>
+        </div>
+      </div>
+
+      <!-- Pro -->
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-badge" style="background:rgba(79,70,229,0.1);color:var(--primary)">⭐ Pro</div>
+          <div class="role-name">Professionnel</div>
+          <div class="role-desc">Plan mensuel · annuel · agence</div>
+        </div>
+        <div class="role-features">
+          <div class="feature-item"><span class="feat-yes">✓</span> Tout du particulier</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Jusqu'à ∞ annonces</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> 20 photos / annonce</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Mise en avant carte</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Stats avancées + export</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Page agence dédiée</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Badge PRO visible</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Gestion Stripe intégrée</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Support prioritaire</div>
+        </div>
+      </div>
+
+      <!-- Admin -->
+      <div class="role-card">
+        <div class="role-header">
+          <div class="role-badge" style="background:rgba(220,38,38,0.1);color:var(--red)">🔑 Admin</div>
+          <div class="role-name">Administrateur</div>
+          <div class="role-desc">Accès total · Back-office</div>
+        </div>
+        <div class="role-features">
+          <div class="feature-item"><span class="feat-yes">✓</span> Tout du pro</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Modération annonces</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Gestion pubs carte</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Paramètres du site</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Config email (Resend)</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Plans & Stripe</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Analytics tracking</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Cron alertes prix</div>
+          <div class="feature-item"><span class="feat-yes">✓</span> Stats pubs (CTR)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ FONCTIONNALITÉS ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">⚡</div>
+      <div>
+        <div class="section-title">Fonctionnalités</div>
+        <div class="section-sub">Toutes les fonctionnalités de la plateforme</div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="feat-card">
+        <div class="feat-card-icon">🗺</div>
+        <div class="feat-card-title">Carte interactive</div>
+        <div class="feat-card-desc">MapLibre GL avec clustering adaptatif, heatmap de densité, mode satellite/plan/topo, vue 3D, sélection au lasso, POI de quartier.</div>
+        <span class="feat-tag" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">🔍</div>
+        <div class="feat-card-title">Recherche & filtres avancés</div>
+        <div class="feat-card-desc">Type (vente/location), catégorie, ville, département, prix max, surface, pièces, DPE, options (parking, terrasse…), rayon géographique.</div>
+        <span class="feat-tag" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">📊</div>
+        <div class="feat-card-title">Analyse du marché</div>
+        <div class="feat-card-desc">Prix au m² par ville, tendances historiques, comparaison par catégorie, évolution des prix sur le bien consulté.</div>
+        <span class="feat-tag" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="feat-card">
+        <div class="feat-card-icon">🏠</div>
+        <div class="feat-card-title">Publication d'annonce</div>
+        <div class="feat-card-desc">Formulaire complet avec géocodage automatique, upload photos, visite virtuelle 360°, DPE, description, équipements. Modération admin.</div>
+        <span class="feat-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">🔔</div>
+        <div class="feat-card-title">Alertes email</div>
+        <div class="feat-card-desc">Sauvegarde de recherche avec critères, notification email automatique à la publication d'un bien correspondant. Configurable depuis le compte.</div>
+        <span class="feat-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">📉</div>
+        <div class="feat-card-title">Alertes baisse de prix</div>
+        <div class="feat-card-desc">Notification automatique par email lorsqu'un bien en favori baisse de prix. Cron job quotidien via Resend, configurable via l'admin.</div>
+        <span class="feat-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="feat-card">
+        <div class="feat-card-icon">🔭</div>
+        <div class="feat-card-title">Mode chercheur actif</div>
+        <div class="feat-card-desc">Profil public d'acheteur avec critères de recherche (type, budget, surface, ville). Les vendeurs peuvent contacter les chercheurs actifs directement.</div>
+        <span class="feat-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">🎯</div>
+        <div class="feat-card-title">Publicités cartographiques</div>
+        <div class="feat-card-desc">3 formats (pin, banner, carte), ciblage géographique (rayon ou zone), planification, capping d'impressions, stats impressions/clics/CTR.</div>
+        <span class="feat-tag" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">🌐</div>
+        <div class="feat-card-title">Visite virtuelle 360°</div>
+        <div class="feat-card-desc">Upload de photos sphériques lors de la publication. Visionneuse immersive sur la fiche détail avec navigation multi-photos.</div>
+        <span class="feat-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="feat-card">
+        <div class="feat-card-icon">🏆</div>
+        <div class="feat-card-title">Score de quartier</div>
+        <div class="feat-card-desc">Score calculé par catégorie POI (transports, santé, éducation, commerces, loisirs) pondérés via l'admin. Affiché sur la fiche détail.</div>
+        <span class="feat-tag" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">💳</div>
+        <div class="feat-card-title">Abonnements Stripe</div>
+        <div class="feat-card-desc">3 plans (mensuel, annuel, agence). Checkout, portail client, webhooks pour sync automatique du plan. Gestion factures intégrée.</div>
+        <span class="feat-tag" style="background:rgba(79,70,229,0.1);color:var(--primary)">Pro</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">⚙️</div>
+        <div class="feat-card-title">Back-office admin</div>
+        <div class="feat-card-desc">Réglages site (SEO, GA4, GTM, Meta Pixel, Matomo), modération annonces, gestion plans tarifaires, config email, paramètres carte.</div>
+        <span class="feat-tag" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ PAGES ══════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,58,237,0.1)">📄</div>
+      <div>
+        <div class="section-title">Pages & routes</div>
+        <div class="section-sub">Architecture de navigation complète</div>
+      </div>
+    </div>
+
+    <table class="pages-table">
+      <thead>
+        <tr>
+          <th>Route</th>
+          <th>Page</th>
+          <th>Accès</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="3" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:0.06em;color:rgba(15,23,42,0.35);text-transform:uppercase;padding:8px 20px">Pages publiques</td></tr>
+        <tr><td><span class="route">/</span></td><td>Accueil — présentation, plans, fonctionnalités</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/annonces</span></td><td>Liste paginée avec filtres</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/carte</span></td><td>Carte interactive MapLibre</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/annonce/[id]</span></td><td>Fiche détail bien (photos, 360°, score quartier)</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/marche</span></td><td>Analyse du marché immobilier par ville</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/estimer</span></td><td>Outil d'estimation gratuit</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/chercheurs</span></td><td>Répertoire des acheteurs actifs</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/chercheurs/[id]</span></td><td>Profil chercheur + formulaire de contact</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/vendeur/[id]</span></td><td>Page agence / vendeur avec ses annonces</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/publicite</span></td><td>Offres publicitaires sur la carte</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/publier</span></td><td>Création d'annonce complète</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
+
+        <tr><td colspan="3" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:0.06em;color:rgba(15,23,42,0.35);text-transform:uppercase;padding:8px 20px">Espace compte</td></tr>
+        <tr><td><span class="route">/compte</span></td><td>Tableau de bord (stats, résumé)</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
+        <tr><td><span class="route">/compte/mes-annonces</span></td><td>Gestion des annonces</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
+        <tr><td><span class="route">/compte/favoris</span></td><td>Mes favoris</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
+        <tr><td><span class="route">/compte/messages</span></td><td>Messagerie acheteurs / vendeurs</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
+        <tr><td><span class="route">/compte/alertes</span></td><td>Alertes de baisse de prix</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
+        <tr><td><span class="route">/compte/chercheur</span></td><td>Profil chercheur actif</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
+        <tr><td><span class="route">/compte/statistiques</span></td><td>Analytics annonces (vues, contacts)</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
+        <tr><td><span class="route">/compte/plan</span></td><td>Abonnement Stripe</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
+        <tr><td><span class="route">/compte/profil</span></td><td>Édition du profil utilisateur</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
+
+        <tr><td colspan="3" style="background:var(--surface);font-size:11px;font-weight:700;letter-spacing:0.06em;color:rgba(15,23,42,0.35);text-transform:uppercase;padding:8px 20px">Administration</td></tr>
+        <tr><td><span class="route">/admin/annonces</span></td><td>Modération (approuver / refuser)</td><td><span class="access-badge" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span></td></tr>
+        <tr><td><span class="route">/admin/map-ads</span></td><td>Pubs carte (CRUD, stats, mini-carte)</td><td><span class="access-badge" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span></td></tr>
+        <tr><td><span class="route">/admin/reglages</span></td><td>Réglages site (SEO, tracking, carte)</td><td><span class="access-badge" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span></td></tr>
+        <tr><td><span class="route">/admin/parametres</span></td><td>Plans tarifaires & Stripe</td><td><span class="access-badge" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span></td></tr>
+        <tr><td><span class="route">/compte/admin/email</span></td><td>Configuration email (Resend API)</td><td><span class="access-badge" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ══ SEO & QUALITÉ ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(22,163,74,0.1)">🔍</div>
+      <div>
+        <div class="section-title">SEO & Qualité</div>
+        <div class="section-sub">Infrastructure de référencement et expérience utilisateur</div>
+      </div>
+    </div>
+    <div class="grid-4">
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">🗺</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">Sitemap dynamique</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">Toutes les annonces publiées + profils chercheurs actifs + pages statiques. Auto-mis à jour.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">🤖</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">robots.txt</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">Indexation autorisée sur les pages publiques. /admin, /compte et /api sont exclus.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">🖼</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">OG Images dynamiques</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">Image de partage générée (1200×630) avec photo du bien, titre, prix et branding Terranova.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">🚫</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">Page 404 personnalisée</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">Page branded avec liens de retour vers la carte et les annonces.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ STACK TECHNIQUE ════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(15,23,42,0.06)">🛠</div>
+      <div>
+        <div class="section-title">Stack technique</div>
+        <div class="section-sub">Technologies et services utilisés</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:rgba(15,23,42,0.35);margin-bottom:12px">Front-end</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--primary)"></div><div class="stack-name">Next.js 16</div><div class="stack-desc">App Router, Server Components, Server Actions</div></div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--location)"></div><div class="stack-name">Tailwind CSS v4</div><div class="stack-desc">Utility-first, variables CSS custom, responsive</div></div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--amber)"></div><div class="stack-name">Zustand</div><div class="stack-desc">State management (filtres, carte, UI)</div></div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--green)"></div><div class="stack-name">MapLibre GL JS</div><div class="stack-desc">Carte interactive, clustering, heatmap, 3D</div></div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--violet)"></div><div class="stack-name">Supercluster</div><div class="stack-desc">Clustering adaptatif par niveau de zoom</div></div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--red)"></div><div class="stack-name">react-photo-sphere-viewer</div><div class="stack-desc">Visionneuse 360° (chargement dynamique SSR off)</div></div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:rgba(15,23,42,0.35);margin-bottom:12px">Back-end & Services</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--green)"></div><div class="stack-name">Supabase</div><div class="stack-desc">PostgreSQL, Auth, Storage, RLS, Realtime</div></div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--primary)"></div><div class="stack-name">Stripe</div><div class="stack-desc">Checkout, portail client, webhooks abonnements</div></div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--amber)"></div><div class="stack-name">Resend</div><div class="stack-desc">Emails transactionnels (alertes, contacts, notifs)</div></div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--location)"></div><div class="stack-name">Nominatim OSM</div><div class="stack-desc">Géocodage et autocomplétion d'adresses</div></div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--navy)"></div><div class="stack-name">Vercel</div><div class="stack-desc">Déploiement, Edge Functions, CI/CD</div></div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--red)"></div><div class="stack-name">Overpass API</div><div class="stack-desc">Données POI OpenStreetMap pour score quartier</div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ PUBLICITÉS ═════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">📍</div>
+      <div>
+        <div class="section-title">Système publicitaire</div>
+        <div class="section-sub">Publicités géolocalisées sur la carte avec analytics</div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="card" style="border-top:3px solid var(--amber)">
+        <div style="font-size:24px;margin-bottom:10px">📍</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px">Format Pin</div>
+        <div style="font-size:13px;color:rgba(15,23,42,0.55)">Pastille compacte colorée avec emoji + titre. Style identique aux marqueurs de biens.</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--primary)">
+        <div style="font-size:24px;margin-bottom:10px">🏷️</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px">Format Banner</div>
+        <div style="font-size:13px;color:rgba(15,23,42,0.55)">Bulle élargie avec emoji, titre et description. Plus visible, idéal pour agences.</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--location)">
+        <div style="font-size:24px;margin-bottom:10px">🃏</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px">Format Carte</div>
+        <div style="font-size:13px;color:rgba(15,23,42,0.55)">Carte blanche avec photo, titre, description et bouton CTA. Format premium.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:rgba(15,23,42,0.35);margin-bottom:14px">Ciblage disponible</div>
+        <div class="feature-item" style="padding:7px 0;border-bottom:1px solid rgba(15,23,42,0.05)"><span style="font-size:16px;width:24px">🌍</span><div><strong style="font-size:13px">Aucun</strong><div style="font-size:12px;color:rgba(15,23,42,0.5)">Pub visible partout sur la carte</div></div></div>
+        <div class="feature-item" style="padding:7px 0;border-bottom:1px solid rgba(15,23,42,0.05)"><span style="font-size:16px;width:24px">📡</span><div><strong style="font-size:13px">Rayon</strong><div style="font-size:12px;color:rgba(15,23,42,0.5)">Visible dans un rayon N km autour du point GPS</div></div></div>
+        <div class="feature-item" style="padding:7px 0"><span style="font-size:16px;width:24px">🗺</span><div><strong style="font-size:13px">Zone carte</strong><div style="font-size:12px;color:rgba(15,23,42,0.5)">Visible uniquement quand la carte est dans la bbox définie</div></div></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:rgba(15,23,42,0.35);margin-bottom:14px">Anti-fraude & analytics</div>
+        <div class="feature-item" style="padding:7px 0;border-bottom:1px solid rgba(15,23,42,0.05)"><span style="font-size:16px;width:24px">🔒</span><div><strong style="font-size:13px">Déduplication IP</strong><div style="font-size:12px;color:rgba(15,23,42,0.5)">1 impression / IP / pub / jour en base</div></div></div>
+        <div class="feature-item" style="padding:7px 0;border-bottom:1px solid rgba(15,23,42,0.05)"><span style="font-size:16px;width:24px">⏱</span><div><strong style="font-size:13px">Rate limiting</strong><div style="font-size:12px;color:rgba(15,23,42,0.5)">30 événements / IP / 60 secondes</div></div></div>
+        <div class="feature-item" style="padding:7px 0"><span style="font-size:16px;width:24px">📈</span><div><strong style="font-size:13px">Stats 30 jours</strong><div style="font-size:12px;color:rgba(15,23,42,0.5)">Impressions, clics, CTR avec graphique courbe</div></div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+  <div style="text-align:center;padding-top:32px;border-top:1px solid rgba(15,23,42,0.08)">
+    <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy);margin-bottom:6px">Terranova</div>
+    <div style="font-size:12px;color:rgba(15,23,42,0.35)">Document généré le 25 avril 2025 · terranova-beta.vercel.app</div>
+  </div>
+
+</div>
+</body>
+</html>

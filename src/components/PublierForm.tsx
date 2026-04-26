@@ -22,6 +22,7 @@ interface SiteSettings {
 
 interface Props {
   profile: Profile
+  userEmail: string
   siteSettings: SiteSettings
 }
 
@@ -51,7 +52,7 @@ const DPE_COLORS: Record<DpeClasse, string> = {
   D:'#F9A825', E:'#EF6C00', F:'#D84315', G:'#B71C1C'
 }
 
-export default function PublierForm({ profile, siteSettings }: Props) {
+export default function PublierForm({ profile, userEmail, siteSettings }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const limite = LIMITES_PLAN[profile.plan]
@@ -237,20 +238,21 @@ export default function PublierForm({ profile, siteSettings }: Props) {
         })
       }
 
-      // Notification email admin si statut = en_attente
-       if (statut === 'en_attente') {
-         fetch('/api/email/admin-notify', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({
-             bienId:       bien.id,
-             titre:        bien.titre,
-             ville:        bien.ville,
-             type:         bien.type,
-             prix:         bien.prix,
-             vendeurNom:   `${profile.prenom} ${profile.nom}`,
-             vendeurEmail: '',           }),
-         }).catch(() => {}) // fire-and-forget, ne bloque pas la navigation
+      // Notification email admin si activée et statut = en_attente
+      if (siteSettings.notifNouvelleAnnonce && statut === 'en_attente') {
+        fetch('/api/email/admin-notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bienId:       bien.id,
+            titre:        bien.titre,
+            ville:        bien.ville,
+            type:         bien.type,
+            prix:         bien.prix,
+            vendeurNom:   `${profile.prenom ?? ''} ${profile.nom ?? ''}`.trim(),
+            vendeurEmail: userEmail,
+          }),
+        }).catch(() => {})
       }
 
       router.push('/compte/mes-annonces')

@@ -53,14 +53,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!bien) return { title: 'Annonce introuvable – Terranova' }
 
-  // Récupérer la photo principale pour OG
-  const { data: photo } = await supabase
-    .from('photos')
-    .select('url')
-    .eq('bien_id', id)
-    .eq('principale', true)
-    .single()
-
   const prix = formatPrix(bien.prix, bien.type)
   const title = `${bien.titre} – ${bien.ville} | Terranova`
   const description = bien.description
@@ -77,13 +69,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: 'Terranova',
       locale: 'fr_FR',
       type: 'website',
-      ...(photo?.url ? { images: [{ url: photo.url, width: 1200, height: 630, alt: bien.titre }] } : {}),
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      ...(photo?.url ? { images: [photo.url] } : {}),
     },
   }
 }

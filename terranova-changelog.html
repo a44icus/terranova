@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Terranova — Changelog</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary:      #4F46E5;
+    --primary-dark: #4338CA;
+    --primary-soft: #818CF8;
+    --navy:         #0F172A;
+    --surface:      #F8FAFC;
+    --location:     #0891B2;
+    --amber:        #F59E0B;
+    --green:        #16A34A;
+    --red:          #DC2626;
+    --violet:       #7C3AED;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--navy); line-height: 1.6; }
+  h1, h2 { font-family: 'DM Serif Display', serif; }
+
+  .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 50%, var(--primary-dark) 100%);
+    color: white; border-radius: 24px; padding: 48px 48px 40px; margin-bottom: 48px;
+  }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 16px; }
+  .hero h1 { font-size: 42px; margin-bottom: 8px; }
+  .hero h1 span { color: var(--primary-soft); }
+  .hero-sub { font-size: 15px; opacity: 0.6; }
+
+  /* Timeline */
+  .timeline { position: relative; }
+  .timeline::before { content: ''; position: absolute; left: 20px; top: 0; bottom: 0; width: 2px; background: rgba(15,23,42,0.08); }
+
+  .session { position: relative; padding-left: 56px; margin-bottom: 48px; }
+  .session-dot { position: absolute; left: 12px; top: 4px; width: 18px; height: 18px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px rgba(15,23,42,0.15); }
+  .session-date { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(15,23,42,0.35); margin-bottom: 6px; }
+  .session-title { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px; }
+  .session-desc { font-size: 13px; color: rgba(15,23,42,0.5); margin-bottom: 20px; }
+
+  .changes { display: flex; flex-direction: column; gap: 8px; }
+  .change { background: white; border-radius: 12px; border: 1px solid rgba(15,23,42,0.07); padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; }
+  .change-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
+  .tag-feat   { background: rgba(79,70,229,0.1);  color: var(--primary); }
+  .tag-fix    { background: rgba(220,38,38,0.1);  color: var(--red); }
+  .tag-ux     { background: rgba(8,145,178,0.1);  color: var(--location); }
+  .tag-perf   { background: rgba(22,163,74,0.1);  color: var(--green); }
+  .tag-admin  { background: rgba(124,58,237,0.1); color: var(--violet); }
+  .tag-sec    { background: rgba(15,23,42,0.08);  color: rgba(15,23,42,0.5); }
+  .change-text { font-size: 13px; color: var(--navy); flex: 1; }
+  .change-text strong { font-weight: 600; }
+  .change-text span { color: rgba(15,23,42,0.5); font-size: 12px; display: block; margin-top: 2px; }
+
+  /* Footer */
+  .footer { text-align: center; padding-top: 32px; border-top: 1px solid rgba(15,23,42,0.08); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-badge">📋 Changelog</div>
+    <h1>Terra<span>nova</span></h1>
+    <p class="hero-sub">Historique des évolutions de la plateforme</p>
+  </div>
+
+  <div class="timeline">
+
+    <!-- ══ SESSION 25 AVRIL 2025 — SOIR ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--green)"></div>
+      <div class="session-date">25 avril 2025 — 20h15</div>
+      <div class="session-title">SEO, OG images & corrections</div>
+      <div class="session-desc">Infrastructure SEO complète, images de partage dynamiques, sécurisation des stats publicitaires et corrections de bugs.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Sitemap.xml amélioré</strong>
+            <span>Ajout des profils chercheurs actifs, page marché, estimation, publicité. Priorités et fréquences affinées. Passage au client admin pour bypasser RLS.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>OG Images dynamiques (1200×630)</strong>
+            <span>Chaque fiche bien génère une image de partage branded via next/og : photo du bien en fond, titre, prix, ville, catégorie et logo Terranova.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-sec">Sécu</span>
+          <div class="change-text">
+            <strong>Anti-fraude stats publicitaires</strong>
+            <span>Détection de bots par User-Agent (60+ patterns). Rate limiting migré en DB (fiable sur Vercel serverless). Déduplication des clics ajoutée (1 clic/IP/pub/jour).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Notifications admin à la publication</strong>
+            <span>Email vendeur vide corrigé (passage de userEmail depuis la page serveur). Condition notifNouvelleAnnonce manquante ajoutée.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 25 AVRIL 2025 — APRÈS-MIDI ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--primary)"></div>
+      <div class="session-date">25 avril 2025 — 18h42</div>
+      <div class="session-title">Publicités, UX & corrections</div>
+      <div class="session-desc">Améliorations majeures du système publicitaire, de la carte et de l'interface utilisateur.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Upload photo pour les publicités</strong>
+            <span>Les pubs peuvent désormais contenir une photo uploadée directement depuis l'éditeur admin (bucket photos-biens/map-ads/).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Mini-carte dans l'éditeur de pub</strong>
+            <span>Placement du pin publicitaire directement sur une carte interactive (clic ou drag) avec recherche d'adresse par autocomplétion.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Autocomplétion d'adresse corrigée</strong>
+            <span>Fix du bug empêchant de cliquer sur les suggestions Nominatim (e.preventDefault() sur onMouseDown).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Bouton "Créer une alerte" inline dans la barre filtres</strong>
+            <span>Le bouton d'alerte email est maintenant placé à côté du bouton Filtres dans la sidebar (mode compact).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Cursor pointer global</strong>
+            <span>Tous les éléments interactifs (button, a, select, label) ont désormais cursor:pointer par défaut via globals.css.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Suppression des infobulles au survol des pubs</strong>
+            <span>Les publicités sur la carte n'affichent plus de popup au survol. Seul le clic reste actif.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-perf">Perf</span>
+          <div class="change-text">
+            <strong>Zoom à l'ouverture d'une fiche bien réduit à 15</strong>
+            <span>Le flyTo3D passe de 17.5 à 15 pour un contexte de quartier plus lisible au clic sur un marqueur.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Photos des pubs absentes sur Vercel</strong>
+            <span>URLs stockées en localhost lors des uploads locaux. Fix SQL pour remplacer les URLs localhost par la production Supabase. Rebuild de la vue map_ad_stats (image_url manquant après DROP/CREATE).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-admin">Admin</span>
+          <div class="change-text">
+            <strong>Thumbnail photo dans la liste des pubs admin</strong>
+            <span>La vignette de chaque pub affiche maintenant la photo uploadée à la place de l'emoji/couleur.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Document vue d'ensemble (terranova-overview.html)</strong>
+            <span>Page HTML standalone récapitulant charte graphique, fonctionnalités, rôles, pages et stack technique.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION PRÉCÉDENTE ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--location)"></div>
+      <div class="session-date">Avril 2025 — Sessions précédentes</div>
+      <div class="session-title">Fonctionnalités majeures</div>
+      <div class="session-desc">Implémentation des 4 grandes fonctionnalités et corrections Vercel.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Géocodage automatique</strong>
+            <span>Auto-remplissage lat/lng depuis l'adresse dans LocationPicker avec bouton "Géolocaliser" et déclenchement au blur.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Alertes de baisse de prix</strong>
+            <span>Trigger PostgreSQL sur biens, queue d'envoi, cron job /api/cron/price-alerts, emails HTML via Resend, config admin.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Visite virtuelle 360°</strong>
+            <span>Upload photos sphériques (is_360), visionneuse react-photo-sphere-viewer avec navigation multi-photos sur la fiche bien.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Mode chercheur actif</strong>
+            <span>Profils acheteurs publics, répertoire /chercheurs, fiche /chercheurs/[id], formulaire de contact vendeur→acheteur.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-perf">Perf</span>
+          <div class="change-text">
+            <strong>Clustering carte adaptatif</strong>
+            <span>Rayon adaptatif par zoom (base × 2^max(0, 7-zoom)), maxZoom 18, valeur par défaut 80px.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Bouton Filtres redesigné</strong>
+            <span>Fond coloré (primary) quand actif, icône sliders, badge compteur, chevron animé.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Corrections build Vercel</strong>
+            <span>Module PubliciteContactForm manquant, erreur "Cannot find name 'user'" dans PublierForm, imports manquants dans VirtualTour360.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);margin-bottom:6px">Terranova</div>
+    <div style="font-size:12px;color:rgba(15,23,42,0.35)">Changelog · terranova-beta.vercel.app</div>
+  </div>
+
+</div>
+</body>
+</html>
