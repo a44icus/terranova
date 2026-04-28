@@ -32,3 +32,29 @@ export async function markContactAsRead(contactId: string) {
   revalidatePath('/compte')
   return { ok: true }
 }
+
+export async function markChercheurContactAsRead(contactId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non autorisé' }
+
+  const { data: contact } = await supabase
+    .from('contacts_chercheurs')
+    .select('id, chercheur_id')
+    .eq('id', contactId)
+    .single()
+
+  if (!contact || contact.chercheur_id !== user.id) {
+    return { error: 'Accès refusé' }
+  }
+
+  const { error } = await createAdminClient()
+    .from('contacts_chercheurs')
+    .update({ lu: true })
+    .eq('id', contactId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/compte/messages')
+  return { ok: true }
+}

@@ -60,6 +60,13 @@ export async function POST(req: NextRequest) {
   const apiKey = emailConfig?.api_key || process.env.RESEND_API_KEY
   if (!apiKey) {
     console.log('[Email] RESEND_API_KEY manquant, email chercheur non envoyé')
+    await admin.from('contacts_chercheurs').insert({
+      chercheur_id:  chercheurId,
+      vendeur_nom:   vendeurNom.trim(),
+      vendeur_email: (vendeurEmail as string).trim(),
+      vendeur_tel:   vendeurTel ? (vendeurTel as string).trim() : null,
+      message:       (message as string).trim(),
+    })
     return NextResponse.json({ ok: true, skipped: true })
   }
 
@@ -156,8 +163,25 @@ export async function POST(req: NextRequest) {
   if (!res.ok) {
     const txt = await res.text()
     console.error('[Email] chercheur-contact error:', res.status, txt)
+    // Persist even if email fails so we don't lose the contact
+    await admin.from('contacts_chercheurs').insert({
+      chercheur_id:  chercheurId,
+      vendeur_nom:   vendeurNom.trim(),
+      vendeur_email: (vendeurEmail as string).trim(),
+      vendeur_tel:   vendeurTel ? (vendeurTel as string).trim() : null,
+      message:       (message as string).trim(),
+    })
     return NextResponse.json({ ok: false, error: txt })
   }
+
+  // Persist the contact in DB for the chercheur's inbox
+  await admin.from('contacts_chercheurs').insert({
+    chercheur_id:  chercheurId,
+    vendeur_nom:   vendeurNom.trim(),
+    vendeur_email: (vendeurEmail as string).trim(),
+    vendeur_tel:   vendeurTel ? (vendeurTel as string).trim() : null,
+    message:       (message as string).trim(),
+  })
 
   return NextResponse.json({ ok: true })
 }

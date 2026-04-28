@@ -1,16 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { getViewUserId } from '@/lib/impersonation'
 
 export default async function FavorisPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const { data: favoris } = await supabase
+  const viewId = await getViewUserId() ?? user.id
+  const admin = createAdminClient()
+
+  const { data: favoris } = await admin
     .from('favoris')
     .select('bien_id, created_at, biens(*, photos(url, principale))')
-    .eq('user_id', user.id)
+    .eq('user_id', viewId)
     .order('created_at', { ascending: false })
 
   const biens = favoris?.map((f: any) => f.biens).filter(Boolean) ?? []

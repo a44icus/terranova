@@ -76,6 +76,7 @@ export default async function AnnoncesPage({ searchParams }: Props) {
           Terra<span className="text-primary italic">nova</span>
         </Link>
         <div className="flex items-center gap-3">
+          <Link href="/agences" className="text-white/50 hover:text-white text-sm transition-colors">Agences</Link>
           <Link href="/carte" className="text-white/50 hover:text-white text-sm transition-colors">Carte</Link>
           <Link href="/publier" className="bg-primary text-white text-sm font-medium px-4 py-1.5 rounded-md hover:bg-primary-dark transition-colors">
             + Publier

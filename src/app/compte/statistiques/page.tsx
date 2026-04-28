@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { formatPrix } from '@/lib/geo'
 import LineChart from '@/components/stats/LineChart'
 import BarChart from '@/components/stats/BarChart'
+import { getViewUserId } from '@/lib/impersonation'
 
 // Génère les 30 derniers jours sous forme YYYY-MM-DD
 function last30Days(): string[] {
@@ -24,12 +25,13 @@ export default async function StatistiquesPage() {
   if (!user) redirect('/auth/login')
 
   const admin = createAdminClient()
+  const viewId = await getViewUserId() ?? user.id
 
   // ── Annonces du vendeur ──────────────────────────────────────────────
-  const { data: biens } = await supabase
+  const { data: biens } = await admin
     .from('biens')
     .select('id, titre, statut, prix, type, vues, favoris_count, created_at')
-    .eq('user_id', user.id)
+    .eq('user_id', viewId)
     .order('created_at', { ascending: false })
 
   const bienIds = (biens ?? []).map(b => b.id)

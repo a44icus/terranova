@@ -38,6 +38,9 @@ export default function Header({ user, unreadCount = 0 }: Props) {
         <Link href="/annonces" className="text-white/50 hover:text-white text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-all">
           Annonces
         </Link>
+        <Link href="/agences" className="text-white/50 hover:text-white text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-all">
+          Agences
+        </Link>
         <Link href="/marche" className="text-white/50 hover:text-white text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-all">
           Marché
         </Link>

@@ -1,16 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import ChercheurForm from '@/components/compte/ChercheurForm'
+import { getViewUserId } from '@/lib/impersonation'
 
 export default async function ChercheurPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login?redirect=/compte/chercheur')
 
-  const { data: recherche } = await supabase
+  const viewId = await getViewUserId() ?? user.id
+  const admin = createAdminClient()
+
+  const { data: recherche } = await admin
     .from('recherches')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', viewId)
     .single()
 
   return (
@@ -22,7 +27,7 @@ export default async function ChercheurPage() {
         </p>
       </div>
 
-      <ChercheurForm userId={user.id} initial={recherche ?? null} />
+      <ChercheurForm userId={viewId} initial={recherche ?? null} />
     </div>
   )
 }

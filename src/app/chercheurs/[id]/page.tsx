@@ -121,6 +121,7 @@ export default async function ChercheurPage({ params }: Props) {
                     <span className="text-xs text-navy/40 w-28 flex-shrink-0">Localisation</span>
                     <span className="text-sm text-navy">
                       {recherche.ville}
+                      {recherche.code_postal ? ` (${recherche.code_postal})` : ''}
                       {recherche.rayon_km ? ` · ${recherche.rayon_km} km autour` : ''}
                     </span>
                   </div>

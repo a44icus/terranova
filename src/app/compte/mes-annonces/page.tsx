@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import AnnonceActions from '@/components/compte/AnnonceActions'
+import { getViewUserId } from '@/lib/impersonation'
 
 const STATUT_STYLE: Record<string, { label: string; bg: string; color: string }> = {
   brouillon:  { label: 'Brouillon',  bg: '#f5f5f5', color: '#888' },
@@ -16,10 +18,13 @@ export default async function MesAnnoncesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const { data: biens } = await supabase
+  const viewId = await getViewUserId() ?? user.id
+  const admin = createAdminClient()
+
+  const { data: biens } = await admin
     .from('biens')
     .select('*, photos(url, principale, ordre)')
-    .eq('user_id', user.id)
+    .eq('user_id', viewId)
     .order('created_at', { ascending: false })
 
   return (

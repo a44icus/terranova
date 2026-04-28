@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import type { Profile } from '@/lib/types'
+import type { Profile, Reseau } from '@/lib/types'
+import { updateProfil } from '@/app/compte/profil/actions'
+import LocationPicker from '@/components/LocationPicker'
 
 interface Props {
   profile: Profile
@@ -18,10 +20,15 @@ export default function ProfilForm({ profile, userEmail }: Props) {
     prenom:    profile.prenom ?? '',
     nom:       profile.nom ?? '',
     telephone: profile.telephone ?? '',
+    ville:     profile.ville ?? '',
+    adresse:   profile.adresse ?? '',
+    lat:       profile.lat ?? 0,
+    lng:       profile.lng ?? 0,
     agence:    profile.agence ?? '',
     siret:     profile.siret ?? '',
     site_web:  profile.site_web ?? '',
     bio:       profile.bio ?? '',
+    reseau_id: profile.reseau_id ?? '',
   })
   const [loading, setLoading]     = useState(false)
   const [success, setSuccess]     = useState(false)
@@ -29,6 +36,13 @@ export default function ProfilForm({ profile, userEmail }: Props) {
   const [logoUrl, setLogoUrl]     = useState(profile.logo_url ?? '')
   const [logoLoading, setLogoLoading] = useState(false)
   const [logoError, setLogoError] = useState('')
+  const [reseaux, setReseaux]     = useState<Reseau[]>([])
+
+  useEffect(() => {
+    if (profile.type !== 'pro') return
+    supabase.from('reseaux').select('id, nom, slug, type_reseau').order('nom')
+      .then(({ data }) => { if (data) setReseaux(data as Reseau[]) })
+  }, [profile.type])
 
   function update(k: string, v: string) { setForm(f => ({ ...f, [k]: v })) }
 
@@ -55,13 +69,23 @@ export default function ProfilForm({ profile, userEmail }: Props) {
   async function save(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true); setError(''); setSuccess(false)
-    const { error } = await supabase.from('profiles').update({
-      prenom: form.prenom, nom: form.nom,
-      telephone: form.telephone || null,
-      agence: form.agence || null, siret: form.siret || null,
-      site_web: form.site_web || null, bio: form.bio || null,
-    }).eq('id', profile.id)
-    if (error) { setError(error.message) } else { setSuccess(true); router.refresh() }
+    try {
+      await updateProfil({
+        prenom: form.prenom, nom: form.nom,
+        telephone: form.telephone || null,
+        ville: form.ville || null,
+        adresse: form.adresse || null,
+        lat: form.lat || null,
+        lng: form.lng || null,
+        agence: form.agence || null, siret: form.siret || null,
+        site_web: form.site_web || null, bio: form.bio || null,
+        reseau_id: form.reseau_id || null,
+      })
+      setSuccess(true)
+      router.refresh()
+    } catch (err: any) {
+      setError(err.message ?? 'Erreur lors de la sauvegarde')
+    }
     setLoading(false)
   }
 
@@ -90,9 +114,15 @@ export default function ProfilForm({ profile, userEmail }: Props) {
             <input type="text" required value={form.nom} onChange={e => update('nom', e.target.value)} className={inputCls} />
           </div>
         </div>
-        <div>
-          <label className={labelCls}>Téléphone</label>
-          <input type="tel" value={form.telephone} onChange={e => update('telephone', e.target.value)} placeholder="06 00 00 00 00" className={inputCls} />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Téléphone</label>
+            <input type="tel" value={form.telephone} onChange={e => update('telephone', e.target.value)} placeholder="06 00 00 00 00" className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>Ville</label>
+            <input type="text" value={form.ville} onChange={e => update('ville', e.target.value)} placeholder="Paris" className={inputCls} />
+          </div>
         </div>
         <div>
           <label className={labelCls}>Bio</label>
@@ -104,8 +134,22 @@ export default function ProfilForm({ profile, userEmail }: Props) {
       {profile.type === 'pro' && (
         <div className="bg-white rounded-2xl border border-navy/08 p-5 space-y-4">
           <h2 className="text-sm font-medium text-navy/50 uppercase tracking-wider">Informations professionnelles</h2>
+          {/* Réseau / enseigne */}
           <div>
-            <label className={labelCls}>Nom de l'agence</label>
+            <label className={labelCls}>Réseau ou enseigne <span className="text-navy/30 font-normal">(optionnel)</span></label>
+            <select value={form.reseau_id} onChange={e => update('reseau_id', e.target.value)} className={inputCls}>
+              <option value="">— Indépendant</option>
+              {reseaux.map(r => (
+                <option key={r.id} value={r.id}>{r.nom}</option>
+              ))}
+            </select>
+            <p className="text-[11px] text-navy/35 mt-1">
+              Si votre réseau n'est pas listé, contactez un administrateur pour l'ajouter.
+            </p>
+          </div>
+
+          <div>
+            <label className={labelCls}>Nom de l'agence <span className="text-navy/30 font-normal">(optionnel si réseau sélectionné)</span></label>
             <input type="text" value={form.agence} onChange={e => update('agence', e.target.value)} placeholder="Agence Dupont Immobilier" className={inputCls} />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -117,6 +161,35 @@ export default function ProfilForm({ profile, userEmail }: Props) {
               <label className={labelCls}>Site web</label>
               <input type="url" value={form.site_web} onChange={e => update('site_web', e.target.value)} placeholder="https://monagence.fr" className={inputCls} />
             </div>
+          </div>
+
+          {/* Localisation agence */}
+          <div>
+            <label className={labelCls}>Adresse de l'agence <span className="text-navy/30 font-normal">(optionnel)</span></label>
+            <p className="text-[11px] text-navy/35 mb-2">Permet aux visiteurs de localiser votre agence sur une carte.</p>
+            <div className="rounded-xl overflow-hidden border border-navy/12" style={{ height: 260 }}>
+              <LocationPicker
+                adresse={form.adresse}
+                ville={form.ville}
+                codePostal=""
+                lat={form.lat}
+                lng={form.lng}
+                onChange={fields => setForm(f => ({
+                  ...f,
+                  ...(fields.adresse !== undefined ? { adresse: fields.adresse } : {}),
+                  ...(fields.ville    !== undefined ? { ville:   fields.ville }   : {}),
+                  ...(fields.lat      !== undefined ? { lat:     fields.lat }     : {}),
+                  ...(fields.lng      !== undefined ? { lng:     fields.lng }     : {}),
+                }))}
+              />
+            </div>
+            {form.lat !== 0 && (
+              <p className="text-[11px] text-green-600 mt-1.5">
+                ✓ Position enregistrée · {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
+                <button type="button" onClick={() => setForm(f => ({ ...f, adresse: '', lat: 0, lng: 0 }))}
+                  className="ml-2 text-navy/35 hover:text-red-500 transition-colors">Effacer</button>
+              </p>
+            )}
           </div>
 
           {/* Logo agence */}

@@ -72,6 +72,242 @@
 
   <div class="timeline">
 
+    <!-- ══ SESSION 28 AVRIL 2026 ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--primary)"></div>
+      <div class="session-date">28 avril 2026 — session</div>
+      <div class="session-title">Agences & agents — UX, debug et données test</div>
+      <div class="session-desc">Amélioration complète du module Agences : recherche, filtres, contact agent, partage, groupement par ville. Corrections de bugs PostgREST. Seed de données test.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Agents affiliés invisibles sur la page réseau</strong>
+            <span>Bug PostgREST : <code>.eq('reseau_id', uuid)</code> retournait 0 résultats malgré des correspondances. Workaround : fetch de tous les profils affiliés + filtre JS-side. Correction complémentaire : colonne <code>ville</code> absente du SELECT causait un retour <code>null</code> global.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Colonne <code>ville</code> sur les profils agents</strong>
+            <span>Migration <code>ALTER TABLE profiles ADD COLUMN ville text</code>. Champ ajouté dans ProfilForm (grille avec téléphone). Sauvegarde déplacée vers une Server Action admin pour bypasser RLS.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Groupement par ville sur /agences/reseau/[slug]</strong>
+            <span>Agents regroupés par ville triées alphabétiquement. Nav pills sticky (ancres) pour naviguer entre villes. Stats en-tête : nb agents, nb villes, total annonces.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Recherche et filtres sur /agences</strong>
+            <span>Nouveau composant client <code>AgencesClient</code> : champ de recherche temps réel (nom, réseau, agence, ville) + filtre par type de réseau (franchise, groupement, mandataires, enseigne). Les réseaux sans agents sont masqués automatiquement.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Formulaire de contact agent sur /vendeur/[id]</strong>
+            <span>Nouveau composant <code>ContactAgentForm</code> en accordéon. Envoie un email à l'agent via Resend avec reply-to automatique. Route API <code>/api/email/contact-agent</code>. Affiche un état de succès après envoi.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Bouton de partage sur /vendeur/[id]</strong>
+            <span>Nouveau composant <code>ShareButton</code> utilisant l'API Web Share native avec fallback clipboard. Feedback "✓ Lien copié" après partage.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-admin">Admin</span>
+          <div class="change-text">
+            <strong>Toggle type utilisateur pro ↔ particulier</strong>
+            <span>Bouton "→ Particulier" / "→ Pro" dans <code>/admin/utilisateurs</code>. Server Action <code>changeUserType</code> via client admin + revalidatePath.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Seed SQL données de test agences</strong>
+            <span>Script <code>supabase/seeds/agences_test.sql</code> : 4 réseaux (Century 21, Orpi, Laforêt, GuideHome sans agent), 6 agents affiliés dans 6 villes différentes, 2 indépendants. DO block avec UUIDs fixés pour idempotence. Mot de passe : <code>Test1234!</code>.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 27 AVRIL 2025 ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--primary)"></div>
+      <div class="session-date">27 avril 2025 — session</div>
+      <div class="session-title">Messagerie chercheur & corrections</div>
+      <div class="session-desc">Persistance des contacts vendeur→chercheur, onglet messagerie dédié, page d'erreur 500 et corrections de formulaire.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Système Réseaux & Enseignes complet</strong>
+            <span>Nouvelle table <code>reseaux</code> (franchise, mandataires, groupement, enseigne). Les pros peuvent s'affilier depuis leur profil. Page <code>/agences/reseau/[slug]</code> avec agents groupés par ville. Badge réseau cliquable sur <code>/vendeur/[id]</code>. Admin <code>/admin/reseaux</code> pour créer/modifier/supprimer. Sitemap mis à jour.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Page Agents & Agences redessinée (<code>/agences</code>)</strong>
+            <span>Réseaux & enseignes en haut (avec compteur d'agents), agences indépendantes en dessous. Lien dans la nav principale, homepage et page annonces.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Contacts vendeur→chercheur persistés en base</strong>
+            <span>Nouvelle table <code>contacts_chercheurs</code> (avec RLS). La route <code>/api/email/chercheur-contact</code> insère désormais le contact en DB après envoi email — même si l'email échoue ou est désactivé.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Onglet "Ma recherche" dans /compte/messages</strong>
+            <span>Les utilisateurs avec un profil chercheur voient un second onglet listant tous les vendeurs qui les ont contactés, avec badge non-lus et bouton "Marquer lu".</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Page d'erreur 500 globale</strong>
+            <span>Création de <code>src/app/error.tsx</code> — boundary React avec bouton "Réessayer", lien retour carte et affichage du digest d'erreur pour le débogage.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Formulaire chercheur : champ code_postal ajouté</strong>
+            <span>Le champ était stocké en base mais sans input dans l'UI. Grille localisation passée de 3 à 4 colonnes (ville / code postal / rayon).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Affichage surface min/max sur les cards chercheurs</strong>
+            <span>La liste <code>/chercheurs</code> affiche maintenant la fourchette complète "40–100 m²" au lieu de seulement "≥ 40 m²". code_postal affiché dans le badge localisation.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>TypeError ChercheurForm : description null</strong>
+            <span><code>form.description.length</code> plantait quand la description était null en base. Corrigé avec <code>?? ''</code>.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 27 AVRIL 2025 ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--violet)"></div>
+      <div class="session-date">27 avril 2025</div>
+      <div class="session-title">Réseaux & Enseignes + Simulation admin</div>
+      <div class="session-desc">Système complet de gestion des réseaux immobiliers, page Agences publique, et feature d'impersonation pour les admins.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Page /agences — Annuaire agents & réseaux</strong>
+            <span>Nouvelle page publique listant tous les réseaux avec leur nombre d'agents, puis les agents indépendants. Accessible depuis la navigation principale.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Page /agences/reseau/[slug]</strong>
+            <span>Page de réseau immobilier avec logo, description, stats, et agents groupés par ville. Lien cliquable depuis la fiche vendeur.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Admin — Réseaux & Enseignes (/admin/reseaux)</strong>
+            <span>CRUD complet des réseaux : 37 réseaux français prédéfinis (Century 21, iAd, Orpi…) groupés par type avec auto-détection du type et du site web. Upload de logo vers Supabase Storage.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Affiliation réseau dans le profil pro</strong>
+            <span>Les agents pros peuvent s'affilier à un réseau depuis leur profil. La fiche vendeur publique affiche le badge réseau cliquable.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Admin — Simulation utilisateur (/admin/utilisateurs)</strong>
+            <span>Nouvelle page admin listant tous les utilisateurs (pros + particuliers). Bouton "Simuler" pour voir le compte d'un utilisateur en mode impersonation. Bannière ambrée visible dans /compte, bouton "Arrêter" pour revenir à l'admin. Cookie httpOnly sécurisé (1h), réservé aux admins.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Messages chercheur — persistance contacts_chercheurs</strong>
+            <span>Nouvelle table SQL pour stocker les messages vendeur→chercheur. Onglet "Ma recherche" dans /compte/messages avec badge non-lus.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Chercheur — code_postal dans le profil et les listes</strong>
+            <span>Champ code postal ajouté au formulaire chercheur. Affiché dans la liste /chercheurs et sur la fiche chercheur individuelle.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Lien "Agences" manquant dans la navigation</strong>
+            <span>Ajouté dans les 3 headers distincts : Header.tsx, page d'accueil (hero + footer), page /annonces.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Input code_postal : controlled/uncontrolled React warning</strong>
+            <span>Initialisation explicite <code>code_postal: initial.code_postal ?? ''</code> dans ChercheurForm pour éviter la transition null→string.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- ══ SESSION 25 AVRIL 2025 — SOIR ══ -->
     <div class="session">
       <div class="session-dot" style="background:var(--green)"></div>

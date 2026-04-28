@@ -161,6 +161,10 @@ export default async function LandingPage() {
               style={{ background: 'rgba(79,70,229,0.35)', border: '1px solid rgba(129,140,248,0.35)' }}>
               Carte
             </Link>
+            <Link href="/agences"
+              className="text-white/70 hover:text-white text-sm px-4 py-1.5 rounded-full hover:bg-white/10 transition-all">
+              Agences
+            </Link>
             <Link href="/marche"
               className="text-white/70 hover:text-white text-sm px-4 py-1.5 rounded-full hover:bg-white/10 transition-all">
               Marché
@@ -846,6 +850,7 @@ export default async function LandingPage() {
           </Link>
           <nav className="flex flex-wrap gap-6 text-xs text-white/35">
             <Link href="/annonces" className="hover:text-white transition-colors">Annonces</Link>
+            <Link href="/agences" className="hover:text-white transition-colors">Agences</Link>
             <Link href="/carte" className="hover:text-white transition-colors">Carte interactive</Link>
             <Link href="/publier" className="hover:text-white transition-colors">Publier un bien</Link>
             <Link href="/auth/login" className="hover:text-white transition-colors">Connexion</Link>

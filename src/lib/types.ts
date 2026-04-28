@@ -1,4 +1,17 @@
 export type UserType = 'particulier' | 'pro'
+export type TypeReseau = 'franchise' | 'mandataires' | 'groupement' | 'enseigne'
+
+export interface Reseau {
+  id: string
+  nom: string
+  slug: string
+  logo_url?: string
+  description?: string
+  site_web?: string
+  type_reseau: TypeReseau
+  created_at: string
+  updated_at: string
+}
 export type BienStatut = 'brouillon' | 'en_attente' | 'publie' | 'archive' | 'refuse'
 export type BienType = 'vente' | 'location'
 export type BienCategorie = 'appartement' | 'maison' | 'bureau' | 'terrain' | 'parking' | 'local'
@@ -22,6 +35,12 @@ export interface Profile {
   stripe_customer_id?: string
   annonces_actives: number
   is_admin?: boolean
+  ville?: string
+  adresse?: string
+  lat?: number
+  lng?: number
+  reseau_id?: string
+  reseau?: Reseau
   created_at: string
   updated_at: string
 }

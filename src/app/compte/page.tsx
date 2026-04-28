@@ -1,17 +1,22 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatPrix } from '@/lib/geo'
+import { getViewUserId } from '@/lib/impersonation'
 
 export default async function ComptePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
+  const viewId = await getViewUserId() ?? user.id
+  const admin = createAdminClient()
+
   const [{ data: profile }, { data: biens }, { data: messages }] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('biens').select('*, photos(url, principale)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
-    supabase.from('contacts').select('*', { count: 'exact' }).eq('vendeur_id', user.id).eq('lu', false),
+    admin.from('profiles').select('*').eq('id', viewId).single(),
+    admin.from('biens').select('*, photos(url, principale)').eq('user_id', viewId).order('created_at', { ascending: false }).limit(5),
+    admin.from('contacts').select('*', { count: 'exact' }).eq('vendeur_id', viewId).eq('lu', false),
   ])
 
   const totalVues = biens?.reduce((s, b) => s + (b.vues ?? 0), 0) ?? 0

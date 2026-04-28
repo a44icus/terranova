@@ -99,14 +99,20 @@ export default async function ChercheurListPage() {
                         ))}
                         {r.ville && (
                           <span className="text-[11px] px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full">
-                            📍 {r.ville}{r.rayon_km ? ` (${r.rayon_km} km)` : ''}
+                            📍 {r.ville}{r.code_postal ? ` ${r.code_postal}` : ''}{r.rayon_km ? ` · ${r.rayon_km} km` : ''}
                           </span>
                         )}
                         {budget && (
                           <span className="text-[11px] px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full">{budget}</span>
                         )}
-                        {r.surface_min && (
-                          <span className="text-[11px] px-2 py-0.5 bg-navy/05 text-navy/60 rounded-full">≥ {r.surface_min} m²</span>
+                        {(r.surface_min || r.surface_max) && (
+                          <span className="text-[11px] px-2 py-0.5 bg-navy/05 text-navy/60 rounded-full">
+                            {r.surface_min && r.surface_max
+                              ? `${r.surface_min}–${r.surface_max} m²`
+                              : r.surface_min
+                                ? `≥ ${r.surface_min} m²`
+                                : `≤ ${r.surface_max} m²`}
+                          </span>
                         )}
                         {r.pieces_min && (
                           <span className="text-[11px] px-2 py-0.5 bg-navy/05 text-navy/60 rounded-full">≥ {r.pieces_min} pièces</span>

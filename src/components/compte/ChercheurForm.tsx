@@ -58,13 +58,15 @@ export default function ChercheurForm({ userId, initial }: Props) {
   const [form, setForm] = useState<Recherche>(
     initial ? {
       ...initial,
-      type: initial.type ?? '',
-      rayon_km:   String(initial.rayon_km ?? ''),
-      prix_min:   String(initial.prix_min ?? ''),
-      prix_max:   String(initial.prix_max ?? ''),
+      type:        initial.type ?? '',
+      code_postal: initial.code_postal ?? '',
+      rayon_km:    String(initial.rayon_km ?? ''),
+      prix_min:    String(initial.prix_min ?? ''),
+      prix_max:    String(initial.prix_max ?? ''),
       surface_min: String(initial.surface_min ?? ''),
       surface_max: String(initial.surface_max ?? ''),
       pieces_min:  String(initial.pieces_min ?? ''),
+      description: initial.description ?? '',
     } : DEFAULT
   )
   const [saving, setSaving] = useState(false)
@@ -166,10 +168,14 @@ export default function ChercheurForm({ userId, initial }: Props) {
         </div>
 
         {/* Localisation */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 gap-3">
           <div className="col-span-2">
             <label className={labelCls}>Ville</label>
             <input type="text" value={form.ville} onChange={e => update('ville', e.target.value)} placeholder="Paris" className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>Code postal</label>
+            <input type="text" value={form.code_postal ?? ''} onChange={e => update('code_postal', e.target.value)} placeholder="75000" maxLength={10} className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>Rayon (km)</label>
@@ -219,7 +225,7 @@ export default function ChercheurForm({ userId, initial }: Props) {
             placeholder="Ex : Cherche maison avec jardin, proche écoles, idéalement sud-exposition…"
             className={inputCls + ' resize-none'}
           />
-          <p className="text-[11px] text-navy/35 mt-1">{form.description.length}/500</p>
+          <p className="text-[11px] text-navy/35 mt-1">{(form.description ?? '').length}/500</p>
         </div>
       </div>
 
