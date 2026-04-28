@@ -45,9 +45,10 @@ export async function getPlanConfig(): Promise<PlanConfigs> {
 }
 
 // Vérifie si le plan est expiré
+// expire_at = null sur un plan pro signifie "illimité" (pas expiré)
 export function isPlanExpired(plan: PlanType, expire_at?: string | null): boolean {
   if (plan === 'gratuit') return false
-  if (!expire_at) return true
+  if (!expire_at) return false
   return new Date(expire_at) < new Date()
 }
 

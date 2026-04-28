@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { grantPlan } from './actions'
 
 const PLAN_LABEL: Record<string, string> = {
@@ -30,6 +30,14 @@ function addDays(n: number) {
 export default function PlanGrantButton({ userId, currentPlan, expireAt }: Props) {
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
+  const [panelPos, setPanelPos] = useState({ top: 0, left: 0 })
+  const btnRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!open || !btnRef.current) return
+    const r = btnRef.current.getBoundingClientRect()
+    setPanelPos({ top: r.bottom + 6, left: r.left })
+  }, [open])
 
   const isExpired = expireAt ? new Date(expireAt) < new Date() : false
   const expireLabel = expireAt
@@ -49,6 +57,7 @@ export default function PlanGrantButton({ userId, currentPlan, expireAt }: Props
     <div className="relative">
       {/* Badge plan actuel */}
       <button
+        ref={btnRef}
         onClick={() => setOpen(o => !o)}
         className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full transition-all border ${
           open ? 'border-primary/30 ring-2 ring-primary/10' : 'border-transparent hover:border-navy/15'
@@ -64,7 +73,8 @@ export default function PlanGrantButton({ userId, currentPlan, expireAt }: Props
 
       {/* Panel débridage */}
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 z-50 bg-white rounded-2xl border border-navy/12 shadow-xl p-4 w-64">
+        <div className="fixed z-50 bg-white rounded-2xl border border-navy/12 shadow-xl p-4 w-64"
+          style={{ top: panelPos.top, left: panelPos.left }}>
           <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">Débridage du plan</p>
 
           <div className="space-y-1.5 mb-4">
