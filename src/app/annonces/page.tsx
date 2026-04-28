@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 import { formatPrix } from '@/lib/geo'
 import type { Metadata } from 'next'
 import type { BienCategorie, BienType } from '@/lib/types'
@@ -70,62 +72,73 @@ export default async function AnnoncesPage({ searchParams }: Props) {
 
   return (
     <div className="min-h-screen bg-surface">
-      {/* Header */}
-      <header className="bg-navy text-white px-6 h-14 flex items-center justify-between sticky top-0 z-10">
-        <Link href="/" className="font-serif text-[22px] tracking-wide">
-          Terra<span className="text-primary italic">nova</span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link href="/agences" className="text-white/50 hover:text-white text-sm transition-colors">Agences</Link>
-          <Link href="/carte" className="text-white/50 hover:text-white text-sm transition-colors">Carte</Link>
-          <Link href="/publier" className="bg-primary text-white text-sm font-medium px-4 py-1.5 rounded-md hover:bg-primary-dark transition-colors">
-            + Publier
-          </Link>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Titre + filtres */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-          <div>
-            <h1 className="font-serif text-3xl text-navy">
-              {p.ville ? `Annonces à ${p.ville}` : 'Toutes les annonces'}
-            </h1>
-            <p className="text-sm text-navy/50 mt-1">
-              {total.toLocaleString('fr-FR')} bien{total > 1 ? 's' : ''}
-              {p.type ? ` · ${p.type === 'vente' ? 'Vente' : 'Location'}` : ''}
-              {p.categorie ? ` · ${CAT_LABEL[p.categorie] ?? p.categorie}` : ''}
-            </p>
+      {/* Hero */}
+      <div className="bg-navy relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse at 85% 40%, rgba(79,70,229,0.18) 0%, transparent 65%), radial-gradient(ellipse at 15% 80%, rgba(124,58,237,0.10) 0%, transparent 55%)',
+        }} />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-12">
+          <p className="text-[11px] font-bold text-primary uppercase tracking-[0.18em] mb-3">Annonces immobilières</p>
+          <h1 className="font-serif text-4xl sm:text-5xl text-white mb-3 leading-tight">
+            {p.ville ? `Annonces à ${p.ville}` : 'Toutes les annonces'}
+          </h1>
+          <p className="text-white/45 text-sm mb-8 max-w-lg leading-relaxed">
+            Appartements, maisons, terrains et locaux — achat et location partout en France.
+          </p>
+
+          {/* Stats pills */}
+          <div className="flex flex-wrap gap-3 mb-8">
+            {total > 0 && (
+              <div className="flex items-baseline gap-1.5 bg-white/08 border border-white/10 rounded-full px-4 py-2">
+                <span className="font-serif text-xl text-white">{total.toLocaleString('fr-FR')}</span>
+                <span className="text-xs text-white/50">bien{total > 1 ? 's' : ''}</span>
+              </div>
+            )}
+            {p.type && (
+              <div className="flex items-baseline gap-1.5 bg-white/08 border border-white/10 rounded-full px-4 py-2">
+                <span className="text-xs text-white/70">{p.type === 'vente' ? 'Vente' : 'Location'}</span>
+              </div>
+            )}
+            {p.categorie && (
+              <div className="flex items-baseline gap-1.5 bg-white/08 border border-white/10 rounded-full px-4 py-2">
+                <span className="text-xs text-white/70">{CAT_LABEL[p.categorie] ?? p.categorie}</span>
+              </div>
+            )}
           </div>
 
-          {/* Filtres rapides */}
+          {/* Filtres */}
           <form method="get" action="/annonces" className="flex flex-wrap gap-2">
-            <select name="type" defaultValue={p.type ?? ''} className="text-xs border border-navy/15 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-primary">
-              <option value="">Vente & Location</option>
-              <option value="vente">Vente</option>
-              <option value="location">Location</option>
+            <select name="type" defaultValue={p.type ?? ''} className="text-xs border border-white/15 bg-white/08 text-white rounded-xl px-3 py-2 focus:outline-none focus:border-primary">
+              <option value="" className="text-navy">Vente & Location</option>
+              <option value="vente" className="text-navy">Vente</option>
+              <option value="location" className="text-navy">Location</option>
             </select>
-            <select name="categorie" defaultValue={p.categorie ?? ''} className="text-xs border border-navy/15 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-primary">
-              <option value="">Tous types</option>
-              <option value="appartement">Appartement</option>
-              <option value="maison">Maison</option>
-              <option value="bureau">Bureau</option>
-              <option value="terrain">Terrain</option>
-              <option value="parking">Parking</option>
-              <option value="local">Local commercial</option>
+            <select name="categorie" defaultValue={p.categorie ?? ''} className="text-xs border border-white/15 bg-white/08 text-white rounded-xl px-3 py-2 focus:outline-none focus:border-primary">
+              <option value="" className="text-navy">Tous types</option>
+              <option value="appartement" className="text-navy">Appartement</option>
+              <option value="maison" className="text-navy">Maison</option>
+              <option value="bureau" className="text-navy">Bureau</option>
+              <option value="terrain" className="text-navy">Terrain</option>
+              <option value="parking" className="text-navy">Parking</option>
+              <option value="local" className="text-navy">Local commercial</option>
             </select>
             <input name="ville" type="text" defaultValue={p.ville ?? ''} placeholder="Ville…"
-              className="text-xs border border-navy/15 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-primary w-32" />
-            <button type="submit" className="text-xs bg-navy text-white px-4 py-2 rounded-lg hover:bg-primary transition-colors">
+              className="text-xs border border-white/15 bg-white/08 text-white placeholder-white/35 rounded-xl px-3 py-2 focus:outline-none focus:border-primary w-32" />
+            <button type="submit" className="text-xs bg-primary hover:bg-primary/90 text-white font-semibold px-4 py-2 rounded-xl transition-colors">
               Filtrer
             </button>
             {(p.type || p.categorie || p.ville || p.dept) && (
-              <Link href="/annonces" className="text-xs border border-navy/15 text-navy/60 px-3 py-2 rounded-lg hover:border-navy/30 transition-colors">
+              <Link href="/annonces" className="text-xs border border-white/15 text-white/60 px-3 py-2 rounded-xl hover:border-white/35 hover:text-white transition-colors">
                 ✕ Réinitialiser
               </Link>
             )}
           </form>
         </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-8">
 
         {/* Grille */}
         {!biens?.length ? (
@@ -199,6 +212,7 @@ export default async function AnnoncesPage({ searchParams }: Props) {
           </div>
         )}
       </div>
+      <SiteFooter />
     </div>
   )
 }

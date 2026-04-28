@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { UserType } from '@/lib/types'
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -75,31 +76,34 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center px-4">
-        <div className="w-full max-w-md text-center">
-          <div className="text-5xl mb-4">📬</div>
-          <h2 className="font-serif text-2xl text-navy mb-3">Vérifiez votre email</h2>
-          <p className="text-sm text-navy/60">
-            Un lien de confirmation a été envoyé à <strong>{form.email}</strong>.
-            Cliquez dessus pour activer votre compte.
-          </p>
-        </div>
+      <div className="w-full max-w-md text-center">
+        <div className="text-5xl mb-4">📬</div>
+        <h2 className="font-serif text-2xl text-navy mb-3">Vérifiez votre email</h2>
+        <p className="text-sm text-navy/60">
+          Un lien de confirmation a été envoyé à <strong>{form.email}</strong>.
+          Cliquez dessus pour activer votre compte.
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="w-full max-w-md">
 
-        <div className="text-center mb-8">
-          <h1 className="font-serif text-3xl text-navy">
-            Terra<span className="text-primary italic">nova</span>
-          </h1>
-          <p className="text-sm text-navy/50 mt-2">Créez votre compte gratuitement</p>
-        </div>
+      <div className="text-center mb-8">
+        <h2 className="font-serif text-3xl text-navy">Inscription</h2>
+        <p className="text-sm text-navy/50 mt-2">Créez votre compte gratuitement</p>
+      </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-navy/10 p-8">
+      <div className="bg-white rounded-2xl shadow-sm border border-navy/10 p-8">
+
+          <GoogleAuthButton label="S'inscrire avec Google" />
+
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-navy/10" />
+            <span className="text-xs text-navy/35">ou</span>
+            <div className="flex-1 h-px bg-navy/10" />
+          </div>
 
           {/* Type de compte */}
           <div className="flex gap-3 mb-6">
@@ -208,11 +212,10 @@ export default function RegisterPage() {
 
         </div>
 
-        <p className="text-center text-xs text-navy/35 mt-4">
-          En créant un compte vous acceptez nos conditions d'utilisation
-        </p>
+      <p className="text-center text-xs text-navy/35 mt-4">
+        En créant un compte vous acceptez nos conditions d'utilisation
+      </p>
 
-      </div>
     </div>
   )
 }

@@ -2,6 +2,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import AgencesClient from '@/components/agences/AgencesClient'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,17 +40,7 @@ export default async function AgencesPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      {/* Header sticky */}
-      <header className="bg-navy text-white px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-20">
-        <Link href="/" className="font-serif text-[22px] tracking-wide">
-          Terra<span className="text-primary italic">nova</span>
-        </Link>
-        <nav className="flex items-center gap-4">
-          <Link href="/annonces" className="text-white/50 hover:text-white text-sm transition-colors">Annonces</Link>
-          <Link href="/chercheurs" className="text-white/50 hover:text-white text-sm transition-colors">Chercheurs</Link>
-          <Link href="/carte" className="text-white/50 hover:text-white text-sm transition-colors">Carte</Link>
-        </nav>
-      </header>
+      <SiteHeader />
 
       {/* Hero */}
       <div className="bg-navy relative overflow-hidden">
@@ -108,6 +100,7 @@ export default async function AgencesPage() {
           </div>
         </div>
       </div>
+      <SiteFooter />
     </div>
   )
 }

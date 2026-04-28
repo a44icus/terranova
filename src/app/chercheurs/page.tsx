@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
   title: 'Chercheurs actifs — Terranova',
@@ -35,16 +37,7 @@ export default async function ChercheurListPage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      {/* Header */}
-      <header className="bg-navy text-white px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-10">
-        <Link href="/" className="font-serif text-[22px] tracking-wide">
-          Terra<span className="text-primary italic">nova</span>
-        </Link>
-        <nav className="flex items-center gap-3">
-          <Link href="/carte" className="text-white/50 hover:text-white text-sm transition-colors">Carte</Link>
-          <Link href="/compte" className="text-white/50 hover:text-white text-sm transition-colors">Mon compte</Link>
-        </nav>
-      </header>
+      <SiteHeader />
 
       <div className="max-w-4xl mx-auto px-4 py-10">
         <div className="mb-8">
@@ -145,6 +138,7 @@ export default async function ChercheurListPage() {
           </div>
         </div>
       </div>
+      <SiteFooter />
     </div>
   )
 }

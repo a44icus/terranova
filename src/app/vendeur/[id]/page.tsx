@@ -5,6 +5,8 @@ import type { Metadata } from 'next'
 import ContactAgentForm from '@/components/vendeur/ContactAgentForm'
 import ShareButton from '@/components/vendeur/ShareButton'
 import AgentMapPin from '@/components/vendeur/AgentMapPin'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -37,18 +39,7 @@ export default async function VendeurPage({ params }: { params: Promise<{ id: st
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
 
-      {/* Header sticky */}
-      <header className="bg-navy text-white px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-20">
-        <Link href="/" className="font-serif text-[22px] tracking-wide">
-          Terra<span className="text-[#4F46E5] italic">nova</span>
-        </Link>
-        <Link href="/agences" className="text-white/50 hover:text-white text-sm transition-colors flex items-center gap-1.5">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Agences
-        </Link>
-      </header>
+      <SiteHeader />
 
       {/* Hero */}
       <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)' }}>
@@ -251,6 +242,7 @@ export default async function VendeurPage({ params }: { params: Promise<{ id: st
           )}
         </div>
       </div>
+      <SiteFooter />
     </div>
   )
 }

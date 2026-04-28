@@ -72,68 +72,148 @@
 
   <div class="timeline">
 
-    <!-- ══ SESSION 28 AVRIL 2026 ══ -->
+    <!-- ══ SESSION 29 AVRIL 2026 (2) ══ -->
     <div class="session">
       <div class="session-dot" style="background:var(--primary)"></div>
-      <div class="session-date">28 avril 2026 — session</div>
-      <div class="session-title">Agences & agents — UX, debug et données test</div>
-      <div class="session-desc">Amélioration complète du module Agences : recherche, filtres, contact agent, partage, groupement par ville. Corrections de bugs PostgREST. Seed de données test.</div>
+      <div class="session-date">29 avril 2026 — session 2</div>
+      <div class="session-title">Navigation unifiée — Header, Footer & Authentification Google</div>
+      <div class="session-desc">Composants SiteHeader et SiteFooter partagés sur toutes les pages publiques, hero navy unifié, et connexion OAuth Google avec onboarding du type de compte.</div>
 
       <div class="changes">
 
         <div class="change">
-          <span class="change-tag tag-fix">Fix</span>
+          <span class="change-tag tag-ux">UX</span>
           <div class="change-text">
-            <strong>Agents affiliés invisibles sur la page réseau</strong>
-            <span>Bug PostgREST : <code>.eq('reseau_id', uuid)</code> retournait 0 résultats malgré des correspondances. Workaround : fetch de tous les profils affiliés + filtre JS-side. Correction complémentaire : colonne <code>ville</code> absente du SELECT causait un retour <code>null</code> global.</span>
-          </div>
-        </div>
-
-        <div class="change">
-          <span class="change-tag tag-feat">Feat</span>
-          <div class="change-text">
-            <strong>Colonne <code>ville</code> sur les profils agents</strong>
-            <span>Migration <code>ALTER TABLE profiles ADD COLUMN ville text</code>. Champ ajouté dans ProfilForm (grille avec téléphone). Sauvegarde déplacée vers une Server Action admin pour bypasser RLS.</span>
+            <strong>SiteFooter partagé sur toutes les pages</strong>
+            <span>Création du composant SiteFooter.tsx avec logo, nav principale et liens légaux. Ajouté sur 13 pages (homepage, annonces, agences, vendeur, marché, estimer, chercheurs, annonce, publicité, pages légales, layout auth).</span>
           </div>
         </div>
 
         <div class="change">
           <span class="change-tag tag-ux">UX</span>
           <div class="change-text">
-            <strong>Groupement par ville sur /agences/reseau/[slug]</strong>
-            <span>Agents regroupés par ville triées alphabétiquement. Nav pills sticky (ancres) pour naviguer entre villes. Stats en-tête : nb agents, nb villes, total annonces.</span>
+            <strong>Hero navy unifié sur toutes les pages publiques</strong>
+            <span>Style hero bg-navy avec gradient radial, label uppercase primary, titre serif blanc appliqué sur /annonces, /estimer, /legal/mentions-legales, /legal/confidentialite, /legal/cgu.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Layout partagé pour les pages auth</strong>
+            <span>Création de auth/layout.tsx (server component) avec SiteHeader + SiteFooter. Les pages login et register simplifiées — plus de logo inline, juste le formulaire centré.</span>
           </div>
         </div>
 
         <div class="change">
           <span class="change-tag tag-feat">Feat</span>
           <div class="change-text">
-            <strong>Recherche et filtres sur /agences</strong>
-            <span>Nouveau composant client <code>AgencesClient</code> : champ de recherche temps réel (nom, réseau, agence, ville) + filtre par type de réseau (franchise, groupement, mandataires, enseigne). Les réseaux sans agents sont masqués automatiquement.</span>
+            <strong>Connexion & inscription via Google OAuth</strong>
+            <span>Bouton "Continuer avec Google" / "S'inscrire avec Google" sur les pages login et register. Composant GoogleAuthButton avec logo SVG Google natif et état de chargement.</span>
           </div>
         </div>
 
         <div class="change">
           <span class="change-tag tag-feat">Feat</span>
           <div class="change-text">
-            <strong>Formulaire de contact agent sur /vendeur/[id]</strong>
-            <span>Nouveau composant <code>ContactAgentForm</code> en accordéon. Envoie un email à l'agent via Resend avec reply-to automatique. Route API <code>/api/email/contact-agent</code>. Affiche un état de succès après envoi.</span>
+            <strong>Page d'onboarding post-Google OAuth</strong>
+            <span>Le callback /auth/callback détecte les nouveaux comptes Google (profile.type null) et redirige vers /auth/onboarding. L'utilisateur choisit Particulier ou Professionnel, avec champ agence optionnel pour les pros. Les reconnexions passent directement.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 29 AVRIL 2026 ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--red)"></div>
+      <div class="session-date">29 avril 2026</div>
+      <div class="session-title">Corrections plan illimité & build Vercel</div>
+      <div class="session-desc">Bug critique plan admin, dropdown clippé et erreur de build Vercel au déploiement.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Plan "illimité" repassait en Gratuit immédiatement</strong>
+            <span>Bug dans <code>isPlanExpired()</code> : <code>!expire_at → return true</code> traitait <code>null</code> comme "expiré" au lieu de "illimité". Le layout <code>/compte</code> dégradait alors le plan en <code>gratuit</code> et l'écrivait en base. Corrigé : <code>null</code> sur plan pro = illimité (pas expiré).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Dropdown PlanGrantButton clippé par overflow-hidden</strong>
+            <span>Panel débridage clippé par le conteneur de la liste. Passage de <code>position: absolute</code> à <code>position: fixed</code> avec coordonnées calculées via <code>getBoundingClientRect()</code> au moment de l'ouverture.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Build Vercel — crash si RESEND_API_KEY absente</strong>
+            <span><code>new Resend(key)</code> au niveau module levait une exception au chargement si la variable d'environnement n'était pas définie, bloquant la collecte des pages. Déplacé dans le handler POST (instanciation lazy).</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 28 AVRIL 2026 ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--primary)"></div>
+      <div class="session-date">28 avril 2026</div>
+      <div class="session-title">Agences & agents — redesign, localisation, débridage admin</div>
+      <div class="session-desc">Redesign complet des pages agences et agents, carte de localisation, débridage plan via l'admin, correction des comptes test et du cache Next.js.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Redesign complet /agences, /agences/reseau/[slug], /vendeur/[id]</strong>
+            <span>Hero dark avec dégradé radial, stats pills, cards horizontales 2 colonnes pour les agents, nav pills sticky par ville, bio avec barre d'accent, bouton "Contacter" ancré, partage natif. <code>force-dynamic</code> ajouté sur les 3 pages pour contourner le cache Next.js.</span>
           </div>
         </div>
 
         <div class="change">
           <span class="change-tag tag-feat">Feat</span>
           <div class="change-text">
-            <strong>Bouton de partage sur /vendeur/[id]</strong>
-            <span>Nouveau composant <code>ShareButton</code> utilisant l'API Web Share native avec fallback clipboard. Feedback "✓ Lien copié" après partage.</span>
+            <strong>Localisation agent sur la fiche /vendeur/[id]</strong>
+            <span>Colonnes <code>adresse</code>, <code>lat</code>, <code>lng</code> ajoutées à <code>profiles</code>. Composant <code>AgentMapPin</code> (MapLibre read-only, pin SVG primaire). <code>LocationPicker</code> intégré dans le formulaire profil pro avec indicateur "✓ Position enregistrée".</span>
           </div>
         </div>
 
         <div class="change">
           <span class="change-tag tag-admin">Admin</span>
           <div class="change-text">
-            <strong>Toggle type utilisateur pro ↔ particulier</strong>
-            <span>Bouton "→ Particulier" / "→ Pro" dans <code>/admin/utilisateurs</code>. Server Action <code>changeUserType</code> via client admin + revalidatePath.</span>
+            <strong>Débridage plan depuis l'interface admin</strong>
+            <span>Composant <code>PlanGrantButton</code> : badge plan cliquable avec présets (+30j, +90j, +365j, illimité) et sélecteur de date personnalisée. Server Action <code>grantPlan</code> via client admin. Redesign complet de la page <code>/admin/utilisateurs</code> : liste card-based, emails depuis <code>auth.users</code>, boutons icônes, simulation.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Recherche, filtres et contact sur /agences</strong>
+            <span>Composant client <code>AgencesClient</code> : recherche temps réel + filtre par type de réseau. Formulaire de contact agent <code>ContactAgentForm</code> (accordéon, Resend, reply-to auto). Bouton de partage <code>ShareButton</code> (Web Share API + fallback clipboard).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Agents affiliés invisibles sur la page réseau</strong>
+            <span>Bug PostgREST : <code>.eq('reseau_id', uuid)</code> retournait 0 résultats. Workaround : fetch global + filtre JS. Colonne <code>ville</code> absente du SELECT causait un retour <code>null</code> global.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Comptes de test impossibles à utiliser</strong>
+            <span>3 problèmes cumulés : hash bcrypt avec mauvais facteur de coût, <code>auth.identities</code> manquantes pour le provider email, seed ignoré par <code>ON CONFLICT DO NOTHING</code> à cause du trigger <code>handle_new_user</code>. Corrigé avec <code>gen_salt('bf', 10)</code>, INSERT dans <code>auth.identities</code> et <code>ON CONFLICT DO UPDATE SET</code>.</span>
           </div>
         </div>
 
@@ -141,7 +221,7 @@
           <span class="change-tag tag-feat">Feat</span>
           <div class="change-text">
             <strong>Seed SQL données de test agences</strong>
-            <span>Script <code>supabase/seeds/agences_test.sql</code> : 4 réseaux (Century 21, Orpi, Laforêt, GuideHome sans agent), 6 agents affiliés dans 6 villes différentes, 2 indépendants. DO block avec UUIDs fixés pour idempotence. Mot de passe : <code>Test1234!</code>.</span>
+            <span>Script <code>supabase/seeds/agences_test.sql</code> : 4 réseaux (Century 21, Orpi, Laforêt, GuideHome), 6 agents affiliés dans 6 villes, 2 indépendants. UUIDs fixés, idempotent. Mot de passe : <code>Test1234!</code>.</span>
           </div>
         </div>
 

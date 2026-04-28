@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import Header from '@/components/Header'
-import { createClient } from '@/lib/supabase/server'
 import PubliciteContactForm from './PubliciteContactForm'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 
 const FORMATS = [
   {
@@ -57,12 +57,9 @@ const FAQ = [
 ]
 
 export default async function PublicitePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <Header user={user} unreadCount={0} />
+      <SiteHeader />
 
       {/* Hero */}
       <section className="bg-[#0F172A] text-white py-20 px-6">
@@ -167,6 +164,7 @@ export default async function PublicitePage() {
           <PubliciteContactForm formats={FORMATS.map(f => f.nom)} />
         </div>
       </section>
+      <SiteFooter />
     </div>
   )
 }

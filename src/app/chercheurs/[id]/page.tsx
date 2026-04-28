@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import ContactChercheurForm from './ContactChercheurForm'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -47,18 +49,7 @@ export default async function ChercheurPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-surface">
-      <header className="bg-navy text-white px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-10">
-        <Link href="/" className="font-serif text-[22px] tracking-wide">
-          Terra<span className="text-primary italic">nova</span>
-        </Link>
-        <nav className="flex items-center gap-3">
-          <Link href="/chercheurs" className="text-white/50 hover:text-white text-sm transition-colors">← Chercheurs</Link>
-          {user
-            ? <Link href="/compte" className="text-white/50 hover:text-white text-sm transition-colors">Mon compte</Link>
-            : <Link href="/auth/login" className="text-white/50 hover:text-white text-sm transition-colors">Se connecter</Link>
-          }
-        </nav>
-      </header>
+      <SiteHeader />
 
       <div className="max-w-3xl mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -186,6 +177,7 @@ export default async function ChercheurPage({ params }: Props) {
 
         </div>
       </div>
+      <SiteFooter />
     </div>
   )
 }

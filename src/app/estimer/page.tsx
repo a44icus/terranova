@@ -1,6 +1,8 @@
 import EstimationForm from '@/components/EstimationForm'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
   title: 'Estimer mon bien — Terranova',
@@ -10,23 +12,25 @@ export const metadata: Metadata = {
 export default function EstimerPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <header className="bg-[#0F172A] text-white px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="font-serif text-[22px] tracking-wide">
-          Terra<span className="text-[#4F46E5] italic">nova</span>
-        </Link>
-        <Link href="/carte" className="text-white/50 hover:text-white text-sm transition-colors">← Carte</Link>
-      </header>
+      <SiteHeader />
 
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="text-center mb-10">
-          <div className="text-5xl mb-4">🏡</div>
-          <h1 className="font-serif text-4xl text-[#0F172A] mb-3">Estimer mon bien</h1>
-          <p className="text-[#0F172A]/50 text-base leading-relaxed">
-            Obtenez une fourchette de prix instantanée basée sur les biens similaires
-            vendus dans votre secteur sur Terranova.
+      {/* Hero */}
+      <div className="bg-navy relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse at 85% 40%, rgba(79,70,229,0.18) 0%, transparent 65%), radial-gradient(ellipse at 15% 80%, rgba(124,58,237,0.10) 0%, transparent 55%)',
+        }} />
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-12">
+          <p className="text-[11px] font-bold text-primary uppercase tracking-[0.18em] mb-3">Estimation gratuite</p>
+          <h1 className="font-serif text-4xl sm:text-5xl text-white mb-3 leading-tight">
+            Estimer mon bien
+          </h1>
+          <p className="text-white/45 text-sm max-w-lg leading-relaxed">
+            Obtenez une fourchette de prix instantanée basée sur les biens similaires vendus dans votre secteur.
           </p>
         </div>
+      </div>
 
+      <div className="max-w-2xl mx-auto px-4 py-10">
         <div className="bg-white rounded-2xl border border-[#0F172A]/08 p-8">
           <EstimationForm />
         </div>
@@ -36,6 +40,7 @@ export default function EstimerPage() {
           Pour une évaluation précise, consultez un professionnel de l&apos;immobilier.
         </p>
       </div>
+      <SiteFooter />
     </div>
   )
 }

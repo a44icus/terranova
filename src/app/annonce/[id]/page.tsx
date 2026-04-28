@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 import { formatPrix } from '@/lib/geo'
 import type { Metadata } from 'next'
 import type { BienPublic } from '@/lib/types'
@@ -159,47 +161,7 @@ export default async function AnnoncePage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-surface">
-      {/* Header */}
-      <header className="bg-navy text-white px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-10 border-b border-white/[0.06]">
-        <Link href="/" className="font-serif text-[22px] tracking-wide flex-shrink-0">
-          Terra<span className="text-primary italic">nova</span>
-        </Link>
-        <nav className="flex items-center gap-2">
-
-          {/* Compte / Connexion — outline secondaire */}
-          {user ? (
-            <Link href="/compte"
-              className="order-2 sm:order-1 flex items-center gap-1.5 border border-white/20 text-white/75 rounded-lg px-2.5 py-1.5 text-sm font-medium hover:bg-white/10 hover:border-white/35 hover:text-white transition-all">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              <span className="hidden sm:inline">Mon compte</span>
-            </Link>
-          ) : (
-            <Link href="/auth/login"
-              className="order-2 sm:order-1 flex items-center gap-1.5 border border-white/20 text-white/75 rounded-lg px-2.5 py-1.5 text-sm font-medium hover:bg-white/10 hover:border-white/35 hover:text-white transition-all">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                <polyline points="10 17 15 12 10 7"/>
-                <line x1="15" y1="12" x2="3" y2="12"/>
-              </svg>
-              <span className="hidden sm:inline">Se connecter</span>
-            </Link>
-          )}
-
-          {/* Retour à la carte — CTA terra/rust */}
-          <Link href="/carte"
-            className="order-1 sm:order-2 flex items-center gap-1.5 bg-[#C8602A] hover:bg-[#b85220] text-white rounded-lg px-3 py-1.5 text-sm font-medium transition-colors shadow-sm shadow-[#C8602A]/30">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-            <span className="hidden sm:inline">Retour à la carte</span>
-            <span className="sm:hidden">Carte</span>
-          </Link>
-
-        </nav>
-      </header>
+      <SiteHeader />
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
@@ -488,6 +450,7 @@ export default async function AnnoncePage({ params }: Props) {
           </section>
         )}
       </div>
+      <SiteFooter />
     </div>
   )
 }

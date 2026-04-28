@@ -6,6 +6,8 @@ import type { BienPublic } from '@/lib/types'
 import { formatPrix } from '@/lib/geo'
 import Image from 'next/image'
 import MarcheCharts from './MarcheCharts'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 
 interface Props { params: Promise<{ ville: string }> }
 
@@ -152,13 +154,10 @@ export default async function MarcheVillePage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div className="min-h-screen bg-surface">
+        <SiteHeader />
         {/* Header hero */}
         <div style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)' }} className="px-6 py-14 text-white">
           <div className="max-w-5xl mx-auto">
-            <Link href="/" className="font-serif text-[22px] tracking-wide block mb-6">
-              Terra<span className="text-primary italic">nova</span>
-            </Link>
-
             {/* Breadcrumb */}
             <nav className="text-xs text-white/30 flex items-center gap-1.5 mb-6">
               <Link href="/" className="hover:text-white transition-colors">Accueil</Link>
@@ -339,6 +338,7 @@ export default async function MarcheVillePage({ params }: Props) {
           </div>
 
         </div>
+        <SiteFooter />
       </div>
     </>
   )

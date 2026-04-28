@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import MarcheVilles from './MarcheVilles'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
   title: 'Marché immobilier par ville – Terranova',
@@ -61,12 +63,10 @@ export default async function MarchePage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      {/* Header */}
+      <SiteHeader />
+      {/* Hero */}
       <div style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)' }} className="px-6 py-16 text-white">
         <div className="max-w-5xl mx-auto">
-          <Link href="/" className="font-serif text-[22px] tracking-wide block mb-8">
-            Terra<span className="text-primary italic">nova</span>
-          </Link>
           <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-primary flex items-center gap-2 mb-4">
             <span className="w-6 h-px bg-primary" /> Données de marché
           </span>
@@ -108,6 +108,7 @@ export default async function MarchePage() {
           <MarcheVilles villes={villes} />
         )}
       </div>
+      <SiteFooter />
     </div>
   )
 }

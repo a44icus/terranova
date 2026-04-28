@@ -7,14 +7,19 @@ export const metadata: Metadata = {
 
 export default function CGUPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1
-        className="text-4xl text-[#0F172A] mb-8"
-        style={{ fontFamily: "'DM Serif Display', serif" }}
-      >
-        Conditions Générales d'Utilisation
-      </h1>
+    <>
+      {/* Hero */}
+      <div className="bg-navy relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse at 85% 40%, rgba(79,70,229,0.18) 0%, transparent 65%), radial-gradient(ellipse at 15% 80%, rgba(124,58,237,0.10) 0%, transparent 55%)',
+        }} />
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-12">
+          <p className="text-[11px] font-bold text-primary uppercase tracking-[0.18em] mb-3">Informations légales</p>
+          <h1 className="font-serif text-4xl sm:text-5xl text-white leading-tight">Conditions Générales d&apos;Utilisation</h1>
+        </div>
+      </div>
 
+      <div className="max-w-3xl mx-auto px-4 py-10">
       <div className="space-y-8 text-[#374151] leading-relaxed">
 
         <section>
@@ -204,6 +209,7 @@ export default function CGUPage() {
           Dernière mise à jour : avril 2026
         </p>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

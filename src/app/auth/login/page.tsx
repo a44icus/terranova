@@ -4,6 +4,7 @@ import { Suspense, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton'
 
 /** Valide que le chemin de redirection est interne (pas d'open-redirect) */
 function safeRedirect(raw: string | null): string {
@@ -136,32 +137,34 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="w-full max-w-md">
 
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <h1 className="font-serif text-3xl text-navy">
-            Terra<span className="text-primary italic">nova</span>
-          </h1>
-          <p className="text-sm text-navy/50 mt-2">Connectez-vous à votre compte</p>
-        </div>
-
-        {/* Carte */}
-        <div className="bg-white rounded-2xl shadow-sm border border-navy/10 p-8">
-          <Suspense fallback={<div className="h-48 animate-pulse bg-navy/05 rounded-xl" />}>
-            <LoginForm />
-          </Suspense>
-
-          <div className="mt-6 text-center text-sm text-navy/50">
-            Pas encore de compte ?{' '}
-            <Link href="/auth/register" className="text-primary hover:underline font-medium">
-              S'inscrire
-            </Link>
-          </div>
-        </div>
-
+      <div className="text-center mb-8">
+        <h2 className="font-serif text-3xl text-navy">Connexion</h2>
+        <p className="text-sm text-navy/50 mt-2">Connectez-vous à votre compte</p>
       </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-navy/10 p-8">
+        <GoogleAuthButton label="Continuer avec Google" />
+
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-navy/10" />
+          <span className="text-xs text-navy/35">ou</span>
+          <div className="flex-1 h-px bg-navy/10" />
+        </div>
+
+        <Suspense fallback={<div className="h-48 animate-pulse bg-navy/05 rounded-xl" />}>
+          <LoginForm />
+        </Suspense>
+
+        <div className="mt-6 text-center text-sm text-navy/50">
+          Pas encore de compte ?{' '}
+          <Link href="/auth/register" className="text-primary hover:underline font-medium">
+            S'inscrire
+          </Link>
+        </div>
+      </div>
+
     </div>
   )
 }

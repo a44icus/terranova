@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { TypeReseau } from '@/lib/types'
+import SiteHeader from '@/components/SiteHeader'
+import SiteFooter from '@/components/SiteFooter'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,18 +58,7 @@ export default async function ReseauPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
 
-      {/* Header sticky */}
-      <header className="bg-navy text-white px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-20">
-        <Link href="/" className="font-serif text-[22px] tracking-wide">
-          Terra<span className="text-primary italic">nova</span>
-        </Link>
-        <Link href="/agences" className="text-white/50 hover:text-white text-sm transition-colors flex items-center gap-1.5">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Agences
-        </Link>
-      </header>
+      <SiteHeader />
 
       {/* Hero réseau */}
       <div className="bg-navy relative overflow-hidden">
@@ -216,6 +207,7 @@ export default async function ReseauPage({ params }: Props) {
           </div>
         )}
       </div>
+      <SiteFooter />
     </div>
   )
 }
