@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { UserType } from '@/lib/types'
-import SiteHeader from '@/components/SiteHeader'
-import SiteFooter from '@/components/SiteFooter'
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -51,10 +49,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <SiteHeader />
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md">
+    <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="text-4xl mb-3">👋</div>
             <h2 className="font-serif text-3xl text-navy">
@@ -130,8 +125,6 @@ export default function OnboardingPage() {
             </form>
           </div>
         </div>
-      </main>
-      <SiteFooter />
     </div>
   )
 }
