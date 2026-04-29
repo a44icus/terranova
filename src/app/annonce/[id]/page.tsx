@@ -15,6 +15,8 @@ import ShareButton from './ShareButton'
 import QuartierScore from '@/components/annonce/QuartierScore'
 import RapportBien from '@/components/annonce/RapportBien'
 import PrixEvolutionChart from '@/components/annonce/PrixEvolutionChart'
+import SimulateurCredit from '@/components/annonce/SimulateurCredit'
+import DemandeVisiteForm from '@/components/annonce/DemandeVisiteForm'
 import { genererRapport } from '@/lib/profils'
 import { getSiteSettings, getPoiWeights, getScoreSeuils } from '@/lib/siteSettings'
 
@@ -432,6 +434,19 @@ export default async function AnnoncePage({ params }: Props) {
                   🗺 Voir sur la carte
                 </Link>
               </div>
+
+              {/* Simulateur de crédit (vente uniquement) */}
+              {bien.type === 'vente' && bien.prix > 0 && (
+                <SimulateurCredit prixBien={bien.prix} />
+              )}
+
+              {/* Demande de visite */}
+              <DemandeVisiteForm
+                bienId={bien.id}
+                vendeurId={bien.user_id}
+                bienTitre={bien.titre}
+                userId={user?.id}
+              />
             </div>
           </div>
         </div>

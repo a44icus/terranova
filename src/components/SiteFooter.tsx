@@ -12,6 +12,7 @@ export default function SiteFooter() {
           <Link href="/annonces" className="hover:text-white transition-colors">Annonces</Link>
           <Link href="/agences" className="hover:text-white transition-colors">Agences</Link>
           <Link href="/carte" className="hover:text-white transition-colors">Carte interactive</Link>
+          <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
           <Link href="/publier" className="hover:text-white transition-colors">Publier un bien</Link>
           <Link href="/publicite" className="hover:text-white transition-colors">Publicité</Link>
           <Link href="/auth/login" className="hover:text-white transition-colors">Connexion</Link>

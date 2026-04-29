@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
 
 function escHtml(str: unknown): string {
   if (typeof str !== 'string') return ''
@@ -7,6 +8,11 @@ function escHtml(str: unknown): string {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req)
+  if (await isEmailRateLimited(ip, 'publicite-contact')) {
+    return NextResponse.json({ error: 'Trop de messages envoyés. Réessayez dans une heure.' }, { status: 429 })
+  }
+
   const RESEND_API_KEY = process.env.RESEND_API_KEY
   const ADMIN_EMAILS   = process.env.ADMIN_EMAILS ?? ''
   if (!RESEND_API_KEY || !ADMIN_EMAILS) {

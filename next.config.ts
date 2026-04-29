@@ -87,6 +87,11 @@ const securityHeaders = [
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
   // Limite les API navigateur accessibles (pas de géoloc, caméra sans permission explicite)
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+  // Isole le contexte de navigation (protège contre Spectre / ouvertures cross-origin)
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+  // Empêche d'autres origines d'embarquer nos ressources en no-cors
+  // Note : Cross-Origin-Embedder-Policy omis volontairement — incompatible avec MapLibre (tuiles externes)
+  { key: 'Cross-Origin-Resource-Policy', value: 'same-site' },
 ]
 
 const nextConfig: NextConfig = {

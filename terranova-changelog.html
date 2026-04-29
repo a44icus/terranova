@@ -72,6 +72,202 @@
 
   <div class="timeline">
 
+    <!-- ══ SESSION 29 AVRIL 2026 (5) ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--primary)"></div>
+      <div class="session-date">29 avril 2026 — session 5</div>
+      <div class="session-title">Calendrier des visites &amp; Refonte du tableau de bord</div>
+      <div class="session-desc">Vue calendrier mensuelle pour les visites, refonte visuelle complète de /compte/statistiques sur le modèle Propelow. 6 fichiers créés ou réécrits.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Calendrier des visites — vue mensuelle</strong>
+            <span>Nouvelle vue calendrier dans <code>/compte/visites</code> (toggle Calendrier / Liste). Grille mensuelle 7 colonnes Lun–Dim avec padding ISO correct. Chaque cellule affiche jusqu'à 3 pills de visites (couleur par statut : amber / green / gray) + badge "+N de plus". Clic sur un jour ouvre un panneau détail avec les actions (confirmer, refuser, rouvrir). Navigation mois précédent/suivant + bouton "Aujourd'hui". Aujourd'hui mis en valeur (cercle indigo).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Actions en ligne sur les visites</strong>
+            <span>Composant <code>VisiteActions.tsx</code> : mise à jour du statut via <code>supabase.from('visites').update()</code> + <code>router.refresh()</code>. Boutons contextuels selon l'état : confirmer/refuser pour <em>en_attente</em>, annuler pour <em>confirme</em>, rouvrir pour <em>annule</em>.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Refonte du tableau de bord statistiques</strong>
+            <span>Redesign complet de <code>/compte/statistiques</code> inspiré du style Propelow : fond <code>#F4F5F7</code> chaud, cartes blanches avec ombre subtile <code>box-shadow 0 1px 4px</code>, zéro border. 4 KPI cards avec icône en cercle coloré, grande valeur serif, tendance colorée. Prochaines visites avec date-box (weekday + jour + mois), fond navy pour aujourd'hui. Tableau visites récentes avec avatar initiales, pills de statut, bouton email bordé. Donut centré + légende en lignes. Tableau annonces avec mini-barre de progression pour les vues.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Graphique d'activité — PeriodChart</strong>
+            <span>Refonte de <code>PeriodChart.tsx</code> : grand chiffre serif en haut à gauche, sélecteur de période vertical (30 j / 14 j / 7 j) en colonne droite. Calcul de tendance vs période précédente (vert/rouge). Compatible avec le nouveau layout dashboard.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>LineChart — courbes de Bézier et axe Y</strong>
+            <span>Réécriture de <code>LineChart.tsx</code> : courbes lissées avec points de contrôle cubiques, axe Y avec valeurs graduées (<code>showYAxis</code>), dégradé de remplissage, étiquettes X en format français (jj Mois), <code>preserveAspectRatio="none"</code> pour un rendu adaptatif parfait.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>DonutChart — centré + légende en lignes</strong>
+            <span>Réécriture de <code>DonutChart.tsx</code> : donut centré au-dessus avec texte en SVG (valeur + sous-titre personnalisables), légende en lignes (label + count en gras + pourcentage discret), gap entre les tranches (1,5°), état vide avec cercle tirets SVG. Props : <code>centerLine1</code>, <code>centerLine2</code>, <code>size</code>.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 29 AVRIL 2026 (4) ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--green)"></div>
+      <div class="session-date">29 avril 2026 — session 4</div>
+      <div class="session-title">4 nouvelles fonctionnalités majeures</div>
+      <div class="session-desc">Simulateur de crédit immobilier, planification de visites, avis & notations des agents, blog SEO avec interface admin. 23 fichiers créés ou modifiés.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Simulateur de crédit immobilier</strong>
+            <span>Composant client accordéon (<code>SimulateurCredit.tsx</code>) sur la page annonce (vente uniquement). Sliders interactifs : apport, durée (10/15/20/25/30 ans), taux d'intérêt, assurance emprunteur. Calcul en temps réel : mensualité, coût des intérêts, coût assurance total, coût total du crédit. Pré-rempli avec le prix du bien.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Planification de visites</strong>
+            <span>Formulaire accordéon <code>DemandeVisiteForm.tsx</code> sur chaque fiche bien : nom, email, téléphone, date souhaitée, créneau (4 options), message. API <code>/api/visites</code> avec validation, rate limiting et email Resend au vendeur. Dashboard <code>/compte/visites</code> avec stats (total, en attente, confirmées) et gestion des statuts (confirmer / refuser / rouvrir). Navigation compte mise à jour.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Avis et notations des agents</strong>
+            <span>Composant <code>AvisAgents.tsx</code> sur chaque fiche vendeur : note moyenne avec étoiles, répartition par note (1–5), liste des avis avec date. Formulaire d'avis pour les utilisateurs connectés (1 avis max par agent, anti-auto-notation). API <code>/api/avis</code> (POST/DELETE). Note moyenne intégrée dans le hero de la fiche vendeur.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Blog SEO</strong>
+            <span>Page liste <code>/blog</code> avec hero navy, article à la une full-width, grille 3 colonnes, filtres par catégorie (Guide, Actualité, Conseil, Marché). Page article <code>/blog/[slug]</code> avec metadata SEO + OpenGraph complets, mise en page typographique soignée, articles connexes, CTA carte. Admin <code>/admin/blog</code> : liste, création, édition (HTML riche, slug auto, preview photo, brouillon/publication). Blog ajouté dans le header, footer et sitemap.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-sec">SQL</span>
+          <div class="change-text">
+            <strong>Migration SQL — 3 nouvelles tables</strong>
+            <span>Fichier <code>20260429_visites_avis_articles.sql</code> : table <code>visites</code> (statuts, RLS vendeur+demandeur), table <code>avis_agents</code> (note 1-5, RLS lecture publique / insert auth), table <code>articles</code> (slug unique, catégorie, trigger updated_at, RLS lecture publique). Index sur toutes les clés de recherche fréquentes.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Typographie article — classe CSS dédiée</strong>
+            <span>Ajout de la classe <code>.article-content</code> dans globals.css (h2, h3, p, ul, ol, a, blockquote, img, code, hr) — compatible Tailwind v4 sans plugin typography.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 29 AVRIL 2026 (3) ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--red)"></div>
+      <div class="session-date">29 avril 2026 — session 3</div>
+      <div class="session-title">Audit de sécurité complet</div>
+      <div class="session-desc">Correction de 8 vulnérabilités identifiées : XSS, rate limiting, validation des inputs, headers HTTP, RGPD.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu</span>
+          <div class="change-text">
+            <strong>XSS corrigé dans MapCanvas — données Overpass API</strong>
+            <span>Ajout d'une fonction <code>esc()</code> locale et application sur <code>p.name</code> et <code>p.subtype</code> dans les 3 occurrences innerHTML/setHTML alimentées par l'API externe Overpass.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Sécu</span>
+          <div class="change-text">
+            <strong>Rate limiting email — max 5 messages/heure/IP</strong>
+            <span>Création de <code>src/lib/emailRateLimit.ts</code> et de la table Supabase <code>email_rate_limits</code> (avec RLS). Appliqué sur les 4 routes : contact-agent, chercheur-contact, contact, publicite-contact. Retourne 429 si dépassé.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu</span>
+          <div class="change-text">
+            <strong>Validation & sanitisation dans contact-agent</strong>
+            <span>Longueurs max (nom 100, email 254, téléphone 20, message 2000), validation regex email, trim des champs, escHtml sur toutes les variables injectées dans le HTML de l'email.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu</span>
+          <div class="change-text">
+            <strong>STRIPE_WEBHOOK_SECRET — suppression du non-null assertion</strong>
+            <span>Remplacement de <code>process.env.STRIPE_WEBHOOK_SECRET!</code> par une vérification explicite retournant un 500 clair si la variable est absente.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu</span>
+          <div class="change-text">
+            <strong>updateProfil — escalade de privilèges via impersonation bloquée</strong>
+            <span>Si <code>viewId !== user.id</code> (impersonation active), vérification que l'appelant est admin avant toute mise à jour de profil.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">Sécu</span>
+          <div class="change-text">
+            <strong>Headers HTTP — COOP & CORP ajoutés</strong>
+            <span>Ajout de <code>Cross-Origin-Opener-Policy: same-origin</code> et <code>Cross-Origin-Resource-Policy: same-site</code> dans next.config.ts. COEP omis (incompatible MapLibre — tuiles cross-origin).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">RGPD</span>
+          <div class="change-text">
+            <strong>Anonymisation IP dans map_ad_events</strong>
+            <span>Fonction <code>anonymizeIp()</code> : IPv4 → dernier octet à 0 (ex: 192.168.1.0), IPv6 → 48 bits conservés. Appliquée avant tout stockage ET avant les comparaisons de rate limiting et déduplication.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Suppression de proxy.ts dupliqué — middleware edge déjà actif</strong>
+            <span>Le fichier <code>proxy.ts</code> (convention Vercel) appelait déjà <code>updateSession</code> qui protège /admin/* et /compte/* au niveau edge. Le middleware.ts créé par erreur a été supprimé.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- ══ SESSION 29 AVRIL 2026 (2) ══ -->
     <div class="session">
       <div class="session-dot" style="background:var(--primary)"></div>

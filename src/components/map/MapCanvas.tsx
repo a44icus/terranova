@@ -21,6 +21,16 @@ import type { MapAd } from '@/lib/mapAds'
 let mapInstance: MapLibreMap | null = null
 export function getMap() { return mapInstance }
 
+/** Échappe les caractères HTML pour éviter les injections XSS dans innerHTML/setHTML */
+function esc(s: unknown): string {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}
+
 const CAT_ICON: Record<string, string> = {
   appartement: '🏢', maison: '🏠', bureau: '🏗️',
   terrain: '🌱', parking: '🅿️', local: '🏪',
@@ -469,8 +479,8 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
         anchor: 'bottom',
       }).setHTML(`
         <div style="font-family:'DM Sans',sans-serif;font-size:12px;padding:2px 0;">
-          <strong style="color:#0F172A;">${p.name || catDef?.label}</strong><br>
-          <span style="color:rgba(15,23,42,0.5);">${p.subtype ?? catDef?.label ?? ''} · ${dist >= 1000 ? (dist/1000).toFixed(1)+' km' : dist+' m'}</span>
+          <strong style="color:#0F172A;">${esc(p.name) || esc(catDef?.label)}</strong><br>
+          <span style="color:rgba(15,23,42,0.5);">${esc(p.subtype ?? catDef?.label ?? '')} · ${dist >= 1000 ? (dist/1000).toFixed(1)+' km' : dist+' m'}</span>
         </div>`)
 
       el.addEventListener('mouseenter', () => {
@@ -505,8 +515,8 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
         return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid rgba(15,23,42,0.07);">
           <span style="font-size:16px;">${catDef?.emoji ?? '📍'}</span>
           <span style="flex:1;min-width:0;">
-            <span style="display:block;font-size:12px;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</span>
-            ${p.subtype ? `<span style="display:block;font-size:10px;color:rgba(15,23,42,0.45);">${p.subtype}</span>` : ''}
+            <span style="display:block;font-size:12px;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.name)}</span>
+            ${p.subtype ? `<span style="display:block;font-size:10px;color:rgba(15,23,42,0.45);">${esc(p.subtype)}</span>` : ''}
           </span>
           <span style="font-size:11px;font-weight:600;color:${label.color};flex-shrink:0;">${dist}</span>
         </div>`

@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import ContactAgentForm from '@/components/vendeur/ContactAgentForm'
 import ShareButton from '@/components/vendeur/ShareButton'
 import AgentMapPin from '@/components/vendeur/AgentMapPin'
+import AvisAgents from '@/components/vendeur/AvisAgents'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 
@@ -24,14 +25,18 @@ export default async function VendeurPage({ params }: { params: Promise<{ id: st
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: profile }, { data: biens }] = await Promise.all([
+  const [{ data: profile }, { data: biens }, { data: avis }, { data: { user } }] = await Promise.all([
     supabase.from('profiles').select('*, reseaux(id, nom, slug, logo_url, type_reseau), adresse, lat, lng').eq('id', id).single(),
     supabase.from('biens').select('*, photos(url, principale)').eq('user_id', id).eq('statut', 'publie').order('publie_at', { ascending: false }),
+    supabase.from('avis_agents').select('id, auteur_id, auteur_nom, note, commentaire, created_at').eq('agent_id', id).order('created_at', { ascending: false }),
+    supabase.auth.getUser(),
   ])
 
   if (!profile) notFound()
 
   const totalVues = biens?.reduce((s, b) => s + (b.vues ?? 0), 0) ?? 0
+  const moyenneNote = avis?.length ? avis.reduce((s, a) => s + a.note, 0) / avis.length : 0
+  const hasDejaNote = user ? avis?.some(a => a.auteur_id === user.id) ?? false : false
   const anneeInscription = new Date(profile.created_at).getFullYear()
   const initials = `${profile.prenom?.[0] ?? ''}${profile.nom?.[0] ?? ''}`.toUpperCase()
   const displayName = profile.agence || `${profile.prenom} ${profile.nom}`
@@ -113,6 +118,18 @@ export default async function VendeurPage({ params }: { params: Promise<{ id: st
                   <div className="font-serif text-2xl text-white">{anneeInscription}</div>
                   <div className="text-[10px] text-white/35 uppercase tracking-wide">membre depuis</div>
                 </div>
+                {(avis?.length ?? 0) > 0 && (
+                  <>
+                    <div className="w-px bg-white/10 self-stretch" />
+                    <div className="text-center">
+                      <div className="font-serif text-2xl text-white flex items-center gap-1">
+                        {moyenneNote.toFixed(1)}
+                        <span className="text-amber-400 text-lg">★</span>
+                      </div>
+                      <div className="text-[10px] text-white/35 uppercase tracking-wide">{avis!.length} avis</div>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Actions contact */}
@@ -171,6 +188,14 @@ export default async function VendeurPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
         )}
+
+        {/* Avis et notations */}
+        <AvisAgents
+          agentId={id}
+          avis={avis ?? []}
+          userId={user?.id}
+          hasDejaNote={hasDejaNote}
+        />
 
         {/* Formulaire contact */}
         <div id="contact">

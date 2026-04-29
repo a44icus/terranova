@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
 
 /** Échappe les caractères HTML dangereux pour éviter les injections dans le template email */
 function escHtml(str: unknown): string {
@@ -19,6 +20,12 @@ function isEmail(v: unknown): v is string {
 }
 
 export async function POST(req: NextRequest) {
+  // ── 0. Rate limiting ──────────────────────────────────────────────────────
+  const ip = getClientIp(req)
+  if (await isEmailRateLimited(ip, 'contact')) {
+    return NextResponse.json({ error: 'Trop de messages envoyés. Réessayez dans une heure.' }, { status: 429 })
+  }
+
   // ── 1. Authentification obligatoire ───────────────────────────────────────
   const cookieStore = await cookies()
   const supabase = createServerClient(

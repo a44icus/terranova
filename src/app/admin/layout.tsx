@@ -8,6 +8,7 @@ const ADMIN_NAV = [
   { href: '/admin/utilisateurs',     label: 'Utilisateurs',        icon: '👥' },
   { href: '/admin/reseaux',          label: 'Réseaux & Enseignes', icon: '🏢' },
   { href: '/admin/map-ads',          label: 'Pubs sur la carte',   icon: '📍' },
+  { href: '/admin/blog',             label: 'Blog',                icon: '📝' },
   { href: '/admin/reglages',         label: 'Réglages du site',    icon: '🔧' },
   { href: '/admin/parametres',       label: 'Plans & Stripe',      icon: '💳' },
 ]

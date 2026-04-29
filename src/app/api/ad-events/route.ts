@@ -9,6 +9,39 @@ function isBot(userAgent: string | null): boolean {
   return BOT_PATTERN.test(userAgent)
 }
 
+// ── Anonymisation IP (RGPD) ──────────────────────────────────────────────────
+// IPv4 : tronque le dernier octet   192.168.1.100 → 192.168.1.0
+// IPv6 : tronque les 80 derniers bits (garde les 48 premiers)  2001:db8:85a3::1 → 2001:db8:85a3::
+function anonymizeIp(ip: string): string {
+  if (!ip || ip === 'unknown') return 'unknown'
+
+  // IPv4 simple (peut être préfixé ::ffff: en dual-stack)
+  const ipv4 = ip.replace(/^::ffff:/i, '')
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(ipv4)) {
+    return ipv4.replace(/\.\d+$/, '.0')
+  }
+
+  // IPv6 : expand puis tronque à 3 groupes (48 bits), complète avec ::
+  try {
+    // Normalise l'adresse en divisant sur '::'
+    const halves = ip.split('::')
+    let groups: string[]
+    if (halves.length === 2) {
+      const left  = halves[0] ? halves[0].split(':') : []
+      const right = halves[1] ? halves[1].split(':') : []
+      const missing = 8 - left.length - right.length
+      groups = [...left, ...Array(missing).fill('0'), ...right]
+    } else {
+      groups = ip.split(':')
+    }
+    if (groups.length !== 8) return 'unknown'
+    // Garde les 3 premiers groupes (48 bits), zéro le reste
+    return groups.slice(0, 3).join(':') + '::'
+  } catch {
+    return 'unknown'
+  }
+}
+
 // ── Rate limiting DB-based : 1 requête par (ip, fenêtre 60s) ─────────────────
 // Fiable sur Vercel serverless contrairement au rate limiting en mémoire
 async function isRateLimited(supabase: any, ip: string): Promise<boolean> {
@@ -40,10 +73,11 @@ export async function POST(req: NextRequest) {
     const ua = req.headers.get('user-agent')
     if (isBot(ua)) return NextResponse.json({ ok: true })
 
-    const ip =
+    const rawIp =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
       req.headers.get('x-real-ip') ??
       'unknown'
+    const ip = anonymizeIp(rawIp)
 
     const body = await req.json()
     const { ad_id, event_type } = body

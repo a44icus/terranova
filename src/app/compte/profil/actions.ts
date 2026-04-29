@@ -23,7 +23,19 @@ export async function updateProfil(data: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Non authentifié')
 
-  const viewId = await getViewUserId() ?? user.id
+  const impersonatedId = await getViewUserId()
+  const viewId = impersonatedId ?? user.id
+
+  // Si impersonation active, vérifier que l'appelant est admin
+  if (impersonatedId && impersonatedId !== user.id) {
+    const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim()).filter(Boolean)
+    const isAdmin =
+      user.user_metadata?.role === 'admin' ||
+      user.app_metadata?.role === 'admin' ||
+      adminEmails.includes(user.email ?? '')
+    if (!isAdmin) throw new Error('Accès refusé')
+  }
+
   const admin = createAdminClient()
 
   const { error } = await admin

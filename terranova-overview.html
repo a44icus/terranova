@@ -142,10 +142,10 @@
     <h1>Terra<span>nova</span></h1>
     <p class="hero-sub">Plateforme immobilière interactive — vente, location, carte dynamique et outils pour acheteurs et professionnels.</p>
     <div class="hero-stats">
-      <div><span class="hero-stat-val">30+</span><span class="hero-stat-lbl">Pages</span></div>
+      <div><span class="hero-stat-val">32+</span><span class="hero-stat-lbl">Pages</span></div>
       <div><span class="hero-stat-val">4</span><span class="hero-stat-lbl">Rôles</span></div>
       <div><span class="hero-stat-val">3</span><span class="hero-stat-lbl">Plans tarifaires</span></div>
-      <div><span class="hero-stat-val">14</span><span class="hero-stat-lbl">API routes</span></div>
+      <div><span class="hero-stat-val">15</span><span class="hero-stat-lbl">API routes</span></div>
     </div>
     <div class="hero-pill">🌐 terranova-beta.vercel.app</div>
   </div>
@@ -432,6 +432,12 @@
         <div class="feat-card-desc">Réglages site (SEO, GA4, GTM, Meta Pixel, Matomo), modération annonces, gestion plans tarifaires, config email, paramètres carte.</div>
         <span class="feat-tag" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span>
       </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">🔑</div>
+        <div class="feat-card-title">Authentification Google OAuth</div>
+        <div class="feat-card-desc">Connexion et inscription via Google en un clic. Onboarding post-OAuth pour choisir le type de compte (Particulier / Pro + nom d'agence).</div>
+        <span class="feat-tag" style="background:rgba(15,23,42,0.06);color:rgba(15,23,42,0.5)">Tous</span>
+      </div>
     </div>
   </div>
 
@@ -492,8 +498,63 @@
         <tr><td><span class="route">/admin/reglages</span></td><td>Réglages site (SEO, tracking, carte)</td><td><span class="access-badge" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span></td></tr>
         <tr><td><span class="route">/admin/parametres</span></td><td>Plans tarifaires & Stripe</td><td><span class="access-badge" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span></td></tr>
         <tr><td><span class="route">/compte/admin/email</span></td><td>Configuration email (Resend API)</td><td><span class="access-badge" style="background:rgba(220,38,38,0.1);color:var(--red)">Admin</span></td></tr>
+        <tr><td><span class="route">/onboarding</span></td><td>Choix du type de compte après inscription Google OAuth (Particulier / Pro)</td><td><span class="access-badge" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span></td></tr>
       </tbody>
     </table>
+  </div>
+
+
+  <!-- ══ SÉCURITÉ ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(220,38,38,0.1)">🔒</div>
+      <div>
+        <div class="section-title">Sécurité</div>
+        <div class="section-sub">Mesures de protection en place</div>
+      </div>
+    </div>
+    <div class="grid-4">
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">🛡</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">Edge middleware (proxy.ts)</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">Protection /admin/* et /compte/* au niveau Vercel Edge avant tout rendu. Vérification session Supabase + rôle admin + IP whitelist.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">📋</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">CSP + Headers HTTP</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">CSP stricte, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">⏱</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">Rate limiting email</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">Max 5 emails/heure/IP sur les 4 routes de contact. Table Supabase email_rate_limits avec RLS. Retourne 429 si dépassé.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">🧹</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">Validation & sanitisation</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">Longueurs max, regex email RFC, trim, escHtml sur toutes les routes email. XSS corrigé dans MapCanvas (données Overpass API).</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">🗺</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">Anonymisation IP (RGPD)</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">IPs tronquées avant stockage dans map_ad_events : IPv4 → dernier octet à 0, IPv6 → 48 bits conservés.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">🔑</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">Server Actions sécurisées</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">Toutes les actions vérifient getUser(). Actions admin appellent checkAdmin(). Impersonation protégée contre l'escalade de privilèges.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">🎣</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">Stripe webhook signé</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">Vérification constructEvent() + STRIPE_WEBHOOK_SECRET vérifié explicitement (plus de non-null assertion).</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:22px;margin-bottom:8px">🤖</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px">Anti-bot & déduplication pubs</div>
+        <div style="font-size:12px;color:rgba(15,23,42,0.5)">Détection UA bot, rate limiting DB-based 30 req/min, déduplication 1 événement/(ad_id, IP anonymisée, type, jour).</div>
+      </div>
+    </div>
   </div>
 
 

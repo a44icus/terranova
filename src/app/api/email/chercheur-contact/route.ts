@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
 
 function escHtml(s: unknown): string {
   if (typeof s !== 'string') return ''
@@ -11,6 +12,11 @@ function isEmail(v: unknown): v is string {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req)
+  if (await isEmailRateLimited(ip, 'chercheur-contact')) {
+    return NextResponse.json({ error: 'Trop de messages envoyés. Réessayez dans une heure.' }, { status: 429 })
+  }
+
   let body: Record<string, unknown>
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 

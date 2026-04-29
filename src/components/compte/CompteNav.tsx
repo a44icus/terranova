@@ -16,6 +16,7 @@ const NAV = [
   { href: '/compte/statistiques',     label: 'Statistiques',    icon: '📊' },
   { href: '/compte/favoris',          label: 'Mes favoris',     icon: '♥' },
   { href: '/compte/messages',         label: 'Messages',        icon: '✉' },
+  { href: '/compte/visites',          label: 'Visites',         icon: '📅' },
   { href: '/compte/alertes',          label: 'Mes alertes',     icon: '🔔' },
   { href: '/compte/chercheur',        label: 'Je cherche',      icon: '🔍' },
   { href: '/compte/plan',             label: 'Mon abonnement',  icon: '⭐' },

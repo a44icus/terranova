@@ -12,8 +12,12 @@ function getStripe() {
 export async function POST(req: NextRequest) {
   const stripe = getStripe()
   const body = await req.text()
-  const sig = req.headers.get('stripe-signature')!
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+  const sig = req.headers.get('stripe-signature')
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!sig || !webhookSecret) {
+    console.error('[Webhook] stripe-signature ou STRIPE_WEBHOOK_SECRET manquant')
+    return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
+  }
 
   let event: Stripe.Event
   try {

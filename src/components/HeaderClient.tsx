@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: '/carte',    label: 'Carte' },
   { href: '/agences',  label: 'Agences' },
   { href: '/marche',   label: 'Marché' },
+  { href: '/blog',     label: 'Blog' },
   { href: '/estimer',  label: 'Estimer' },
 ]
 
