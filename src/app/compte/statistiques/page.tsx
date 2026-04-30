@@ -104,25 +104,25 @@ export default async function StatistiquesPage() {
   const maxVues = Math.max(...Object.values(vuesParBien), 1)
 
   return (
-    <div className="min-h-screen p-6 space-y-5" style={{ background: '#F4F5F7' }}>
+    <div className="min-h-screen p-3 sm:p-6 space-y-4 sm:space-y-5" style={{ background: '#F4F5F7' }}>
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
-        <h1 className="font-serif text-2xl text-[#0F172A]">Tableau de bord</h1>
-        <div className="flex gap-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="font-serif text-xl sm:text-2xl text-[#0F172A]">Tableau de bord</h1>
+        <div className="flex gap-2">
           <Link href="/compte/visites"
-            className="text-sm font-medium border border-[#0F172A]/15 text-[#0F172A]/70 px-4 py-2 rounded-xl hover:bg-white transition-colors">
+            className="hidden sm:block text-sm font-medium border border-[#0F172A]/15 text-[#0F172A]/70 px-4 py-2 rounded-xl hover:bg-white transition-colors">
             Planifier une visite
           </Link>
           <Link href="/publier"
-            className="text-sm font-semibold bg-[#4F46E5] text-white px-4 py-2 rounded-xl hover:bg-[#4338CA] transition-colors">
-            Créer une annonce
+            className="text-sm font-semibold bg-[#4F46E5] text-white px-3 sm:px-4 py-2 rounded-xl hover:bg-[#4338CA] transition-colors whitespace-nowrap">
+            + Annonce
           </Link>
         </div>
       </div>
 
       {/* ── 4 KPI cards ─────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <KpiCard
           label="Vues totales"
           value={totalVues.toLocaleString('fr-FR')}
@@ -164,7 +164,7 @@ export default async function StatistiquesPage() {
       </div>
 
       {/* ── Ligne 2 : Graphique + Prochaines visites ────────────────────── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* Graphique — 2/3 */}
         <div className="xl:col-span-2 bg-white rounded-2xl p-6 shadow-[0_1px_4px_rgba(15,23,42,0.06)]">
@@ -253,7 +253,7 @@ export default async function StatistiquesPage() {
       </div>
 
       {/* ── Ligne 3 : Tableau visites récentes + Donut ──────────────────── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* Tableau — 2/3 */}
         <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_1px_4px_rgba(15,23,42,0.06)] overflow-hidden">
@@ -362,11 +362,11 @@ export default async function StatistiquesPage() {
 
       {/* ── Ligne 4 : Tableau annonces ──────────────────────────────────── */}
       <div className="bg-white rounded-2xl shadow-[0_1px_4px_rgba(15,23,42,0.06)] overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#0F172A]/05">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[#0F172A]/05">
           <h2 className="font-medium text-[#0F172A]">Mes annonces</h2>
           <span className="text-xs text-[#0F172A]/35">{(biens ?? []).length} annonce{(biens ?? []).length > 1 ? 's' : ''}</span>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-0">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#0F172A]/05">

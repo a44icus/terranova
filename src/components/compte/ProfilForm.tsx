@@ -167,7 +167,7 @@ export default function ProfilForm({ profile, userEmail }: Props) {
           <div>
             <label className={labelCls}>Adresse de l'agence <span className="text-navy/30 font-normal">(optionnel)</span></label>
             <p className="text-[11px] text-navy/35 mb-2">Permet aux visiteurs de localiser votre agence sur une carte.</p>
-            <div className="rounded-xl overflow-hidden border border-navy/12" style={{ height: 260 }}>
+            <div>
               <LocationPicker
                 adresse={form.adresse}
                 ville={form.ville}

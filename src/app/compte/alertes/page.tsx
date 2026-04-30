@@ -22,7 +22,7 @@ export default async function AlertesPage() {
   const alertes = await getAlertes()
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 sm:p-8 max-w-3xl">
       <div className="mb-8">
         <h1 className="font-serif text-3xl text-[#0F172A] mb-1">Mes alertes</h1>
         <p className="text-sm text-[#0F172A]/50">

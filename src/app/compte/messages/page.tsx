@@ -61,7 +61,7 @@ export default async function MessagesPage({ searchParams }: Props) {
   const chercheurBadge = tab === 'recherche' ? nonLusChercheur : (unreadChercheurCount ?? 0)
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 sm:p-8 max-w-3xl">
       <div className="mb-6">
         <h1 className="font-serif text-2xl text-navy">Messages</h1>
       </div>

@@ -37,7 +37,7 @@ export default async function PlanPage({
   const limite = planConfig[effectivePlan]
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="p-4 sm:p-8 max-w-5xl">
       {/* En-tête */}
       <div className="mb-8">
         <h1 className="font-serif text-3xl text-[#0F172A] mb-1">Mon abonnement</h1>

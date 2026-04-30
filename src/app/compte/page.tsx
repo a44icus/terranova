@@ -33,9 +33,9 @@ export default async function ComptePage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl">
-      <h1 className="font-serif text-3xl text-navy mb-1">Bonjour, {profile?.prenom} 👋</h1>
-      <p className="text-sm text-navy/50 mb-8">Voici un aperçu de votre activité</p>
+    <div className="p-4 sm:p-8 max-w-4xl">
+      <h1 className="font-serif text-2xl sm:text-3xl text-navy mb-1">Bonjour, {profile?.prenom} 👋</h1>
+      <p className="text-sm text-navy/50 mb-6 sm:mb-8">Voici un aperçu de votre activité</p>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -58,7 +58,7 @@ export default async function ComptePage() {
 
       {/* Dernières annonces */}
       <div className="bg-white rounded-2xl border border-navy/08 overflow-hidden mb-6">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-navy/08">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-navy/08">
           <h2 className="font-medium text-navy">Dernières annonces</h2>
           <Link href="/compte/mes-annonces" className="text-xs text-primary hover:underline">Voir tout →</Link>
         </div>
@@ -68,25 +68,40 @@ export default async function ComptePage() {
           </div>
         ) : (
           biens.map((bien: any) => {
-            const photo = bien.photos?.find((p: any) => p.principale)?.url ?? bien.photos?.[0]?.url
+            const photo  = bien.photos?.find((p: any) => p.principale)?.url ?? bien.photos?.[0]?.url
             const statut = STATUT_STYLE[bien.statut] ?? STATUT_STYLE.brouillon
+            const prix   = bien.type === 'location'
+              ? `${bien.prix?.toLocaleString('fr-FR')} €/mois`
+              : `${bien.prix?.toLocaleString('fr-FR')} €`
             return (
-              <div key={bien.id} className="flex items-center gap-4 px-6 py-3.5 border-b border-navy/06 last:border-b-0 hover:bg-navy/02 transition-colors">
-                <div className="w-12 h-10 rounded-lg bg-gradient-to-br from-[#e0ddd8] to-[#c8c4bc] overflow-hidden flex-shrink-0">
+              <div key={bien.id} className="flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-navy/06 last:border-b-0 hover:bg-navy/02 transition-colors">
+                {/* Photo */}
+                <div className="w-11 h-10 rounded-lg bg-gradient-to-br from-[#e0ddd8] to-[#c8c4bc] overflow-hidden flex-shrink-0">
                   {photo && <img src={photo} alt="" className="w-full h-full object-cover" />}
                 </div>
+
+                {/* Infos — prend tout l'espace disponible */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-navy truncate">{bien.titre}</div>
-                  <div className="text-xs text-navy/45 mt-0.5">{bien.ville} · {bien.type === 'location' ? `${bien.prix.toLocaleString('fr-FR')} €/mois` : `${bien.prix.toLocaleString('fr-FR')} €`}</div>
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                      style={{ background: statut.bg, color: statut.color }}>
+                      {statut.label}
+                    </span>
+                  </div>
+                  <div className="text-xs font-medium text-navy truncate leading-tight">{bien.titre}</div>
+                  <div className="text-[11px] text-navy/45 mt-0.5 flex items-center gap-2">
+                    <span className="truncate">{bien.ville}</span>
+                    <span className="flex-shrink-0 font-medium text-navy/70">{prix}</span>
+                  </div>
                 </div>
-                <span className="text-[10px] font-semibold px-2 py-1 rounded-full flex-shrink-0"
-                  style={{ background: statut.bg, color: statut.color }}>
-                  {statut.label}
-                </span>
-                <div className="flex gap-3 text-[11px] text-navy/40 flex-shrink-0">
-                  <span>👁 {bien.vues}</span>
-                  <span>✉ {bien.contacts}</span>
+
+                {/* Stats — desktop seulement */}
+                <div className="hidden sm:flex gap-3 text-[11px] text-navy/40 flex-shrink-0">
+                  <span>👁 {bien.vues ?? 0}</span>
+                  <span>✉ {bien.contacts ?? 0}</span>
                 </div>
+
+                {/* Bouton */}
                 <Link href={`/compte/mes-annonces/${bien.id}/modifier`}
                   className="text-xs bg-navy text-white px-3 py-1.5 rounded-lg hover:bg-primary transition-colors flex-shrink-0">
                   Modifier
@@ -99,7 +114,7 @@ export default async function ComptePage() {
 
       {/* Action rapide */}
       <Link href="/publier"
-        className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-primary-dark transition-colors">
+        className="flex sm:inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-primary-dark transition-colors">
         + Publier un nouveau bien
       </Link>
     </div>

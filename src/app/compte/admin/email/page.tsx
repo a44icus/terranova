@@ -22,7 +22,7 @@ export default async function AdminEmailPage() {
     .single()
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 sm:p-8 max-w-2xl">
       <div className="mb-8">
         <p className="text-xs font-medium text-primary uppercase tracking-wider mb-1">Administration</p>
         <h1 className="font-serif text-3xl text-navy mb-1">Configuration email</h1>

@@ -71,6 +71,9 @@ export default function LocationPicker({ adresse, ville, codePostal, lat, lng, o
       })
       mapRef.current = map
 
+      // Force le recalcul de taille une fois le style chargé
+      map.once('load', () => map.resize())
+
       // Marker draggable indigo
       const el = document.createElement('div')
       el.style.cssText = `
@@ -244,8 +247,8 @@ export default function LocationPicker({ adresse, ville, codePostal, lat, lng, o
       </button>
 
       {/* Carte */}
-      <div className="rounded-xl overflow-hidden border border-navy/10 relative" style={{ height: 280 }}>
-        <div ref={containerRef} className="w-full h-full" />
+      <div className="rounded-xl overflow-hidden border border-navy/10 relative">
+        <div ref={containerRef} style={{ width: '100%', height: 360 }} />
 
         {/* Hint quand pas encore de position */}
         {lat === 0 && (

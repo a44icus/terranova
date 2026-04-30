@@ -29,7 +29,7 @@ export default async function MessageThreadPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 sm:p-8 max-w-3xl">
       {/* Header */}
       <div className="mb-6">
         <Link href="/compte/messages" className="text-sm text-[#0F172A]/40 hover:text-[#0F172A] flex items-center gap-1 mb-4">

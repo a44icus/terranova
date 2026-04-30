@@ -72,6 +72,86 @@
 
   <div class="timeline">
 
+    <!-- ══ SESSION 30 AVRIL 2026 (2) ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--primary)"></div>
+      <div class="session-date">30 avril 2026 — session 2</div>
+      <div class="session-title">Responsive mobile — espace compte</div>
+      <div class="session-desc">Navigation mobile complète, pagination des annonces, correctifs de layout. 8 fichiers modifiés, 2 créés.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Navigation mobile — barre fixe + tiroir slide-up</strong>
+            <span>Nouveau composant <code>MobileNav.tsx</code> rendu hors du conteneur flex (indépendant du layout). Barre fixe 56px en bas (Accueil / Annonces / Messages / Visites / Menu). Bouton Menu ouvre un tiroir slide-up avec profil, tous les liens, "Publier" et déconnexion. Tout en <code>style={{}}</code> inline pour éviter tout problème de génération JIT Tailwind. Masquage/affichage via <code>@media</code> dans une balise <code>&lt;style&gt;</code> directement dans le layout server — fiable à 100%, pas de dépendance au cache HMR.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Sidebar desktop séparée (<code>CompteNav</code>)</strong>
+            <span>Refactoring : <code>CompteNav</code> ne gère plus que la sidebar desktop (classe <code>compte-sidebar</code>). Séparation stricte des deux composants pour éviter le bug Fragment-in-flex qui empêchait les éléments <code>position:fixed</code> de s'ancrer correctement au viewport.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Tiroir mobile — bord supérieur visible quand fermé</strong>
+            <span>Bug géométrique : tiroir à <code>bottom: 56px</code> + <code>translateY(100%)</code> laissait le bord supérieur visible au-dessus de la barre. Corrigé en positionnant à <code>bottom: 0</code> + <code>translateY(110%)</code> + <code>paddingBottom: 56px</code> interne.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Mes annonces — pagination + filtres par statut</strong>
+            <span>12 annonces par page. Filtres par statut (Toutes / Publiées / En attente / Brouillons / Archivées / Refusées) avec compteur. Pagination numérotée avec ellipsis. Filtre et page passés en search params URL. Filtres à 0 masqués automatiquement.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Paddings et grilles responsive sur toutes les pages /compte</strong>
+            <span>Toutes les pages passent de <code>p-8</code> à <code>p-4 sm:p-8</code>. Page statistiques : grilles <code>xl:grid-cols-*</code> → <code>lg:grid-cols-*</code>, padding réduit mobile, boutons header adaptés. Dashboard : rangées "Dernières annonces" restructurées (badge + titre + ville/prix en bloc, stats masquées sur mobile, bouton compact). <code>pb-14 md:pb-0</code> sur le main pour compenser la barre fixe mobile.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 30 AVRIL 2026 ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--red)"></div>
+      <div class="session-date">30 avril 2026</div>
+      <div class="session-title">Correctif tracking des vues</div>
+      <div class="session-desc">Les vues des annonces n'étaient jamais enregistrées — deux bugs combinés identifiés et corrigés.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Table <code>vues_stats</code> et RPC <code>increment_vue_stat</code> manquants</strong>
+            <span>La table <code>vues_stats</code> (historique journalier des vues par bien) et la fonction RPC <code>increment_vue_stat</code> étaient appelées dans le code mais n'existaient jamais en base. Migration <code>20260430_vues_stats.sql</code> créée : table avec contrainte unique <code>(bien_id, date)</code>, index, RLS lecture publique, fonction upsert <code>security definer</code>.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Promesse abandonnée — passage à <code>after()</code> Next.js 15</strong>
+            <span>Le pattern <code>(async () =&gt; { ... })().catch(() =&gt; {})</code> dans la page <code>/annonce/[id]</code> était une promesse non-awaitée : Next.js App Router l'abandonnait avant exécution dès que la réponse était envoyée. Remplacé par <code>after()</code> de <code>next/server</code>, qui exécute le callback après l'envoi de la réponse sans bloquer le rendu.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- ══ SESSION 29 AVRIL 2026 (5) ══ -->
     <div class="session">
       <div class="session-dot" style="background:var(--primary)"></div>

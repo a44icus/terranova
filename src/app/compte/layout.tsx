@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import CompteNav from '@/components/compte/CompteNav'
+import MobileNav from '@/components/compte/MobileNav'
 import FavorisSync from '@/components/FavorisSync'
 import ImpersonationBanner from '@/components/ImpersonationBanner'
 import type { Profile, PlanType } from '@/lib/types'
@@ -37,6 +38,10 @@ export default async function CompteLayout({ children }: { children: React.React
 
   return (
     <div className="min-h-screen bg-surface">
+      <style>{`
+        @media (max-width: 767px) { .compte-sidebar { display: none !important; } }
+        @media (min-width: 768px) { .compte-mobile-nav { display: none !important; } }
+      `}</style>
       {/* Impersonation banner */}
       {impersonatedId && <ImpersonationBanner name={displayName} />}
 
@@ -59,10 +64,12 @@ export default async function CompteLayout({ children }: { children: React.React
       <FavorisSync />
       <div className="flex min-h-[calc(100vh-56px)]">
         <CompteNav profile={profile} />
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto pb-14 md:pb-0">
           {children}
         </main>
       </div>
+      {/* Nav mobile — en dehors du flex, position:fixed indépendante */}
+      <MobileNav profile={profile} />
     </div>
   )
 }

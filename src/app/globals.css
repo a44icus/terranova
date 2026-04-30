@@ -153,6 +153,16 @@ html, body {
 /* ── Groupes hover (sidebar cards etc.) ─────────────────────── */
 .group:hover .group-hover\:scale-105 { transform: scale(1.05); }
 
+/* ── Navigation compte responsive ───────────────────────────── */
+/* Sidebar desktop : cachée sous 768px */
+@media (max-width: 767px) {
+  .compte-sidebar { display: none !important; }
+}
+/* Nav mobile : cachée au-dessus de 768px */
+@media (min-width: 768px) {
+  .compte-mobile-nav { display: none !important; }
+}
+
 /* ── Article blog (rendu HTML) ───────────────────────────────── */
 .article-content {
   color: color-mix(in srgb, var(--color-navy) 70%, transparent);

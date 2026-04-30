@@ -21,7 +21,7 @@ export default async function ModifierAnnoncePage({ params }: Props) {
   if (!bien) notFound()
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 sm:p-8 max-w-2xl">
       <div className="mb-6">
         <h1 className="font-serif text-2xl text-navy">Modifier l'annonce</h1>
         <p className="text-sm text-navy/50 mt-0.5 truncate">{bien.titre}</p>

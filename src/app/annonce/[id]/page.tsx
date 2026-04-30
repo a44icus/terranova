@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
+import { after } from 'next/server'
 import Link from 'next/link'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
@@ -94,15 +95,18 @@ export default async function AnnoncePage({ params }: Props) {
 
   if (!bien) notFound()
 
-  // Incrémenter vues + historique journalier (fire & forget)
-  const _admin = createAdminClient()
-  const _today = new Date().toISOString().slice(0, 10);
-  (async () => {
-    await Promise.all([
-      _admin.from('biens').update({ vues: (bien.vues ?? 0) + 1 }).eq('id', id),
-      _admin.rpc('increment_vue_stat', { p_bien_id: id, p_date: _today }),
-    ])
-  })().catch(() => {})
+  // Incrémenter vues uniquement en production (évite les faux comptages en dev)
+  if (process.env.NODE_ENV === 'production') {
+    const _admin = createAdminClient()
+    const _today = new Date().toISOString().slice(0, 10)
+    after(async () => {
+      await Promise.all([
+        // Incrément atomique SQL — évite les race conditions read-then-write
+        _admin.rpc('increment_bien_vues', { p_bien_id: id }),
+        _admin.rpc('increment_vue_stat',  { p_bien_id: id, p_date: _today }),
+      ]).catch(() => {})
+    })
+  }
 
   // Fetch settings + vendeur + biens similaires + email vendeur en parallèle
   const adminClient = createAdminClient()

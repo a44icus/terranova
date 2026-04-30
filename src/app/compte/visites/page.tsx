@@ -25,7 +25,7 @@ export default async function VisitesPage() {
   }
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="p-4 sm:p-8 max-w-5xl">
       <div className="mb-6">
         <h1 className="font-serif text-3xl text-[#0F172A] mb-1">Visites</h1>
         <p className="text-sm text-[#0F172A]/50">
