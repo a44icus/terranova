@@ -399,19 +399,24 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
       delay += 60
 
       /*
-       * Structure standard MapLibre :
-       * el = l'élément visuellement visible, ancré anchor:'bottom'
-       *   → son bord inférieur (le stem) est exactement sur [p.lon, p.lat]
-       *   → flex-column : icône + badge + stem dot
-       *   → transform-origin:bottom center → scale part du point géo
-       * Pas de wrapper 0×0, pas d'absolute interne, pas de translateX.
+       * IMPORTANT : MapLibre positionne les markers en écrasant el.style.transform
+       * (translate3d). Il ne faut JAMAIS animer el directement.
+       * On utilise un wrapper interne (inner) pour l'animation CSS.
+       * el = shell vide positionné par MapLibre
+       * inner = conteneur visuel animé
        */
       const el = document.createElement('div')
-      el.style.cssText = `
+      el.style.cssText = 'display:inline-flex;'
+
+      // Inner : reçoit toute l'animation — MapLibre ne le touche pas
+      const inner = document.createElement('div')
+      inner.style.cssText = `
         display:flex;flex-direction:column;align-items:center;gap:3px;
         cursor:pointer;
         transform-origin:bottom center;
         filter:drop-shadow(0 2px 6px rgba(0,0,0,0.20));
+        opacity:0;
+        transform:translateY(8px) scale(0.88);
       `
 
       // Icône ronde
@@ -424,7 +429,7 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
       `
       iconEl.textContent = p.emoji
 
-      // Badge distance + catégorie
+      // Badge distance
       const badgeEl = document.createElement('div')
       badgeEl.style.cssText = `
         background:white;border-radius:7px;padding:2px 7px;
@@ -436,37 +441,30 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
         <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:${color};">${dist >= 1000 ? (dist/1000).toFixed(1)+'km' : dist+'m'}</span>
       `
 
-      // Stem (petit trait + dot qui touche exactement le sol)
+      // Stem
       const stemEl = document.createElement('div')
-      stemEl.style.cssText = `
-        display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;
-      `
+      stemEl.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;'
       const stemLine = document.createElement('div')
       stemLine.style.cssText = `width:2px;height:8px;background:${color};border-radius:1px;`
       const stemDot = document.createElement('div')
-      stemDot.style.cssText = `
-        width:7px;height:7px;border-radius:50%;
-        background:${color};border:1.5px solid white;
-      `
+      stemDot.style.cssText = `width:7px;height:7px;border-radius:50%;background:${color};border:1.5px solid white;`
       stemEl.appendChild(stemLine)
       stemEl.appendChild(stemDot)
 
-      el.appendChild(iconEl)
-      el.appendChild(badgeEl)
-      el.appendChild(stemEl)
+      inner.appendChild(iconEl)
+      inner.appendChild(badgeEl)
+      inner.appendChild(stemEl)
+      el.appendChild(inner)
 
-      // Animation d'entrée — uniquement translateY + opacity, jamais translateX
-      el.style.opacity = '0'
-      el.style.transform = 'translateY(8px) scale(0.88)'
+      // Animation sur inner uniquement — el.style.transform est libre pour MapLibre
       setTimeout(() => {
-        el.style.transition = `opacity 0.35s ease, transform 0.35s cubic-bezier(.34,1.45,.64,1)`
-        el.style.opacity = '1'
-        el.style.transform = 'translateY(0) scale(1)'
-        // Nettoyer la transition après animation pour que hover/snap soient réactifs
-        setTimeout(() => { el.style.transition = '' }, 400)
+        inner.style.transition = `opacity 0.35s ease, transform 0.35s cubic-bezier(.34,1.45,.64,1)`
+        inner.style.opacity = '1'
+        inner.style.transform = 'translateY(0) scale(1)'
+        setTimeout(() => { inner.style.transition = '' }, 400)
       }, curDelay)
 
-      // Marker MapLibre standard : anchor bottom = stem dot sur le point géo
+      // Marker MapLibre : anchor bottom = stem dot sur le point géo
       const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([p.lon, p.lat])
         .addTo(map)
@@ -483,12 +481,12 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
           <span style="color:rgba(15,23,42,0.5);">${esc(p.subtype ?? catDef?.label ?? '')} · ${dist >= 1000 ? (dist/1000).toFixed(1)+' km' : dist+' m'}</span>
         </div>`)
 
-      el.addEventListener('mouseenter', () => {
+      inner.addEventListener('mouseenter', () => {
         popup.setLngLat([p.lon, p.lat]).addTo(map)
         popup.getElement()?.style.setProperty('z-index', '9999')
       })
-      el.addEventListener('mouseleave', () => { popup.remove() })
-      el.addEventListener('click', (e) => { e.stopPropagation() })
+      inner.addEventListener('mouseleave', () => { popup.remove() })
+      inner.addEventListener('click', (e) => { e.stopPropagation() })
 
       poiMarkersRef.current.push(marker)
       poiCleanupRef.current.push(() => { popup.remove() })
