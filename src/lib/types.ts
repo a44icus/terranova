@@ -167,6 +167,7 @@ export interface BienPublic {
   vendeur_agence?: string
   vendeur_avatar?: string
   vendeur_logo?: string
+  score_quartier?: number | null
 }
 
 // Filtres de recherche

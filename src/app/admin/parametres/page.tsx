@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { DEFAULT_PLAN_CONFIG } from '@/lib/plan'
 import type { PlanType } from '@/lib/types'
 import { updatePlanConfig } from './actions'
+import BackfillScoresButton from '@/components/admin/BackfillScoresButton'
 
 const PLAN_META: Record<PlanType, { label: string; color: string; icon: string }> = {
   gratuit:     { label: 'Plan Gratuit',     color: '#7f8c8d', icon: '🆓' },
@@ -220,6 +221,22 @@ NEXT_PUBLIC_BASE_URL=https://votre-domaine.fr`}
           )}
         </div>
       </form>
+
+      {/* Outils de maintenance */}
+      <div className="mt-10 border-t border-[#0F172A]/08 pt-8">
+        <h2 className="font-serif text-xl text-[#0F172A] mb-1">Outils</h2>
+        <p className="text-sm text-[#0F172A]/50 mb-5">
+          Actions de maintenance ponctuelles.
+        </p>
+        <div className="bg-white border border-[#0F172A]/08 rounded-2xl p-5">
+          <p className="text-sm font-medium text-[#0F172A] mb-1">Score de quartier</p>
+          <p className="text-xs text-[#0F172A]/50 mb-4">
+            Calcule et enregistre le score OSM pour tous les biens publiés qui n'en ont pas encore.
+            Traitement séquentiel (~1,5 s par bien pour respecter Overpass).
+          </p>
+          <BackfillScoresButton />
+        </div>
+      </div>
     </div>
   )
 }

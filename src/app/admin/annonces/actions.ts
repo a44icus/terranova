@@ -34,6 +34,21 @@ export async function approuverAnnonce(bienId: string): Promise<{ ok?: boolean; 
   revalidatePath('/admin/annonces')
   revalidatePath('/admin/annonces/toutes')
 
+  // Calcul du score de quartier (fire-and-forget — ne bloque pas l'approbation)
+  try {
+    const { data: bien } = await adminClient
+      .from('biens')
+      .select('lat, lng')
+      .eq('id', bienId)
+      .single()
+    if (bien?.lat && bien?.lng) {
+      const { computeAndStoreScore } = await import('@/lib/computeBienScore')
+      computeAndStoreScore(bienId, bien.lat, bien.lng, adminClient).catch(() => {})
+    }
+  } catch {
+    // Silencieux — le score peut être calculé plus tard
+  }
+
   // Notifier les alertes correspondantes
   try {
     const { notifierAlertes } = await import('@/app/api/alertes/actions')

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Profile, BienType, BienCategorie, DpeClasse } from '@/lib/types'
 import { LIMITES_PLAN } from '@/lib/types'
 import LocationPicker from '@/components/LocationPicker'
+import { computeScoreApresPublication } from '@/app/publier/actions'
 
 interface SiteSettings {
   moderation: "auto" | "manuelle"
@@ -236,6 +237,11 @@ export default function PublierForm({ profile, userEmail, siteSettings }: Props)
           ordre: i,
           principale: i === 0,
         })
+      }
+
+      // Calcul score quartier (fire-and-forget — ne bloque pas la redirection)
+      if (form.lat && form.lng) {
+        computeScoreApresPublication(bien.id, form.lat, form.lng).catch(() => {})
       }
 
       // Notification email admin si activée et statut = en_attente

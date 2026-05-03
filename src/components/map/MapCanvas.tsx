@@ -198,11 +198,17 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
       // Centrer la carte sur le bien
       flyTo3D([bien.lng, bien.lat], 15)
 
+      // Afficher immédiatement le score stocké en DB si disponible
+      if (typeof bien.score_quartier === 'number') {
+        renderInsights({}, bien.score_quartier)
+      }
+
       if (bien.approx) addApproxZone(bien)
       loadPOI(bien.id, bien.lat, bien.lng).then(result => {
         if (!result) { console.warn('[POI] Pas de résultat'); return }
         setPoiData(result)
         renderPOIMarkers(result.pois, bien.lng, bien.lat)
+        // Le score API remplace le score DB une fois chargé
         renderInsights(result.best, result.score)
       })
     } else {
