@@ -215,12 +215,25 @@ export default async function AnnoncePage({ params }: Props) {
                 {bien.titre}
               </h1>
 
-              <p className="text-sm text-navy/50 mb-5">
+              <p className="text-sm text-navy/50 mb-4">
                 📍 {bien.approx
                   ? `${bien.ville} ${bien.code_postal} — localisation approximative`
                   : [bien.adresse, bien.complement, bien.ville, bien.code_postal].filter(Boolean).join(', ')
                 }
               </p>
+
+              {/* CTA prominent : voir sur la carte (feature phare) */}
+              <Link href={`/carte?bien=${bien.id}`}
+                className="group inline-flex items-center gap-2.5 mb-5 px-5 py-3 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition-all shadow-lg shadow-[#4F46E5]/30 hover:-translate-y-0.5">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+                  <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
+                </svg>
+                Voir sur la carte
+                <svg className="transition-transform group-hover:translate-x-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </Link>
 
               {/* Prix */}
               <div className="pt-5 border-t border-navy/06 flex items-end justify-between gap-4 flex-wrap">
@@ -432,11 +445,6 @@ export default async function AnnoncePage({ params }: Props) {
                   </div>
                 )}
 
-                {/* Voir sur la carte */}
-                <Link href={`/carte?bien=${bien.id}`}
-                  className="mt-4 w-full flex items-center justify-center gap-2 text-sm text-navy/60 border border-navy/15 rounded-xl py-2.5 hover:border-navy/30 hover:text-navy transition-all">
-                  🗺 Voir sur la carte
-                </Link>
               </div>
 
               {/* Simulateur de crédit (vente uniquement) */}
