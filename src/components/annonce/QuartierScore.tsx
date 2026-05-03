@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { POI_CATEGORIES, OVERPASS_QUERY, OVERPASS_SERVERS, SEARCH_RADII, detectCategory, computeNeighborhoodScore, scoreLabel, DEFAULT_SCORE_SEUILS, type ScoreSeuils } from '@/lib/poi'
+import { POI_CATEGORIES, scoreLabel, DEFAULT_SCORE_SEUILS, type ScoreSeuils } from '@/lib/poi'
 
 interface Props {
   lat: number
@@ -12,85 +12,37 @@ interface Props {
 
 type POIResult = { name: string; distance: number; emoji: string }
 
-function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371000
-  const dLat = (lat2 - lat1) * Math.PI / 180
-  const dLng = (lng2 - lng1) * Math.PI / 180
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-}
-
-
-async function fetchAtRadius(
-  lat: number, lng: number, deg: number, maxDistM: number
-): Promise<Record<string, POIResult> | null> {
-  const bbox = `${lat - deg},${lng - deg},${lat + deg},${lng + deg}`
-  const query = OVERPASS_QUERY(bbox)
-
-  for (const server of OVERPASS_SERVERS) {
-    try {
-      const res = await fetch(server, {
-        method: 'POST',
-        body: `data=${encodeURIComponent(query)}`,
-        signal: AbortSignal.timeout(9000),
-      })
-      if (!res.ok) continue
-
-      const data = await res.json()
-      const best: Record<string, POIResult> = {}
-
-      for (const el of data.elements ?? []) {
-        const cat = detectCategory(el.tags ?? {})
-        if (!cat) continue
-        const dist = Math.round(haversineM(lat, lng, el.lat, el.lon))
-        if (dist > maxDistM) continue
-        const name = el.tags?.name || el.tags?.['name:fr'] || ''
-        if (!best[cat] || dist < best[cat].distance) {
-          best[cat] = {
-            name,
-            distance: dist,
-            emoji: POI_CATEGORIES.find(c => c.key === cat)?.emoji ?? '📍',
-          }
-        }
-      }
-
-      // Retourner si au moins un POI trouvé, sinon null pour essayer le rayon suivant
-      return Object.keys(best).length > 0 ? best : null
-    } catch {
-      continue
-    }
-  }
-  return null
-}
-
 export default function QuartierScore({ lat, lng, poiWeights, seuils = DEFAULT_SCORE_SEUILS }: Props) {
-  const [score, setScore]                 = useState<number | null>(null)
+  const [score, setScore]                   = useState<number | null>(null)
   const [bestByCategory, setBestByCategory] = useState<Record<string, POIResult>>({})
-  const [radiusKm, setRadiusKm]           = useState(1)
-  const [loading, setLoading]             = useState(true)
+  const [radiusKm, setRadiusKm]             = useState(1)
+  const [loading, setLoading]               = useState(true)
 
   useEffect(() => {
     if (!lat || !lng) { setLoading(false); return }
+    let cancelled = false
 
     async function run() {
-      for (const { km, deg } of SEARCH_RADII) {
-        const best = await fetchAtRadius(lat, lng, deg, km * 1000)
-        if (best) {
-          setBestByCategory(best)
-          setScore(computeNeighborhoodScore(best, poiWeights))
-          setRadiusKm(km)
-          setLoading(false)
-          return
-        }
+      try {
+        const params = new URLSearchParams({ lat: String(lat), lng: String(lng) })
+        if (poiWeights) params.set('weights', JSON.stringify(poiWeights))
+        const res = await fetch(`/api/quartier-score?${params}`, { signal: AbortSignal.timeout(15000) })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        if (cancelled) return
+        setBestByCategory(data.best ?? {})
+        setScore(typeof data.score === 'number' ? data.score : 0)
+        setRadiusKm(data.radiusKm ?? 1)
+      } catch {
+        if (!cancelled) setScore(0)
+      } finally {
+        if (!cancelled) setLoading(false)
       }
-      // Aucun POI trouvé même à 5 km — score 0 affiché
-      setScore(0)
-      setRadiusKm(SEARCH_RADII[SEARCH_RADII.length - 1].km)
-      setLoading(false)
     }
 
     run()
-  }, [lat, lng])
+    return () => { cancelled = true }
+  }, [lat, lng, poiWeights])
 
   if (loading) return (
     <div className="bg-white rounded-2xl p-6 border border-navy/08">
