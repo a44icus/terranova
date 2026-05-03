@@ -5,6 +5,7 @@ import { getEffectivePlan, isPlanExpired, PLAN_LABEL } from '@/lib/plan'
 import type { PlanType } from '@/lib/types'
 import PlanCheckoutButton from '@/components/compte/PlanCheckoutButton'
 import StripePortalButton from '@/components/compte/StripePortalButton'
+import PageHeader from '@/components/compte/ui/PageHeader'
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('fr-FR', {
@@ -38,11 +39,7 @@ export default async function PlanPage({
 
   return (
     <div className="p-4 sm:p-8 max-w-5xl">
-      {/* En-tête */}
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl text-[#0F172A] mb-1">Mon abonnement</h1>
-        <p className="text-sm text-[#0F172A]/50">Gérez votre plan et vos limites de publication</p>
-      </div>
+      <PageHeader title="Mon abonnement" description="Gérez votre plan et vos limites de publication" />
 
       {/* Notifications */}
       {params.success && (
@@ -74,14 +71,14 @@ export default async function PlanPage({
       )}
 
       {/* Plan actuel */}
-      <div className="bg-white rounded-2xl border border-[#0F172A]/08 p-6 mb-6">
+      <div className="bg-white rounded-2xl border border-navy/08 p-6 mb-6">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <p className="text-xs font-semibold text-[#0F172A]/40 uppercase tracking-wider mb-2">Plan actuel</p>
+            <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-2">Plan actuel</p>
             <div className="flex items-center gap-3 mb-3">
-              <span className="font-serif text-2xl text-[#0F172A]">{PLAN_LABEL[effectivePlan]}</span>
+              <span className="font-serif text-2xl text-navy">{PLAN_LABEL[effectivePlan]}</span>
               {effectivePlan !== 'gratuit' && (
-                <span className="text-xs font-semibold px-2 py-1 rounded-full bg-[#4F46E5]/10 text-[#4F46E5]">
+                <span className="text-xs font-semibold px-2 py-1 rounded-full bg-primary/10 text-primary">
                   Actif
                 </span>
               )}
@@ -93,9 +90,9 @@ export default async function PlanPage({
             </div>
 
             {profile?.plan_expire_at && !expired && (
-              <p className="text-sm text-[#0F172A]/50">
+              <p className="text-sm text-navy/50">
                 Renouvellement automatique le{' '}
-                <span className="font-medium text-[#0F172A]/80">{formatDate(profile.plan_expire_at)}</span>
+                <span className="font-medium text-navy/80">{formatDate(profile.plan_expire_at)}</span>
               </p>
             )}
             {profile?.plan_expire_at && expired && (
@@ -107,11 +104,11 @@ export default async function PlanPage({
 
           {/* Utilisation */}
           <div className="min-w-[200px]">
-            <div className="flex justify-between text-xs text-[#0F172A]/50 mb-1.5">
+            <div className="flex justify-between text-xs text-navy/50 mb-1.5">
               <span>Annonces actives</span>
               <span className="font-medium">{annoncesActives} / {limite.annonces === 999 ? '∞' : limite.annonces}</span>
             </div>
-            <div className="h-2 bg-[#0F172A]/06 rounded-full overflow-hidden">
+            <div className="h-2 bg-navy/06 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
                 style={{
@@ -122,7 +119,7 @@ export default async function PlanPage({
                 }}
               />
             </div>
-            <div className="mt-1.5 text-[11px] text-[#0F172A]/40">
+            <div className="mt-1.5 text-[11px] text-navy/40">
               {limite.photos} photos/annonce · Visibilité {limite.duree_jours} jours
             </div>
           </div>
@@ -238,15 +235,15 @@ function PlanCard({
     <div
       className={`relative bg-white rounded-2xl border p-6 flex flex-col transition-all ${
         highlight && !isCurrent
-          ? 'border-[#4F46E5]/40 shadow-lg shadow-[#4F46E5]/08'
+          ? 'border-primary/40 shadow-lg shadow-primary/08'
           : isCurrent
             ? 'border-[' + color + ']/40'
-            : 'border-[#0F172A]/08'
+            : 'border-navy/08'
       }`}
     >
       {badge && !isCurrent && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="bg-[#4F46E5] text-white text-[10px] font-semibold px-3 py-1 rounded-full whitespace-nowrap">
+          <span className="bg-primary text-white text-[10px] font-semibold px-3 py-1 rounded-full whitespace-nowrap">
             {badge}
           </span>
         </div>
@@ -262,20 +259,20 @@ function PlanCard({
       )}
 
       <div className="mb-4">
-        <h3 className="font-semibold text-[#0F172A] mb-1">{label}</h3>
-        <p className="text-xs text-[#0F172A]/45">{description}</p>
+        <h3 className="font-semibold text-navy mb-1">{label}</h3>
+        <p className="text-xs text-navy/45">{description}</p>
       </div>
 
       <div className="mb-5">
-        <span className="font-serif text-3xl text-[#0F172A]">{priceDisplay}</span>
+        <span className="font-serif text-3xl text-navy">{priceDisplay}</span>
         {perMonth && (
-          <p className="text-xs text-[#0F172A]/40 mt-0.5">{perMonth}</p>
+          <p className="text-xs text-navy/40 mt-0.5">{perMonth}</p>
         )}
       </div>
 
       <ul className="space-y-2 mb-6 flex-1">
         {features.map(f => (
-          <li key={f} className="flex items-start gap-2 text-sm text-[#0F172A]/70">
+          <li key={f} className="flex items-start gap-2 text-sm text-navy/70">
             <span className="mt-0.5 flex-shrink-0" style={{ color }}>✓</span>
             {f}
           </li>
@@ -283,7 +280,7 @@ function PlanCard({
       </ul>
 
       {plan === 'gratuit' ? (
-        <div className="w-full text-center py-2.5 rounded-xl border border-[#0F172A]/10 text-sm text-[#0F172A]/40">
+        <div className="w-full text-center py-2.5 rounded-xl border border-navy/10 text-sm text-navy/40">
           {isCurrent ? 'Plan actuel' : 'Gratuit'}
         </div>
       ) : (

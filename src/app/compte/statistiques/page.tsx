@@ -108,14 +108,14 @@ export default async function StatistiquesPage() {
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-serif text-xl sm:text-2xl text-[#0F172A]">Tableau de bord</h1>
+        <h1 className="font-serif text-xl sm:text-2xl text-navy">Tableau de bord</h1>
         <div className="flex gap-2">
           <Link href="/compte/visites"
-            className="hidden sm:block text-sm font-medium border border-[#0F172A]/15 text-[#0F172A]/70 px-4 py-2 rounded-xl hover:bg-white transition-colors">
+            className="hidden sm:block text-sm font-medium border border-navy/15 text-navy/70 px-4 py-2 rounded-xl hover:bg-white transition-colors">
             Planifier une visite
           </Link>
           <Link href="/publier"
-            className="text-sm font-semibold bg-[#4F46E5] text-white px-3 sm:px-4 py-2 rounded-xl hover:bg-[#4338CA] transition-colors whitespace-nowrap">
+            className="text-sm font-semibold bg-primary text-white px-3 sm:px-4 py-2 rounded-xl hover:bg-primary-dark transition-colors whitespace-nowrap">
             + Annonce
           </Link>
         </div>
@@ -170,8 +170,8 @@ export default async function StatistiquesPage() {
         <div className="xl:col-span-2 bg-white rounded-2xl p-6 shadow-[0_1px_4px_rgba(15,23,42,0.06)]">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="font-medium text-[#0F172A] text-base">Activité mensuelle des vues</h2>
-              <p className="text-xs text-[#0F172A]/40 mt-0.5">Toutes vos annonces · 30 derniers jours</p>
+              <h2 className="font-medium text-navy text-base">Activité mensuelle des vues</h2>
+              <p className="text-xs text-navy/40 mt-0.5">Toutes vos annonces · 30 derniers jours</p>
             </div>
           </div>
           <PeriodChart data30j={vuesTotalesCourbe} color="#4F46E5" />
@@ -180,17 +180,17 @@ export default async function StatistiquesPage() {
         {/* Prochaines visites — 1/3 */}
         <div className="bg-white rounded-2xl shadow-[0_1px_4px_rgba(15,23,42,0.06)] flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-5 pt-5 pb-3">
-            <h2 className="font-medium text-[#0F172A] text-base">Prochaines visites</h2>
+            <h2 className="font-medium text-navy text-base">Prochaines visites</h2>
           </div>
 
           <div className="flex-1 overflow-auto">
             {!(prochainesVisites?.length) ? (
               <div className="flex flex-col items-center justify-center py-12 text-center px-5">
-                <div className="w-12 h-12 rounded-2xl bg-[#4F46E5]/08 flex items-center justify-center mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-primary/08 flex items-center justify-center mb-3">
                   <CalIcon color="#4F46E5" />
                 </div>
-                <p className="text-sm font-medium text-[#0F172A]/40">Aucune visite à venir</p>
-                <p className="text-xs text-[#0F172A]/25 mt-1">Les demandes confirmées apparaîtront ici</p>
+                <p className="text-sm font-medium text-navy/40">Aucune visite à venir</p>
+                <p className="text-xs text-navy/25 mt-1">Les demandes confirmées apparaîtront ici</p>
               </div>
             ) : (prochainesVisites as any[]).map(v => {
               const d      = new Date(v.date_souhaitee + 'T12:00:00')
@@ -199,37 +199,37 @@ export default async function StatistiquesPage() {
               const cfg    = VISITE_CFG[v.statut] ?? VISITE_CFG.en_attente
               return (
                 <div key={v.id}
-                  className="flex items-center gap-3 px-5 py-3 hover:bg-[#F4F5F7] transition-colors border-t border-[#0F172A]/04 first:border-0">
+                  className="flex items-center gap-3 px-5 py-3 hover:bg-[#F4F5F7] transition-colors border-t border-navy/04 first:border-0">
                   {/* Heure / créneau */}
                   <div className={`flex-shrink-0 text-center min-w-[46px] rounded-xl py-2 px-1
-                    ${isToday ? 'bg-[#4F46E5]' : 'bg-[#0F172A]/05'}`}>
-                    <div className={`text-[9px] font-bold uppercase tracking-wide ${isToday ? 'text-white/60' : 'text-[#0F172A]/35'}`}>
+                    ${isToday ? 'bg-primary' : 'bg-navy/05'}`}>
+                    <div className={`text-[9px] font-bold uppercase tracking-wide ${isToday ? 'text-white/60' : 'text-navy/35'}`}>
                       {d.toLocaleDateString('fr-FR', { weekday: 'short' })}
                     </div>
-                    <div className={`font-serif text-xl leading-tight ${isToday ? 'text-white' : 'text-[#0F172A]'}`}>
+                    <div className={`font-serif text-xl leading-tight ${isToday ? 'text-white' : 'text-navy'}`}>
                       {d.getDate()}
                     </div>
-                    <div className={`text-[9px] ${isToday ? 'text-white/50' : 'text-[#0F172A]/30'}`}>
+                    <div className={`text-[9px] ${isToday ? 'text-white/50' : 'text-navy/30'}`}>
                       {d.toLocaleDateString('fr-FR', { month: 'short' })}
                     </div>
                   </div>
 
                   {/* Infos */}
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-[#0F172A] truncate">{v.demandeur_nom}</div>
+                    <div className="text-sm font-semibold text-navy truncate">{v.demandeur_nom}</div>
                     {v.biens && (
-                      <div className="text-[11px] text-[#0F172A]/40 truncate mt-0.5 flex items-center gap-1">
+                      <div className="text-[11px] text-navy/40 truncate mt-0.5 flex items-center gap-1">
                         <span>📍</span>{v.biens.titre}
                       </div>
                     )}
                     {v.creneau && (
-                      <div className="text-[10px] text-[#0F172A]/30 mt-0.5">{v.creneau}</div>
+                      <div className="text-[10px] text-navy/30 mt-0.5">{v.creneau}</div>
                     )}
                   </div>
 
                   {/* Lien */}
                   <a href={`mailto:${v.demandeur_email}`}
-                    className="flex-shrink-0 w-7 h-7 rounded-lg bg-[#0F172A]/04 flex items-center justify-center text-[#0F172A]/35 hover:bg-[#4F46E5]/10 hover:text-[#4F46E5] transition-all">
+                    className="flex-shrink-0 w-7 h-7 rounded-lg bg-navy/04 flex items-center justify-center text-navy/35 hover:bg-primary/10 hover:text-primary transition-all">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
                     </svg>
@@ -240,9 +240,9 @@ export default async function StatistiquesPage() {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-[#0F172A]/06 px-5 py-3">
+          <div className="border-t border-navy/06 px-5 py-3">
             <Link href="/compte/visites"
-              className="text-xs font-medium text-[#0F172A]/40 hover:text-[#4F46E5] transition-colors flex items-center gap-1">
+              className="text-xs font-medium text-navy/40 hover:text-primary transition-colors flex items-center gap-1">
               Voir toutes les visites
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
@@ -257,24 +257,24 @@ export default async function StatistiquesPage() {
 
         {/* Tableau — 2/3 */}
         <div className="xl:col-span-2 bg-white rounded-2xl shadow-[0_1px_4px_rgba(15,23,42,0.06)] overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#0F172A]/05">
-            <h2 className="font-medium text-[#0F172A]">Visites récentes</h2>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-navy/05">
+            <h2 className="font-medium text-navy">Visites récentes</h2>
             <Link href="/compte/visites"
-              className="text-xs text-[#4F46E5] hover:underline font-medium">
+              className="text-xs text-primary hover:underline font-medium">
               Tout voir →
             </Link>
           </div>
 
           {!(visitesRecentes?.length) ? (
             <div className="py-14 text-center">
-              <p className="text-sm text-[#0F172A]/30">Aucune visite passée</p>
+              <p className="text-sm text-navy/30">Aucune visite passée</p>
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#0F172A]/05">
+                <tr className="border-b border-navy/05">
                   {['Bien', 'Date', 'Visiteur', 'Statut', ''].map((h, i) => (
-                    <th key={i} className="text-left text-[10px] font-semibold text-[#0F172A]/30 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
+                    <th key={i} className="text-left text-[10px] font-semibold text-navy/30 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
                       {h}
                     </th>
                   ))}
@@ -285,33 +285,33 @@ export default async function StatistiquesPage() {
                   const cfg = VISITE_CFG[v.statut] ?? VISITE_CFG.en_attente
                   const d   = new Date(v.date_souhaitee + 'T12:00:00')
                   return (
-                    <tr key={v.id} className="border-b border-[#0F172A]/04 last:border-0 hover:bg-[#F4F5F7] transition-colors">
+                    <tr key={v.id} className="border-b border-navy/04 last:border-0 hover:bg-[#F4F5F7] transition-colors">
                       <td className="px-6 py-3.5">
                         {v.biens ? (
                           <>
                             <a href={`/annonce/${v.biens.id}`}
-                              className="text-xs font-semibold text-[#0F172A] hover:text-[#4F46E5] transition-colors line-clamp-1 block max-w-[160px]">
+                              className="text-xs font-semibold text-navy hover:text-primary transition-colors line-clamp-1 block max-w-[160px]">
                               {v.biens.titre}
                             </a>
-                            <div className="text-[10px] text-[#0F172A]/35 mt-0.5 flex items-center gap-0.5">
+                            <div className="text-[10px] text-navy/35 mt-0.5 flex items-center gap-0.5">
                               <span>📍</span>{v.biens.ville}
                             </div>
                           </>
-                        ) : <span className="text-xs text-[#0F172A]/25">—</span>}
+                        ) : <span className="text-xs text-navy/25">—</span>}
                       </td>
                       <td className="px-6 py-3.5 whitespace-nowrap">
-                        <div className="text-xs font-medium text-[#0F172A]/70">
+                        <div className="text-xs font-medium text-navy/70">
                           {d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                         </div>
-                        {v.creneau && <div className="text-[10px] text-[#0F172A]/35 mt-0.5">{v.creneau}</div>}
+                        {v.creneau && <div className="text-[10px] text-navy/35 mt-0.5">{v.creneau}</div>}
                       </td>
                       <td className="px-6 py-3.5">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-[#4F46E5]/15 flex items-center justify-center text-[10px] font-bold text-[#4F46E5] flex-shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0">
                             {v.demandeur_nom[0]?.toUpperCase()}
                           </div>
                           <div>
-                            <div className="text-xs font-medium text-[#0F172A]">{v.demandeur_nom}</div>
+                            <div className="text-xs font-medium text-navy">{v.demandeur_nom}</div>
                           </div>
                         </div>
                       </td>
@@ -324,7 +324,7 @@ export default async function StatistiquesPage() {
                       </td>
                       <td className="px-6 py-3.5">
                         <a href={`mailto:${v.demandeur_email}`}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#0F172A]/10 text-[#0F172A]/35 hover:border-[#4F46E5]/40 hover:text-[#4F46E5] transition-all">
+                          className="w-7 h-7 flex items-center justify-center rounded-lg border border-navy/10 text-navy/35 hover:border-primary/40 hover:text-primary transition-all">
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                           </svg>
@@ -341,8 +341,8 @@ export default async function StatistiquesPage() {
         {/* Donut — 1/3 */}
         <div className="bg-white rounded-2xl shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-6">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-medium text-[#0F172A]">Visites par statut</h2>
-            <span className="text-[10px] font-semibold text-[#0F172A]/35 bg-[#0F172A]/05 px-2.5 py-1 rounded-full">
+            <h2 className="font-medium text-navy">Visites par statut</h2>
+            <span className="text-[10px] font-semibold text-navy/35 bg-navy/05 px-2.5 py-1 rounded-full">
               Ce mois
             </span>
           </div>
@@ -362,16 +362,16 @@ export default async function StatistiquesPage() {
 
       {/* ── Ligne 4 : Tableau annonces ──────────────────────────────────── */}
       <div className="bg-white rounded-2xl shadow-[0_1px_4px_rgba(15,23,42,0.06)] overflow-hidden">
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[#0F172A]/05">
-          <h2 className="font-medium text-[#0F172A]">Mes annonces</h2>
-          <span className="text-xs text-[#0F172A]/35">{(biens ?? []).length} annonce{(biens ?? []).length > 1 ? 's' : ''}</span>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-navy/05">
+          <h2 className="font-medium text-navy">Mes annonces</h2>
+          <span className="text-xs text-navy/35">{(biens ?? []).length} annonce{(biens ?? []).length > 1 ? 's' : ''}</span>
         </div>
         <div className="overflow-x-auto -mx-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#0F172A]/05">
+              <tr className="border-b border-navy/05">
                 {['Annonce', 'Statut', 'Prix', 'Vues 30j', 'Messages', 'Favoris', 'Conversion'].map(h => (
-                  <th key={h} className="text-left text-[10px] font-semibold text-[#0F172A]/30 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
+                  <th key={h} className="text-left text-[10px] font-semibold text-navy/30 uppercase tracking-wider px-6 py-3 whitespace-nowrap">
                     {h}
                   </th>
                 ))}
@@ -384,13 +384,13 @@ export default async function StatistiquesPage() {
                 const conv   = vues30 > 0 ? ((msgs / vues30) * 100).toFixed(1) + '%' : '—'
                 const st     = STATUT_BIEN[b.statut] ?? STATUT_BIEN.brouillon
                 return (
-                  <tr key={b.id} className="border-b border-[#0F172A]/04 last:border-0 hover:bg-[#F4F5F7] transition-colors">
+                  <tr key={b.id} className="border-b border-navy/04 last:border-0 hover:bg-[#F4F5F7] transition-colors">
                     <td className="px-6 py-3.5">
                       <Link href={`/annonce/${b.id}`}
-                        className="text-xs font-semibold text-[#0F172A] hover:text-[#4F46E5] transition-colors line-clamp-1 max-w-[200px] block">
+                        className="text-xs font-semibold text-navy hover:text-primary transition-colors line-clamp-1 max-w-[200px] block">
                         {b.titre}
                       </Link>
-                      <div className="text-[10px] text-[#0F172A]/30 mt-0.5">
+                      <div className="text-[10px] text-navy/30 mt-0.5">
                         {new Date(b.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </div>
                     </td>
@@ -400,24 +400,24 @@ export default async function StatistiquesPage() {
                         {st.label}
                       </span>
                     </td>
-                    <td className="px-6 py-3.5 text-xs font-semibold text-[#0F172A] whitespace-nowrap">
+                    <td className="px-6 py-3.5 text-xs font-semibold text-navy whitespace-nowrap">
                       {formatPrix(b.prix, b.type)}
                     </td>
                     <td className="px-6 py-3.5">
                       <div className="flex items-center gap-2.5">
-                        <span className="text-sm font-bold text-[#0F172A]">{vues30}</span>
+                        <span className="text-sm font-bold text-navy">{vues30}</span>
                         {vues30 > 0 && (
-                          <div className="h-1.5 bg-[#0F172A]/08 rounded-full overflow-hidden w-16">
-                            <div className="h-full bg-[#4F46E5] rounded-full transition-all"
+                          <div className="h-1.5 bg-navy/08 rounded-full overflow-hidden w-16">
+                            <div className="h-full bg-primary rounded-full transition-all"
                               style={{ width: `${Math.min((vues30 / maxVues) * 100, 100)}%` }} />
                           </div>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-3.5 text-xs font-medium text-[#0F172A]/60">{msgs}</td>
-                    <td className="px-6 py-3.5 text-xs font-medium text-[#0F172A]/60">{b.favoris_count ?? 0}</td>
+                    <td className="px-6 py-3.5 text-xs font-medium text-navy/60">{msgs}</td>
+                    <td className="px-6 py-3.5 text-xs font-medium text-navy/60">{b.favoris_count ?? 0}</td>
                     <td className="px-6 py-3.5">
-                      <span className={`text-xs font-bold ${msgs > 0 ? 'text-[#16A34A]' : 'text-[#0F172A]/20'}`}>
+                      <span className={`text-xs font-bold ${msgs > 0 ? 'text-[#16A34A]' : 'text-navy/20'}`}>
                         {conv}
                       </span>
                     </td>
@@ -425,7 +425,7 @@ export default async function StatistiquesPage() {
                 )
               })}
               {!(biens ?? []).length && (
-                <tr><td colSpan={7} className="py-14 text-center text-[#0F172A]/25 text-sm">Aucune annonce</td></tr>
+                <tr><td colSpan={7} className="py-14 text-center text-navy/25 text-sm">Aucune annonce</td></tr>
               )}
             </tbody>
           </table>
@@ -454,8 +454,8 @@ function KpiCard({ label, value, trend, trendUp, trendNeutral, sub, icon, iconCo
           <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7v10"/>
         </svg>
       </div>
-      <div className="font-serif text-3xl text-[#0F172A] mb-0.5 leading-none">{value}</div>
-      <div className="text-xs font-semibold text-[#0F172A]/60 mb-1">{label}</div>
+      <div className="font-serif text-3xl text-navy mb-0.5 leading-none">{value}</div>
+      <div className="text-xs font-semibold text-navy/60 mb-1">{label}</div>
       <div className="text-[11px] font-medium" style={{ color: trendColor }}>{trend}</div>
     </div>
   )

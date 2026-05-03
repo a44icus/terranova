@@ -8,8 +8,14 @@ import type { Profile } from '@/lib/types'
 import { LIMITES_PLAN } from '@/lib/types'
 import { NAV, isNavActive } from './CompteNav'
 
+interface NavCounts {
+  messages: number
+  visites:  number
+}
+
 interface Props {
   profile: Profile | null
+  counts?: NavCounts
 }
 
 const BOTTOM_NAV = [
@@ -25,7 +31,7 @@ const PLAN_LABEL: Record<string, { label: string; color: string }> = {
   pro_annuel:  { label: 'Pro Annuel', color: '#4F46E5' },
 }
 
-export default function MobileNav({ profile }: Props) {
+export default function MobileNav({ profile, counts }: Props) {
   const pathname = usePathname()
   const router   = useRouter()
   const supabase = createClient()
@@ -120,6 +126,9 @@ export default function MobileNav({ profile }: Props) {
         <nav style={{ flex: 1, padding: '8px 12px', overflowY: 'auto' }}>
           {NAV.map(item => {
             const active = isNavActive(pathname, item.href)
+            const badge  = item.href === '/compte/messages' ? counts?.messages
+              : item.href === '/compte/visites'  ? counts?.visites
+              : 0
             return (
               <Link key={item.href} href={item.href}
                 onClick={() => setOpen(false)}
@@ -132,7 +141,17 @@ export default function MobileNav({ profile }: Props) {
                   textDecoration: 'none',
                 }}>
                 <span style={{ width: 20, textAlign: 'center' }}>{item.icon}</span>
-                {item.label}
+                <span style={{ flex: 1 }}>{item.label}</span>
+                {!!badge && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 700,
+                    padding: '2px 6px', borderRadius: 99,
+                    background: '#DC2626', color: 'white',
+                    minWidth: 18, textAlign: 'center',
+                  }}>
+                    {badge > 99 ? '99+' : badge}
+                  </span>
+                )}
               </Link>
             )
           })}
@@ -173,16 +192,33 @@ export default function MobileNav({ profile }: Props) {
       }}>
         {BOTTOM_NAV.map(item => {
           const active = isNavActive(pathname, item.href)
+          const badge  = item.href === '/compte/messages' ? counts?.messages
+            : item.href === '/compte/visites'  ? counts?.visites
+            : 0
           return (
             <Link key={item.href} href={item.href}
               style={{
                 flex: 1, display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center', gap: 2,
-                fontSize: 10, fontWeight: 500,
+                fontSize: 10, fontWeight: 500, position: 'relative',
                 color: active ? '#4F46E5' : 'rgba(15,23,42,0.4)',
                 textDecoration: 'none',
               }}>
-              <span style={{ fontSize: 20, lineHeight: 1 }}>{item.icon}</span>
+              <span style={{ fontSize: 20, lineHeight: 1, position: 'relative' }}>
+                {item.icon}
+                {!!badge && (
+                  <span style={{
+                    position: 'absolute', top: -4, right: -10,
+                    fontSize: 9, fontWeight: 700,
+                    padding: '1px 5px', borderRadius: 99,
+                    background: '#DC2626', color: 'white',
+                    minWidth: 16, textAlign: 'center', lineHeight: 1.2,
+                    border: '1.5px solid white',
+                  }}>
+                    {badge > 9 ? '9+' : badge}
+                  </span>
+                )}
+              </span>
               {item.label}
             </Link>
           )

@@ -6,6 +6,8 @@ import MarkAsRead from '@/components/compte/MarkAsRead'
 import MarkChercheurContactRead from '@/components/compte/MarkChercheurContactRead'
 import Link from 'next/link'
 import StopPropagationWrapper from '@/components/compte/StopPropagationWrapper'
+import PageHeader from '@/components/compte/ui/PageHeader'
+import EmptyState from '@/components/compte/ui/EmptyState'
 
 interface Props {
   searchParams: Promise<{ tab?: string }>
@@ -62,9 +64,7 @@ export default async function MessagesPage({ searchParams }: Props) {
 
   return (
     <div className="p-4 sm:p-8 max-w-3xl">
-      <div className="mb-6">
-        <h1 className="font-serif text-2xl text-navy">Messages</h1>
-      </div>
+      <PageHeader title="Messages" />
 
       {/* Tabs — only show if user has a chercheur profile */}
       {hasRecherche && (
@@ -75,7 +75,7 @@ export default async function MessagesPage({ searchParams }: Props) {
           >
             Mes annonces
             {nonLusVendeur > 0 && (
-              <span className="ml-1.5 bg-[#e74c3c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+              <span className="ml-1.5 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                 {nonLusVendeur}
               </span>
             )}
@@ -86,7 +86,7 @@ export default async function MessagesPage({ searchParams }: Props) {
           >
             Ma recherche
             {chercheurBadge > 0 && (
-              <span className="ml-1.5 bg-[#e74c3c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+              <span className="ml-1.5 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                 {chercheurBadge}
               </span>
             )}
@@ -100,7 +100,7 @@ export default async function MessagesPage({ searchParams }: Props) {
           <p className="text-sm text-navy/50 mb-4">
             {contacts?.length ?? 0} message{(contacts?.length ?? 0) > 1 ? 's' : ''}
             {nonLusVendeur > 0 && (
-              <span className="ml-2 bg-[#e74c3c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+              <span className="ml-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                 {nonLusVendeur} non lu{nonLusVendeur > 1 ? 's' : ''}
               </span>
             )}
@@ -157,7 +157,7 @@ export default async function MessagesPage({ searchParams }: Props) {
                       <p className="text-sm text-navy/80 leading-relaxed mb-3 line-clamp-2">{contact.message}</p>
 
                       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-navy/06">
-                        <span className="text-xs text-[#4F46E5] font-medium group-hover:underline">
+                        <span className="text-xs text-primary font-medium group-hover:underline">
                           Voir la conversation →
                         </span>
                       </div>
@@ -187,7 +187,7 @@ export default async function MessagesPage({ searchParams }: Props) {
           <p className="text-sm text-navy/50 mb-4">
             {contactsChercheur?.length ?? 0} vendeur{(contactsChercheur?.length ?? 0) > 1 ? 's' : ''} vous ont contacté
             {nonLusChercheur > 0 && (
-              <span className="ml-2 bg-[#e74c3c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+              <span className="ml-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                 {nonLusChercheur} non lu{nonLusChercheur > 1 ? 's' : ''}
               </span>
             )}

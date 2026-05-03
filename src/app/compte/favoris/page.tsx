@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getViewUserId } from '@/lib/impersonation'
+import PageHeader from '@/components/compte/ui/PageHeader'
+import EmptyState from '@/components/compte/ui/EmptyState'
 
 export default async function FavorisPage() {
   const supabase = await createClient()
@@ -22,19 +24,21 @@ export default async function FavorisPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl">
-      <div className="mb-6">
-        <h1 className="font-serif text-2xl text-navy">Mes favoris</h1>
-        <p className="text-sm text-navy/50 mt-0.5">{biens.length} bien{biens.length > 1 ? 's' : ''} sauvegardé{biens.length > 1 ? 's' : ''}</p>
-      </div>
+      <PageHeader
+        title="Mes favoris"
+        description={`${biens.length} bien${biens.length > 1 ? 's' : ''} sauvegardé${biens.length > 1 ? 's' : ''}`}
+      />
 
       {!biens.length ? (
-        <div className="bg-white rounded-2xl border border-navy/08 py-16 text-center">
-          <div className="text-4xl mb-3">♡</div>
-          <p className="text-sm text-navy/50 mb-4">Vous n'avez pas encore de favoris</p>
-          <Link href="/" className="inline-block bg-navy text-white text-sm px-5 py-2.5 rounded-xl hover:bg-primary transition-colors">
-            Explorer les annonces
-          </Link>
-        </div>
+        <EmptyState
+          icon="♡"
+          title="Vous n'avez pas encore de favoris"
+          action={
+            <Link href="/" className="inline-block bg-navy text-white text-sm px-5 py-2.5 rounded-xl hover:bg-primary transition-colors">
+              Explorer les annonces
+            </Link>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {biens.map((bien: any) => {

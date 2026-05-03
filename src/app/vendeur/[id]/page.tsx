@@ -161,14 +161,18 @@ export default async function VendeurPage({ params }: { params: Promise<{ id: st
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-6">
 
         {/* Bio */}
-        {profile.bio && (
-          <div className="bg-white rounded-2xl border border-[#0F172A]/08 p-6 flex gap-4">
-            <div className="w-0.5 bg-primary/30 rounded-full flex-shrink-0 self-stretch" />
+        <div className="bg-white rounded-2xl border border-[#0F172A]/08 p-6 flex gap-4">
+          <div className="w-0.5 rounded-full flex-shrink-0 self-stretch" style={{ background: '#4F46E5', opacity: 0.3 }} />
+          {profile.bio ? (
             <p className="text-[#0F172A]/60 text-sm leading-relaxed italic flex-1">
               « {profile.bio} »
             </p>
-          </div>
-        )}
+          ) : (
+            <p className="text-[#0F172A]/30 text-sm leading-relaxed flex-1 italic">
+              {displayName} n&apos;a pas encore renseigné de présentation.
+            </p>
+          )}
+        </div>
 
         {/* Carte localisation */}
         {profile.lat && profile.lng && (

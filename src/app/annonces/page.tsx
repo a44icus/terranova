@@ -1,9 +1,8 @@
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
-import { formatPrix } from '@/lib/geo'
+import AnnonceCard from '@/components/AnnonceCard'
 import type { Metadata } from 'next'
 import type { BienCategorie, BienType } from '@/lib/types'
 
@@ -12,10 +11,6 @@ const PAGE_SIZE = 24
 const CAT_LABEL: Record<string, string> = {
   appartement: 'Appartement', maison: 'Maison', bureau: 'Bureau',
   terrain: 'Terrain', parking: 'Parking', local: 'Local commercial',
-}
-const DPE_COLORS: Record<string, string> = {
-  A: '#2E7D32', B: '#558B2F', C: '#9E9D24',
-  D: '#F9A825', E: '#EF6C00', F: '#D84315', G: '#B71C1C',
 }
 
 interface Props {
@@ -149,44 +144,7 @@ export default async function AnnoncesPage({ searchParams }: Props) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {biens.map((b: any) => (
-              <Link key={b.id} href={`/annonce/${b.id}`}
-                className="bg-white rounded-2xl overflow-hidden border border-navy/08 hover:border-primary/40 hover:-translate-y-0.5 transition-all block group">
-                <div className="relative h-44 bg-gradient-to-br from-[#e0ddd8] to-[#c8c4bc] overflow-hidden">
-                  {b.photo_url
-                    ? <Image src={b.photo_url} alt={b.titre} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" />
-                    : <div className="w-full h-full flex items-center justify-center text-4xl opacity-20">🏠</div>
-                  }
-                  <span className="absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded text-white"
-                    style={{ background: b.type === 'vente' ? '#4F46E5' : '#0891B2' }}>
-                    {b.type === 'vente' ? 'Vente' : 'Location'}
-                  </span>
-                  {b.coup_de_coeur && (
-                    <span className="absolute top-2 right-2 text-xs bg-amber-400 text-amber-900 px-1.5 py-0.5 rounded font-semibold">❤</span>
-                  )}
-                  {b.vendeur_logo && (
-                    <div className="absolute bottom-2 right-2 w-8 h-8 rounded-lg bg-white shadow overflow-hidden flex items-center justify-center p-0.5 border border-white/60">
-                      <img src={b.vendeur_logo} alt="" className="w-full h-full object-contain" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-3.5">
-                  <div className="font-serif text-lg text-navy">
-                    {formatPrix(b.prix, b.type)}
-                  </div>
-                  <div className="text-xs font-medium text-navy mt-0.5 truncate">{b.titre}</div>
-                  <div className="text-[11px] text-navy/45 mt-0.5">📍 {b.ville} {b.code_postal}</div>
-                  <div className="flex items-center gap-2 mt-2 text-[10px] text-navy/50">
-                    {b.surface && <span>{b.surface} m²</span>}
-                    {(b.pieces ?? 0) > 0 && <span>{b.pieces} p.</span>}
-                    {b.dpe && (
-                      <span className="ml-auto text-white font-bold px-1.5 py-0.5 rounded text-[9px]"
-                        style={{ background: DPE_COLORS[b.dpe] }}>
-                        {b.dpe}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Link>
+              <AnnonceCard key={b.id} bien={b} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" />
             ))}
           </div>
         )}

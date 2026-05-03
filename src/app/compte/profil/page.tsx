@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import ProfilForm from '@/components/compte/ProfilForm'
 import { getViewUserId } from '@/lib/impersonation'
+import PageHeader from '@/components/compte/ui/PageHeader'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -22,8 +23,7 @@ export default async function ProfilPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-2xl">
-      <h1 className="font-serif text-2xl text-navy mb-1">Mon profil</h1>
-      <p className="text-sm text-navy/50 mb-6">Gérez vos informations personnelles</p>
+      <PageHeader title="Mon profil" description="Gérez vos informations personnelles" />
       <ProfilForm profile={profile} userEmail={viewEmail} />
     </div>
   )

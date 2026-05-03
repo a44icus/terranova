@@ -18,11 +18,20 @@ export default async function CompteLayout({ children }: { children: React.React
   const viewUserId = impersonatedId ?? user.id
 
   const adminClient = createAdminClient()
-  const { data: profile } = await adminClient
-    .from('profiles')
-    .select('*')
-    .eq('id', viewUserId)
-    .single()
+  const [{ data: profile }, { count: unreadMessages }, { count: pendingVisites }] = await Promise.all([
+    adminClient.from('profiles').select('*').eq('id', viewUserId).single(),
+    adminClient.from('contacts')
+      .select('id', { count: 'exact', head: true })
+      .eq('vendeur_id', viewUserId).eq('lu', false),
+    adminClient.from('visites')
+      .select('id', { count: 'exact', head: true })
+      .eq('vendeur_id', viewUserId).eq('statut', 'en_attente'),
+  ])
+
+  const navCounts = {
+    messages: unreadMessages ?? 0,
+    visites:  pendingVisites ?? 0,
+  }
 
   // Auto-dégrader le plan si expiré (only for real user)
   if (!impersonatedId && profile && isPlanExpired(profile.plan as PlanType, profile.plan_expire_at)) {
@@ -63,13 +72,13 @@ export default async function CompteLayout({ children }: { children: React.React
 
       <FavorisSync />
       <div className="flex min-h-[calc(100vh-56px)]">
-        <CompteNav profile={profile} />
+        <CompteNav profile={profile} counts={navCounts} />
         <main className="flex-1 overflow-auto pb-14 md:pb-0">
           {children}
         </main>
       </div>
       {/* Nav mobile — en dehors du flex, position:fixed indépendante */}
-      <MobileNav profile={profile} />
+      <MobileNav profile={profile} counts={navCounts} />
     </div>
   )
 }

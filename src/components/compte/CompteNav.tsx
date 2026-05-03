@@ -6,8 +6,14 @@ import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/lib/types'
 import { LIMITES_PLAN } from '@/lib/types'
 
+interface NavCounts {
+  messages: number
+  visites:  number
+}
+
 interface Props {
   profile: Profile
+  counts?: NavCounts
 }
 
 export const NAV = [
@@ -35,7 +41,7 @@ export function isNavActive(pathname: string, href: string) {
 }
 
 /** Sidebar desktop uniquement — cachée sur mobile via CSS */
-export default function CompteNav({ profile }: Props) {
+export default function CompteNav({ profile, counts }: Props) {
   const pathname = usePathname()
   const router   = useRouter()
   const supabase = createClient()
@@ -94,17 +100,27 @@ export default function CompteNav({ profile }: Props) {
 
       {/* Navigation */}
       <nav className="flex-1 p-3">
-        {NAV.map(item => (
-          <Link key={item.href} href={item.href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm mb-0.5 transition-all ${
-              isNavActive(pathname, item.href)
-                ? 'bg-navy text-white font-medium'
-                : 'text-navy/60 hover:bg-navy/05 hover:text-navy'
-            }`}>
-            <span className="text-base w-5 text-center">{item.icon}</span>
-            {item.label}
-          </Link>
-        ))}
+        {NAV.map(item => {
+          const badge = item.href === '/compte/messages' ? counts?.messages
+            : item.href === '/compte/visites'  ? counts?.visites
+            : 0
+          return (
+            <Link key={item.href} href={item.href}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm mb-0.5 transition-all ${
+                isNavActive(pathname, item.href)
+                  ? 'bg-navy text-white font-medium'
+                  : 'text-navy/60 hover:bg-navy/05 hover:text-navy'
+              }`}>
+              <span className="text-base w-5 text-center">{item.icon}</span>
+              <span className="flex-1">{item.label}</span>
+              {!!badge && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#DC2626] text-white min-w-[18px] text-center">
+                  {badge > 99 ? '99+' : badge}
+                </span>
+              )}
+            </Link>
+          )
+        })}
 
         {profile.is_admin && (
           <div className="mt-3 pt-3 border-t border-navy/08">

@@ -72,6 +72,298 @@
 
   <div class="timeline">
 
+    <!-- ══ SESSION 2 MAI 2026 (5) ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:#7C3AED"></div>
+      <div class="session-date">2 mai 2026 — session 5</div>
+      <div class="session-title">VendeurSection — glassmorphism premium, gradient-fade "crypto" sur cartes pricing</div>
+      <div class="session-desc">Refonte complète de VendeurSection vers un design dark glassmorphism de type "crypto pricing UI" : cartes unifiées sans séparation nette, gradient lumineux qui se dissout naturellement du haut vers le bas, particules étoilées, glow radial central. 0 erreur TypeScript. 1 fichier réécrit.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>VendeurSection — dark background #08080F + étoiles</strong>
+            <span>Section désormais sur fond quasi-noir (#08080F) pour contraster avec la page blanche. 22 particules étoilées à positions fixes (déterministes, pas de SSR mismatch) avec animation <code>vs-twinkle</code> décalée (2,5 s → 5 s). Glow radial central indigo (700×500 px, blur 50 px). Cartes secondaires avec <code>vs-side</code> hover lift sur CSS transition.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Gradient overlay plein-carte — dissolution naturelle du haut vers le bas</strong>
+            <span>Architecture clé : la couleur n'est plus dans un div "top section" à hauteur fixe mais dans un <code>position:absolute; inset:0</code> avec <code>radial-gradient(ellipse at 50% -5%)</code> opaque en haut, transparent vers le bas. Aucune séparation nette. Gratuit → bleu royal → transparent 70% ; Essentiel → violet/indigo profond → transparent 75% ; Agence → slate foncé → transparent 65%.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Structure unifiée — icône + nom en haut, prix + features en bas</strong>
+            <span>Suppression de tout div "top section" avec <code>overflow-hidden</code> ou hauteur fixe qui créait une coupure visible. Un seul flux vertical <code>flex-col</code> en <code>relative z-10</code> : icône+nom → spacer flex-1 (le gradient reste visible ici) → prix → CTA → séparateur → features. Spacer <code>minHeight: 56px</code> (featured) ou 40 px (secondaires).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Shapes géométriques décoratives par carte</strong>
+            <span>Coin supérieur droit de chaque carte : 3 rectangles imbriqués avec rotation +14°/−6°, plus un losange central, tous en <code>border-color</code> semi-transparent dérivé de l'accent de la carte. Renforcent la profondeur sans alourdir la lisibilité.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-perf">Perf</span>
+          <div class="change-text">
+            <strong>TypeScript 0 erreur — ease tuple typé</strong>
+            <span><code>const ease: [number, number, number, number] = [0.22, 1, 0.36, 1]</code> pour éviter l'erreur <code>Type 'number[]' is not assignable to type 'Easing'</code> de Framer Motion. Vérification <code>npx tsc --noEmit</code> : 0 erreur.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 2 MAI 2026 (4) ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--primary)"></div>
+      <div class="session-date">2 mai 2026 — session 4</div>
+      <div class="session-title">Refonte section "Pour les vendeurs" — design clair post-FeaturesShowcase</div>
+      <div class="session-desc">Remplacement de la section sombre Vendeurs+Tarifs par un composant blanc/clair avec processus en étapes, stats, aperçu annonce et pricing cards épuré. 0 erreur TypeScript. 1 fichier créé, 1 modifié.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>VendeurSection — design blanc / éditorial</strong>
+            <span>Nouveau composant <code>src/components/home/VendeurSection.tsx</code> : fond blanc (#FFFFFF) avec zone de dégradé indigo clair à droite (clipPath diagonal + dot-grid). Titre serif "Votre bien mérite mieux qu'un intermédiaire." sur fond clair — contraste immédiat après la section FeaturesShowcase sombre (#06090F). Badge chip animé "Pour les vendeurs" avec pulse.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Processus en 3 étapes avec hover lift</strong>
+            <span>Colonne gauche : 3 cartes "Étapes" empilées (01 Créez / 02 Publiez / 03 Vendez), chacune avec icône SVG indigo, numéro mono, description. Connectées par une ligne dégradée verticale. Animation <code>translateY(-3px)</code> au survol avec ombre indigo légère.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Stats + aperçu annonce + CTA</strong>
+            <span>Grille 3 colonnes : N vendeurs actifs (données live Supabase) / 5 min / 0€ avec emoji et valeur serif. Mini-card annonce exemple (photo Unsplash + vues/favoris/messages). Bouton CTA "Publier gratuitement" indigo avec shadow-lg et hover lift.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Pricing cards — design épuré sur fond blanc</strong>
+            <span>3 plans (Gratuit / Essentiel / Agence) sur fond blanc, bordures légères. Plan Essentiel : fond indigo, ombre 48px, translateY(-6px) permanent + hover accentué, badge "★ Populaire" avec shimmer doré (<code>vs-badge-shine</code>). Plans non-featured : hover lift + ombre légère. CTA adapté par plan (white/texte indigo ou bordure indigo → hover indigo plein).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-perf">Perf</span>
+          <div class="change-text">
+            <strong>Nettoyage page.tsx — 65 lignes supprimées</strong>
+            <span>L'array <code>PLANS</code> (65 lignes) déplacé dans <code>VendeurSection.tsx</code>. Section <code>bg-[#0F172A]</code> inline (~100 lignes) remplacée par <code>&lt;VendeurSection totalAnnonceurs={totalAnnonceurs ?? 0} /&gt;</code>. Import <code>VendeurSection</code> ajouté. 0 erreur TypeScript confirmée.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 2 MAI 2026 (3) ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--violet)"></div>
+      <div class="session-date">2 mai 2026 — session 3</div>
+      <div class="session-title">Nouvelle section "Pourquoi Terranova" — FeaturesShowcase avec Framer Motion</div>
+      <div class="session-desc">Remplacement complet de la bento-grid statique par un composant interactif à onglets animés : 5 features avec visuels CSS animés, auto-avancement, transitions Framer Motion, palette sombre premium. 0 erreur TypeScript. 2 fichiers modifiés, 1 créé.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>FeaturesShowcase — onglets animés Framer Motion</strong>
+            <span>Nouveau composant <code>src/components/home/FeaturesShowcase.tsx</code> : 5 features (Carte, Score, Filtres, Contact, Publier) présentées dans des onglets avec indicateur sliding via <code>layoutId="tab-bg"</code>. Auto-avancement toutes les 5,5 s avec barre de progression CSS par tab. Transitions de contenu <code>AnimatePresence mode="wait"</code> (fade + slide). Couleur accent animée par feature (<code>motion.div</code> avec <code>animate={{ background }}</code>). Section dark #06090F avec glow radial et dot-grid overlay.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>5 visuels CSS animés uniques par feature</strong>
+            <span>CarteVisual : grille map + pins pulsants + zone lasso animée + tooltip. ScoreVisual : barres de progression shimmer (Transports, Commerces, Écoles) dans un cadre browser. FiltresVisual : pills pop-in séquencées + résultats-fantômes. ContactVisual : bulles de chat fade-in décalé dans frame téléphone. PublierVisual : checklist steps fill-in avec spinner. Chaque visuel réagit à la couleur accent de la feature active.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Intégration dans page.tsx — remplacement de 400 lignes</strong>
+            <span>La section bento-grid "Pourquoi Terranova" (~400 lignes de JSX + CSS inline) a été remplacée par <code>&lt;FeaturesShowcase /&gt;</code> dans <code>src/app/page.tsx</code>. Imports nettoyés (<code>formatPrix</code>, <code>DPE_COLORS</code>, <code>CAT_ICON</code> supprimés). 0 erreur TypeScript confirmée après remplacement.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Badge shimmer — approche child-span</strong>
+            <span>Le shimmer des badges "Nouveau" dans <code>AnnonceCard</code> et <code>LatestBiens</code> échouait avec <code>::before</code> CSS (conflit de spécificité avec Tailwind <code>absolute</code>). Solution finale : <code>&lt;span class="badge-shimmer" aria-hidden="true" /&gt;</code> positionné en absolu à l'intérieur du badge (qui a <code>overflow-hidden</code>), animé par <code>@keyframes badge-shimmer</code> dans <code>globals.css</code>. Fonctionne quel que soit le positionnement parent.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 2 MAI 2026 (2) ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--green)"></div>
+      <div class="session-date">2 mai 2026 — session 2</div>
+      <div class="session-title">6 améliorations produit — AnnonceCard · iCal · Alertes · Estimer · Dark mode · Vendeur</div>
+      <div class="session-desc">Composant partagé AnnonceCard, export iCal des visites confirmées, cron alertes nouveaux biens, wizard estimation 3 étapes, mode sombre complet avec anti-flash, page vendeur enrichie. 0 erreur TypeScript. 9 fichiers créés ou modifiés.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Composant <code>&lt;AnnonceCard&gt;</code> partagé</strong>
+            <span>Création de <code>src/components/AnnonceCard.tsx</code> : carte unifiée (photo, badge type, badge Nouveau animé, coup de cœur, logo vendeur, prix, ville, surface, pièces, DPE). Remplace le JSX inline dans <code>/annonces/page.tsx</code> (suppression de 40 lignes dupliquées). Interface <code>AnnonceCardBien</code> exportée pour réutilisation.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Export iCal des visites confirmées</strong>
+            <span>Nouvelle route <code>GET /api/visites/ical?id=…</code> : génère un fichier <code>.ics</code> RFC 5545 valide (folding 75 octets, DTSTART/DTEND, SUMMARY, LOCATION, DESCRIPTION, URL). Accès restreint au vendeur et au demandeur (vérification email). Bouton "📅 .ics" affiché dans la liste des visites, uniquement pour les visites confirmées.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Cron alertes — nouveaux biens publiés</strong>
+            <span>Route <code>POST /api/cron/new-biens</code> protégée par <code>CRON_SECRET</code>. Cherche les biens publiés dans la dernière heure, les filtre par critères (type, catégorie, ville, prix max, surface min) et envoie des emails HTML soignés via Resend à chaque abonné dont l'alerte matche. Mise à jour de <code>derniere_notif_at</code> après envoi.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Estimation immobilière — wizard 3 étapes</strong>
+            <span>Refonte de <code>EstimationForm.tsx</code> : stepper visuel Étape 1→2→3 avec barre de progression et checkmarks. Étape 1 : type de transaction + catégorie. Étape 2 : ville (autocomplete) + surface + pièces. Étape 3 : état + critères avancés (DPE, étage, équipements…). Résultat : grande valeur serif + barre de fourchette visuelle + détails ajustements. Boutons Retour/Continuer cohérents à chaque étape. Spinner de chargement animé.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Mode sombre complet avec anti-flash</strong>
+            <span>Script inline exécuté avant le premier rendu (<code>dangerouslySetInnerHTML</code> dans <code>&lt;head&gt;</code>) : lit <code>localStorage.theme</code> ou <code>prefers-color-scheme</code> et pose <code>data-theme="dark"</code> sur <code>&lt;html&gt;</code> avant la peinture → zéro flash. Variables CSS <code>[data-theme="dark"]</code> dans <code>globals.css</code> : backgrounds, cartes, bordures, inputs, textes. Composant <code>ThemeToggle.tsx</code> (variants <code>icon</code> et <code>pill</code>) intégré dans le <code>HeaderClient</code>. Transition <code>0.2s ease</code> sur tous les éléments. Persistance <code>localStorage</code>.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Page vendeur — bio systématique + présentation vide</strong>
+            <span>La section bio est désormais toujours visible : si le vendeur n'a pas renseigné de présentation, un placeholder discret ("n'a pas encore renseigné de présentation") est affiché à la place du bloc vide. Plus de section invisible pour les particuliers sans bio.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION 2 MAI 2026 ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--violet)"></div>
+      <div class="session-date">2 mai 2026</div>
+      <div class="session-title">Dashboard enrichi · Cohérence visuelle · Refonte homepage</div>
+      <div class="session-desc">Dashboard compte enrichi, tri/recherche sur Mes annonces, badges de notification, normalisation de 145 occurrences de couleurs en variables CSS, et refonte des deux sections homepage avec animations CSS. 10+ fichiers modifiés, 3 créés.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Dashboard /compte — 3 nouveaux panneaux</strong>
+            <span>Le dashboard principal affiche maintenant les prochaines visites (date-box avec jour/mois, heure, statut pill), les derniers messages reçus (avatar initiales, extrait, date relative) et les avis récents (étoiles, auteur, date). KpiCards pointent vers les bons sous-chemins. Toutes les données sont chargées en parallèle via <code>Promise.all</code> pour minimiser la latence.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Mes annonces — recherche texte + 7 tris</strong>
+            <span>Barre de recherche plein-texte (<code>ilike</code> sur titre et ville), sélecteur de tri : Plus récentes, Plus vues, Prix croissant/décroissant, Surface croissante/décroissante, Alphabétique. Tous les paramètres passent en GET (URL partageable). Résultats paginés 12/page.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-feat">Feat</span>
+          <div class="change-text">
+            <strong>Badges de notification dans les navs</strong>
+            <span>Le layout /compte calcule <code>unreadMessages</code> + <code>pendingVisites</code> et passe un objet <code>navCounts</code> aux deux composants de navigation. Badges rouges (<code>bg-[#DC2626]</code>) sur les items Messages et Visites — chiffre tronqué à 99+. Présents sur la sidebar desktop (<code>CompteNav</code>) et la barre mobile (<code>MobileNav</code>).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Composants partagés PageHeader et EmptyState</strong>
+            <span>Nouveau <code>src/components/compte/ui/PageHeader.tsx</code> : titre h1 serif, sous-titre, slot action optionnel. Nouveau <code>EmptyState.tsx</code> : icône SVG, titre, description, bouton CTA. Appliqués sur toutes les pages /compte pour une typographie uniforme.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Cohérence visuelle — 145 occurrences de hex remplacées par des variables CSS</strong>
+            <span>Audit global : <code>[#0F172A]</code> → <code>navy</code>, <code>[#4F46E5]</code> → <code>primary</code>, <code>[#4338CA]</code> → <code>primary-dark</code>, <code>[#818CF8]</code> → <code>primary-soft</code>, <code>[#0891B2]</code> → <code>location</code>. Remplacement en masse via PowerShell sur 8 fichiers. Les tokens sont désormais centralisés dans <code>globals.css</code> (<code>:root</code>).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>SQL exposé en production — guard NODE_ENV</strong>
+            <span>Les blocs <code>&lt;details&gt;</code> contenant des instructions CREATE TABLE dans <code>/compte/admin/email</code> et <code>/compte/alertes</code> étaient visibles en production. Enveloppés dans <code>{process.env.NODE_ENV !== 'production' &amp;&amp; (...)}</code>.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Fix</span>
+          <div class="change-text">
+            <strong>Hauteur de la carte LocationPicker dans /compte/profil</strong>
+            <span>La map ne s'affichait pas (hauteur nulle) car le wrapper parent imposait <code>height: 260px</code> sur un conteneur flex sans hauteur explicite sur l'enfant. Correction : wrapper supprimé, hauteur 360px posée directement sur <code>containerRef</code>, et appel <code>map.once('load', () =&gt; map.resize())</code> ajouté pour forcer le recalcul après montage.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Refonte homepage — section Dernières annonces</strong>
+            <span>Nouveau composant client <code>LatestBiens.tsx</code> : pills de filtres rapides (Tout / Vente / Location / Maisons / Apparts), grille magazine desktop (carte héros 2×2 avec pills caractéristiques + overlay fade-in, 4 petites cartes avec slide-up au hover), carrousel snap mobile. Badges Nouveau (shimmer animé), coup de cœur, logo vendeur. Transitions <code>cubic-bezier(0.4, 0, 0.2, 1)</code> sur toutes les cartes.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-ux">UX</span>
+          <div class="change-text">
+            <strong>Refonte homepage — section Pourquoi Terranova</strong>
+            <span>Numéros en outline (<code>WebkitTextStroke</code>), animations CSS-only : ping-pin sur le marqueur carte, barres de progression shimmer, pills de catégories pop-in séquencé, bulles de messages fade-in décalé, pill "En ligne" shine. Entrée générale fade-up au scroll (<code>IntersectionObserver</code>). <code>prefers-reduced-motion</code> respecté — toutes les animations coupées si activé.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- ══ SESSION 30 AVRIL 2026 (2) ══ -->
     <div class="session">
       <div class="session-dot" style="background:var(--primary)"></div>

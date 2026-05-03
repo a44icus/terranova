@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import ThemeToggle from './ThemeToggle'
 
 const NAV_LINKS = [
   { href: '/annonces', label: 'Annonces' },
@@ -96,6 +97,7 @@ export default function HeaderClient({ isLoggedIn }: Props) {
             Se connecter
           </Link>
         )}
+        <ThemeToggle variant="icon" />
         <Link href="/publier"
           className="bg-[#4F46E5] text-white text-xs lg:text-sm font-medium px-3 lg:px-4 py-1.5 rounded-full hover:bg-[#4338CA] transition-colors whitespace-nowrap">
           + Publier

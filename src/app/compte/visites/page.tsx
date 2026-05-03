@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { getViewUserId } from '@/lib/impersonation'
 import VisitesClient from './VisitesClient'
+import PageHeader from '@/components/compte/ui/PageHeader'
 
 export default async function VisitesPage() {
   const supabase = await createClient()
@@ -26,13 +27,10 @@ export default async function VisitesPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-5xl">
-      <div className="mb-6">
-        <h1 className="font-serif text-3xl text-[#0F172A] mb-1">Visites</h1>
-        <p className="text-sm text-[#0F172A]/50">
-          Planifiez et gérez les demandes de visite reçues pour vos annonces
-        </p>
-      </div>
-
+      <PageHeader
+        title="Visites"
+        description="Planifiez et gérez les demandes de visite reçues pour vos annonces"
+      />
       <VisitesClient visites={visites ?? []} counts={counts} />
     </div>
   )

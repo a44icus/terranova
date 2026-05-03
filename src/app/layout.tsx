@@ -4,6 +4,9 @@ import './globals.css'
 import { getSiteSettings } from '@/lib/siteSettings'
 import CookieBanner from '@/components/ui/CookieBanner'
 
+/* Script inline exécuté AVANT le premier rendu pour éviter le flash */
+const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`
+
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSiteSettings()
   return {
@@ -19,8 +22,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const s = await getSiteSettings()
 
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <head>
+        {/* Initialisation du thème avant peinture — évite le flash blanc/noir */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />

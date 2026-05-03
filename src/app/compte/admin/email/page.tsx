@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import AdminEmailForm from '@/components/compte/AdminEmailForm'
+import PageHeader from '@/components/compte/ui/PageHeader'
 
 export default async function AdminEmailPage() {
   const supabase = await createClient()
@@ -23,14 +24,11 @@ export default async function AdminEmailPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-2xl">
-      <div className="mb-8">
-        <p className="text-xs font-medium text-primary uppercase tracking-wider mb-1">Administration</p>
-        <h1 className="font-serif text-3xl text-navy mb-1">Configuration email</h1>
-        <p className="text-sm text-navy/50">
-          Paramétrez l'envoi des alertes prix et notifications aux utilisateurs.
-        </p>
-      </div>
-
+      <p className="text-xs font-medium text-primary uppercase tracking-wider mb-1">Administration</p>
+      <PageHeader
+        title="Configuration email"
+        description="Paramétrez l'envoi des alertes prix et notifications aux utilisateurs."
+      />
       <AdminEmailForm
         initial={{
           api_key:    config?.api_key ?? null,
@@ -40,6 +38,7 @@ export default async function AdminEmailPage() {
         }}
       />
 
+      {process.env.NODE_ENV !== 'production' && (
       <details className="mt-8">
         <summary className="text-xs text-navy/30 cursor-pointer hover:text-navy/50">SQL requis (si tables manquantes)</summary>
         <pre className="mt-2 text-[10px] bg-navy/04 rounded-xl p-4 text-navy/60 font-mono overflow-x-auto whitespace-pre-wrap">{`-- Fichier complet : supabase/prix-alerts.sql
@@ -65,6 +64,7 @@ CREATE TABLE IF NOT EXISTS prix_alerts_queue (
 
 -- Trigger : voir supabase/prix-alerts.sql`}</pre>
       </details>
+      )}
     </div>
   )
 }

@@ -5,6 +5,8 @@ import Link from 'next/link'
 import AnnonceActions from '@/components/compte/AnnonceActions'
 import { getViewUserId } from '@/lib/impersonation'
 import { formatPrix } from '@/lib/geo'
+import PageHeader from '@/components/compte/ui/PageHeader'
+import EmptyState from '@/components/compte/ui/EmptyState'
 
 const PER_PAGE = 12
 
@@ -25,8 +27,18 @@ const FILTRES = [
   { key: 'refuse',     label: 'Refusées' },
 ]
 
+const TRIS = [
+  { key: 'recent',     label: 'Plus récentes',  column: 'created_at', asc: false },
+  { key: 'ancien',     label: 'Plus anciennes', column: 'created_at', asc: true  },
+  { key: 'vues',       label: 'Plus vues',      column: 'vues',       asc: false },
+  { key: 'favoris',    label: 'Plus aimées',    column: 'favoris_count', asc: false },
+  { key: 'messages',   label: 'Plus contactées',column: 'contacts',   asc: false },
+  { key: 'prix_desc',  label: 'Prix décroissant', column: 'prix',     asc: false },
+  { key: 'prix_asc',   label: 'Prix croissant',   column: 'prix',     asc: true  },
+]
+
 interface Props {
-  searchParams: Promise<{ statut?: string; page?: string }>
+  searchParams: Promise<{ statut?: string; page?: string; q?: string; tri?: string }>
 }
 
 export default async function MesAnnoncesPage({ searchParams }: Props) {
@@ -34,10 +46,11 @@ export default async function MesAnnoncesPage({ searchParams }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const { statut: statutFilter = '', page: pageStr = '1' } = await searchParams
+  const { statut: statutFilter = '', page: pageStr = '1', q = '', tri = 'recent' } = await searchParams
   const page    = Math.max(1, parseInt(pageStr) || 1)
   const from    = (page - 1) * PER_PAGE
   const to      = from + PER_PAGE - 1
+  const triCfg  = TRIS.find(t => t.key === tri) ?? TRIS[0]
 
   const viewId = await getViewUserId() ?? user.id
   const admin  = createAdminClient()
@@ -54,46 +67,83 @@ export default async function MesAnnoncesPage({ searchParams }: Props) {
   }, {})
   const total = counts?.length ?? 0
 
-  // Fetch paginé + filtré
+  // Fetch paginé + filtré + trié + recherché
   let query = admin
     .from('biens')
     .select('*, photos(url, principale, ordre)', { count: 'exact' })
     .eq('user_id', viewId)
-    .order('created_at', { ascending: false })
+    .order(triCfg.column, { ascending: triCfg.asc })
     .range(from, to)
 
   if (statutFilter) query = query.eq('statut', statutFilter)
+  if (q.trim())     query = query.or(`titre.ilike.%${q.trim()}%,ville.ilike.%${q.trim()}%`)
 
   const { data: biens, count: filteredCount } = await query
 
   const totalPages = Math.ceil((filteredCount ?? 0) / PER_PAGE)
 
-  function pageUrl(p: number) {
+  function buildUrl(overrides: Record<string, string | undefined> = {}) {
+    const merged = { statut: statutFilter, page: String(page), q, tri, ...overrides }
     const params = new URLSearchParams()
-    if (statutFilter) params.set('statut', statutFilter)
-    if (p > 1) params.set('page', String(p))
+    if (merged.statut) params.set('statut', merged.statut)
+    if (merged.q)      params.set('q', merged.q)
+    if (merged.tri && merged.tri !== 'recent') params.set('tri', merged.tri)
+    if (merged.page && merged.page !== '1')    params.set('page', merged.page)
     const qs = params.toString()
     return `/compte/mes-annonces${qs ? `?${qs}` : ''}`
   }
 
-  function filtreUrl(s: string) {
-    return s ? `/compte/mes-annonces?statut=${s}` : '/compte/mes-annonces'
-  }
+  const pageUrl   = (p: number) => buildUrl({ page: String(p) })
+  const filtreUrl = (s: string) => buildUrl({ statut: s, page: '1' })
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl">
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h1 className="font-serif text-2xl text-navy">Mes annonces</h1>
-          <p className="text-sm text-navy/50 mt-0.5">{total} annonce{total > 1 ? 's' : ''} au total</p>
-        </div>
-        <Link href="/publier"
-          className="bg-primary text-white text-sm font-medium px-4 py-2.5 rounded-xl hover:bg-primary-dark transition-colors whitespace-nowrap">
-          + Nouvelle
-        </Link>
-      </div>
+      <PageHeader
+        title="Mes annonces"
+        description={`${total} annonce${total > 1 ? 's' : ''} au total`}
+        action={
+          <Link href="/publier"
+            className="bg-primary text-white text-sm font-medium px-4 py-2.5 rounded-xl hover:bg-primary-dark transition-colors whitespace-nowrap">
+            + Nouvelle
+          </Link>
+        }
+      />
+
+      {/* Recherche + tri (form GET) */}
+      {total > 0 && (
+        <form method="get" className="flex flex-col sm:flex-row gap-2 mb-4">
+          {statutFilter && <input type="hidden" name="statut" value={statutFilter} />}
+          <div className="relative flex-1">
+            <input
+              type="search"
+              name="q"
+              defaultValue={q}
+              placeholder="Rechercher par titre ou ville…"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-navy/12 text-sm focus:outline-none focus:border-primary/50 transition-colors"
+            />
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/><path strokeLinecap="round" d="M21 21l-4.35-4.35"/>
+            </svg>
+          </div>
+          <select name="tri" defaultValue={tri}
+            className="px-3 py-2.5 rounded-xl border border-navy/12 text-sm bg-white focus:outline-none focus:border-primary/50 transition-colors">
+            {TRIS.map(t => (
+              <option key={t.key} value={t.key}>{t.label}</option>
+            ))}
+          </select>
+          <button type="submit"
+            className="px-5 py-2.5 rounded-xl bg-navy text-white text-sm font-medium hover:bg-primary transition-colors">
+            Filtrer
+          </button>
+          {(q || tri !== 'recent') && (
+            <Link href={filtreUrl(statutFilter)}
+              className="px-4 py-2.5 rounded-xl border border-navy/12 text-sm text-navy/60 hover:bg-navy/04 transition-colors text-center whitespace-nowrap">
+              Réinitialiser
+            </Link>
+          )}
+        </form>
+      )}
 
       {/* Filtres par statut */}
       {total > 0 && (
@@ -121,19 +171,19 @@ export default async function MesAnnoncesPage({ searchParams }: Props) {
 
       {/* Liste vide */}
       {!biens?.length ? (
-        <div className="bg-white rounded-2xl border border-navy/08 py-16 text-center">
-          <div className="text-4xl mb-3">🏠</div>
-          {total === 0 ? (
-            <>
-              <p className="text-sm text-navy/50 mb-4">Vous n'avez pas encore d'annonce</p>
+        total === 0 ? (
+          <EmptyState
+            icon="🏠"
+            title="Vous n'avez pas encore d'annonce"
+            action={
               <Link href="/publier" className="inline-block bg-primary text-white text-sm px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-colors">
                 Publier mon premier bien
               </Link>
-            </>
-          ) : (
-            <p className="text-sm text-navy/50">Aucune annonce pour ce filtre</p>
-          )}
-        </div>
+            }
+          />
+        ) : (
+          <EmptyState icon="🏠" title="Aucune annonce pour ce filtre" />
+        )
       ) : (
         <>
           <div className="space-y-3">
