@@ -34,6 +34,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import MapApp from '@/components/map/MapApp'
 import Header from '@/components/Header'
+import SiteFooterSlim from '@/components/SiteFooterSlim'
 import { getSiteSettings } from '@/lib/siteSettings'
 import type { MapStyleKey } from '@/lib/mapStyles'
 import type { MapAd } from '@/lib/mapAds'   // ← NOUVEAU
@@ -98,6 +99,7 @@ export default async function CartePage({ searchParams }: Props) {
         carteSettings={carteSettings}
         ads={(ads ?? []) as MapAd[]}   // ← NOUVEAU
       />
+      <SiteFooterSlim />
     </div>
   )
 }
