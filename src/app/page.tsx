@@ -177,7 +177,7 @@ export default async function LandingPage() {
       </header>
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section className="min-h-screen flex overflow-hidden relative bg-[#0F172A]">
+      <section className="min-h-[78vh] lg:min-h-[82vh] flex overflow-hidden relative bg-[#0F172A]">
 
         {/* Photo plein écran */}
         <Image
@@ -204,28 +204,28 @@ export default async function LandingPage() {
         }} />
 
         {/* ── Colonne texte ── */}
-        <div className="relative flex flex-col justify-center px-6 lg:px-16 xl:px-20 w-full lg:w-[52%] lg:flex-shrink-0 z-10 pt-28 pb-16 lg:pt-0 lg:pb-0">
+        <div className="relative flex flex-col justify-center px-6 lg:px-16 xl:px-20 w-full lg:w-[52%] lg:flex-shrink-0 z-10 pt-24 pb-12 lg:pt-0 lg:pb-0">
           <div className="relative z-10 max-w-lg lg:max-w-none mx-auto lg:mx-0">
 
-            <div className="flex items-center gap-3 text-[#818CF8] text-[11px] font-semibold tracking-[0.18em] uppercase mb-6">
+            <div className="flex items-center gap-3 text-[#818CF8] text-[11px] font-semibold tracking-[0.18em] uppercase mb-4">
               <span className="w-8 h-px bg-[#4F46E5]" />
               Immobilier &middot; France
             </div>
 
-            <h1 className="font-serif text-white leading-[0.95] mb-6"
-              style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(2.8rem, 8vw, 5.5rem)' }}>
+            <h1 className="font-serif text-white leading-[0.95] mb-4"
+              style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(2.2rem, 6vw, 4.2rem)' }}>
               {"L'immobilier"}<br />
               <em className="text-[#818CF8]">autrement.</em>
             </h1>
 
-            <p className="text-white/50 text-sm lg:text-base leading-relaxed mb-8 max-w-sm">
+            <p className="text-white/50 text-sm lg:text-base leading-relaxed mb-6 max-w-sm">
               Carte interactive, filtres intelligents,<br className="hidden sm:block" />contact direct. Sans interm&eacute;diaire.
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-10">
+            <div className="flex flex-col sm:flex-row gap-3 mb-7">
               <Link href="/carte"
-                className="inline-flex items-center justify-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold px-6 py-3.5 rounded-xl text-sm transition-all shadow-xl shadow-[#4F46E5]/30 hover:-translate-y-0.5">
+                className="inline-flex items-center justify-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all shadow-xl shadow-[#4F46E5]/30 hover:-translate-y-0.5">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
                   <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
@@ -233,24 +233,24 @@ export default async function LandingPage() {
                 Voir la carte
               </Link>
               <Link href="/publier"
-                className="inline-flex items-center justify-center gap-2 border-2 border-white/20 hover:border-[#4F46E5] hover:bg-[#4F46E5]/10 text-white font-semibold px-6 py-3.5 rounded-xl text-sm transition-all hover:-translate-y-0.5">
+                className="inline-flex items-center justify-center gap-2 border-2 border-white/20 hover:border-[#4F46E5] hover:bg-[#4F46E5]/10 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all hover:-translate-y-0.5">
                 + Publier une annonce
               </Link>
               <Link href="/estimer"
-                className="inline-flex items-center justify-center gap-2 text-white/70 hover:text-white text-sm font-medium px-5 py-3.5 rounded-xl transition-all hover:-translate-y-0.5 sm:hidden lg:inline-flex"
+                className="inline-flex items-center justify-center gap-2 text-white/70 hover:text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-all hover:-translate-y-0.5 sm:hidden lg:inline-flex"
                 style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)' }}>
                 Estimer mon bien →
               </Link>
             </div>
 
             {/* Stats */}
-            <div className="flex gap-8 lg:gap-10 pt-6 border-t border-white/10">
+            <div className="flex gap-8 lg:gap-10 pt-5 border-t border-white/10">
               {[
                 { val: (totalBiens ?? 0).toLocaleString('fr-FR'), label: 'biens' },
                 { val: (totalVilles ?? 0).toLocaleString('fr-FR'), label: 'villes' },
               ].map(s => (
                 <div key={s.label}>
-                  <div className="font-serif text-3xl lg:text-4xl text-white" style={{ fontFamily: "'DM Serif Display', serif" }}>{s.val}</div>
+                  <div className="font-serif text-2xl lg:text-3xl text-white" style={{ fontFamily: "'DM Serif Display', serif" }}>{s.val}</div>
                   <div className="text-xs text-white/30 mt-1">{s.label}</div>
                 </div>
               ))}
@@ -266,7 +266,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Marquee ──────────────────────────────────────────────── */}
-      <div className="bg-[#4F46E5] overflow-hidden py-3.5 select-none">
+      <div className="bg-[#06090F] overflow-hidden py-3.5 select-none">
         <div className="marquee-track flex whitespace-nowrap">
           {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
             <span key={i} className="inline-flex items-center gap-5 px-5 text-white/90 text-sm font-medium">

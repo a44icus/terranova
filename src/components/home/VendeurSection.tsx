@@ -258,15 +258,24 @@ export default function VendeurSection({ totalAnnonceurs }: Props) {
                   </div>
                 )}
 
-                {/* ── Contenu unifié ── */}
-                <div className="relative z-10 flex flex-col flex-1 p-6">
+                {/* ── Quart de rond avec icône, angle supérieur gauche ── */}
+                <div className="absolute top-0 left-0 z-[15] pointer-events-none"
+                  style={{
+                    width: 58, height: 58,
+                    background: plan.iconGrad,
+                    borderBottomRightRadius: '100%',
+                    boxShadow: `0 4px 16px ${plan.glow}`,
+                  }}>
+                  <div className="absolute" style={{ top: 11, left: 11 }}>
+                    <PlanIcon planKey={plan.key} />
+                  </div>
+                </div>
 
-                  {/* Icône + Nom + Desc */}
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-11 h-11 rounded-2xl flex-shrink-0 flex items-center justify-center"
-                      style={{ background: plan.iconGrad, boxShadow:`0 6px 20px ${plan.glow}` }}>
-                      <PlanIcon planKey={plan.key} />
-                    </div>
+                {/* ── Contenu unifié ── */}
+                <div className="relative z-10 flex flex-col flex-1 pt-16 px-6 pb-6">
+
+                  {/* Nom + Desc (l'icône est dans le quart de rond ci-dessus) */}
+                  <div className="mb-5">
                     <div>
                       <p className="font-bold text-2xl leading-tight" style={{ color: plan.nameColor }}>{plan.name}</p>
                       <p className="text-[11px] leading-snug mt-0.5 max-w-[180px]" style={{ color: plan.descColor }}>{plan.desc}</p>
@@ -274,7 +283,7 @@ export default function VendeurSection({ totalAnnonceurs }: Props) {
                   </div>
 
                   {/* Spacer — le gradient reste visible ici */}
-                  <div className="flex-1" style={{ minHeight: f ? 56 : 40 }} />
+                  <div className="flex-1" style={{ minHeight: f ? 28 : 20 }} />
 
                   {/* Prix */}
                   <div className="flex items-end gap-1.5 mb-5">

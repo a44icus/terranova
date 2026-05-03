@@ -456,7 +456,7 @@ export default function FeaturesShowcase() {
   const feat   = FEATURES[active]
 
   return (
-    <section className="relative overflow-hidden py-20 lg:py-32" style={{ background: '#06090F' }}>
+    <section className="relative overflow-hidden py-12 lg:py-16" style={{ background: '#06090F' }}>
 
       {/* ── CSS animations globales à ce composant ── */}
       <style>{`
@@ -502,8 +502,8 @@ export default function FeaturesShowcase() {
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
 
         {/* ── Header ── */}
-        <div className="text-center mb-12 lg:mb-16">
-          <div className="inline-flex items-center gap-3 mb-6">
+        <div className="text-center mb-8 lg:mb-10">
+          <div className="inline-flex items-center gap-3 mb-4">
             <span className="h-px w-6" style={{ background: accent }} />
             <span className="text-[10px] font-mono font-semibold tracking-[0.3em] uppercase"
               style={{ color: accent }}>
@@ -511,8 +511,8 @@ export default function FeaturesShowcase() {
             </span>
             <span className="h-px w-6" style={{ background: accent }} />
           </div>
-          <h2 className="font-serif text-white leading-[1.05] mb-4"
-            style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(2.2rem, 5vw, 4.5rem)' }}>
+          <h2 className="font-serif text-white leading-[1.05] mb-3"
+            style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(1.8rem, 3.6vw, 3rem)' }}>
             Tout ce qu'il faut.<br />
             <em style={{ color: accent }}>Rien de superflu.</em>
           </h2>
@@ -522,7 +522,7 @@ export default function FeaturesShowcase() {
         </div>
 
         {/* ── Tab navigation ── */}
-        <div className="flex justify-center mb-8 lg:mb-12">
+        <div className="flex justify-center mb-12 lg:mb-18">
           <div className="relative flex gap-1 p-1.5 rounded-2xl"
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
             {FEATURES.map((f, i) => (
@@ -553,7 +553,7 @@ export default function FeaturesShowcase() {
         </div>
 
         {/* ── Content panel ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-8 items-stretch">
 
           {/* Texte */}
           <AnimatePresence mode="wait">
@@ -563,10 +563,10 @@ export default function FeaturesShowcase() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-              className="flex flex-col justify-center py-4 lg:py-8"
+              className="flex flex-col justify-center py-2 lg:py-4"
             >
               {/* Numéro */}
-              <div className="font-serif text-8xl font-bold leading-none mb-4 select-none"
+              <div className="font-serif text-6xl font-bold leading-none mb-3 select-none"
                 style={{
                   fontFamily: "'DM Serif Display', serif",
                   color: 'transparent',
@@ -575,17 +575,17 @@ export default function FeaturesShowcase() {
                 {feat.num}
               </div>
 
-              <h3 className="font-serif text-2xl lg:text-3xl text-white mb-4 leading-snug"
+              <h3 className="font-serif text-xl lg:text-2xl text-white mb-3 leading-snug"
                 style={{ fontFamily: "'DM Serif Display', serif" }}>
                 {feat.title}
               </h3>
 
-              <p className="text-white/50 text-sm leading-relaxed mb-6">
+              <p className="text-white/50 text-sm leading-relaxed mb-4">
                 {feat.desc}
               </p>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-8">
+              <div className="flex flex-wrap gap-2 mb-5">
                 {feat.tags.map(tag => (
                   <span key={tag}
                     className="text-xs px-3 py-1.5 rounded-full"
@@ -623,7 +623,7 @@ export default function FeaturesShowcase() {
               style={{
                 background: 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
                 border: `1px solid ${accent}25`,
-                height: 400,            /* hauteur explicite — nécessaire pour propager aux enfants en h-full */
+                height: 320,            /* hauteur explicite — nécessaire pour propager aux enfants en h-full */
                 boxShadow: `0 0 60px ${accent}12, inset 0 1px 0 rgba(255,255,255,0.06)`,
               }}
             >
