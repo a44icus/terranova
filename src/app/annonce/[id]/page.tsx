@@ -222,18 +222,12 @@ export default async function AnnoncePage({ params }: Props) {
                 }
               </p>
 
-              {/* CTA prominent : voir sur la carte (feature phare) */}
-              <Link href={`/carte?bien=${bien.id}`}
-                className="group inline-flex items-center gap-2.5 mb-5 px-5 py-3 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition-all shadow-lg shadow-[#4F46E5]/30 hover:-translate-y-0.5">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
-                  <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
-                </svg>
-                Voir sur la carte
-                <svg className="transition-transform group-hover:translate-x-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </Link>
+              {/* Description */}
+              {bien.description && (
+                <p className="mb-5 text-sm text-navy/65 leading-relaxed whitespace-pre-line">
+                  {bien.description}
+                </p>
+              )}
 
               {/* Prix */}
               <div className="pt-5 border-t border-navy/06 flex items-end justify-between gap-4 flex-wrap">
@@ -273,78 +267,93 @@ export default async function AnnoncePage({ params }: Props) {
 
             </div>
 
-            {/* Performance énergétique */}
-            {(bien.dpe || bien.ges) && (
-              <div className="bg-white rounded-2xl p-6 border border-navy/08">
-                <h2 className="font-medium text-navy mb-5">Performance énergétique</h2>
-
-                {/* DPE scale bar */}
-                <div className="flex flex-col gap-1 mb-6">
-                  {['A','B','C','D','E','F','G'].map((l, i) => {
-                    const isActive = l === bien.dpe
-                    const widths = ['w-[30%]','w-[42%]','w-[54%]','w-[66%]','w-[78%]','w-[90%]','w-full']
-                    const colors = ['#2E7D32','#558B2F','#9E9D24','#F9A825','#EF6C00','#D84315','#B71C1C']
-                    return (
-                      <div key={l} className="flex items-center gap-2">
-                        <span className="text-[10px] font-medium text-navy/40 w-3">{l}</span>
-                        <div className={`${widths[i]} h-5 rounded-r-md flex items-center justify-end pr-2 transition-all`}
-                          style={{ background: colors[i], opacity: isActive ? 1 : 0.25 }}>
-                          {isActive && <span className="text-white text-[10px] font-bold">{l}</span>}
-                        </div>
-                        {isActive && bien.conso_energie && (
-                          <span className="text-xs font-semibold text-navy">{bien.conso_energie} kWh/m².an</span>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-
-                {/* GES scale bar */}
-                {bien.ges && (
-                  <>
-                    <h3 className="text-xs font-medium text-navy/50 uppercase tracking-wider mb-3">Performance climatique</h3>
-                    <div className="flex flex-col gap-1 mb-6">
-                      {['A','B','C','D','E','F','G'].map((l, i) => {
-                        const isActive = l === bien.ges
-                        const widths = ['w-[30%]','w-[42%]','w-[54%]','w-[66%]','w-[78%]','w-[90%]','w-full']
-                        const colors = ['#2E7D32','#558B2F','#9E9D24','#F9A825','#EF6C00','#D84315','#B71C1C']
-                        return (
-                          <div key={l} className="flex items-center gap-2">
-                            <span className="text-[10px] font-medium text-navy/40 w-3">{l}</span>
-                            <div className={`${widths[i]} h-5 rounded-r-md flex items-center justify-end pr-2`}
-                              style={{ background: colors[i], opacity: isActive ? 1 : 0.25 }}>
-                              {isActive && <span className="text-white text-[10px] font-bold">{l}</span>}
-                            </div>
-                            {isActive && bien.emissions_co2 && (
-                              <span className="text-xs font-semibold text-navy">{bien.emissions_co2} kgCO2/m².an</span>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </>
-                )}
-
-                {/* Annual costs */}
-                {bien.depenses_energie_min && bien.depenses_energie_max && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <div className="text-xs font-medium text-amber-700 mb-1">💡 Estimation dépenses annuelles</div>
-                    <div className="text-sm font-semibold text-amber-900">
-                      Entre {bien.depenses_energie_min.toLocaleString('fr-FR')} € et {bien.depenses_energie_max.toLocaleString('fr-FR')} €/an
-                    </div>
-                    <div className="text-[11px] text-amber-600 mt-1">Prix moyens des énergies indexés au 1er janvier 2025 (abonnement compris)</div>
-                  </div>
-                )}
-              </div>
+            {/* Score quartier */}
+            {bien.lat && bien.lng && (
+              <QuartierScore
+                lat={bien.lat}
+                lng={bien.lng}
+                storedScore={bien.score_quartier ?? null}
+                poiWeights={getPoiWeights(siteSettings)}
+                seuils={getScoreSeuils(siteSettings)}
+              />
             )}
 
-            {/* Description */}
-            {bien.description && (
-              <div className="bg-white rounded-2xl p-6 border border-navy/08">
-                <h2 className="font-medium text-navy mb-3">Description</h2>
-                <p className="text-sm text-navy/70 leading-relaxed whitespace-pre-line">
-                  {bien.description}
-                </p>
+            {/* Performance énergétique */}
+            {(bien.dpe || bien.ges) && (
+              <div className="bg-white rounded-2xl p-5 border border-navy/08">
+                <h2 className="font-medium text-navy mb-4">Performance énergétique</h2>
+
+                {(() => {
+                  const LABELS = ['A','B','C','D','E','F','G']
+                  // Couleurs officielles étiquette énergie (vert → rouge)
+                  const COLORS_DPE = ['#2A9B45','#4EB153','#C3D529','#F5D000','#F0A500','#E05A1B','#C0201A']
+                  // Couleurs officielles étiquette GES (bleu clair → noir)
+                  const COLORS_GES = ['#9DD4E8','#76B8D8','#4D9DC4','#2E7BAE','#1B5C94','#0F3D72','#071E45']
+                  // Largeurs progressives pour simuler les flèches officielles DPE
+                  const WIDTHS = [52, 62, 72, 82, 92, 102, 112]
+
+                  const DpeArrows = ({
+                    active, value, unit, title, colors,
+                  }: { active: string; value?: number | null; unit: string; title: string; colors: string[] }) => (
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-semibold text-navy/40 uppercase tracking-wider mb-2">{title}</p>
+                      <div className="flex flex-col gap-px">
+                        {LABELS.map((l, i) => {
+                          const isActive = l === active
+                          const color = colors[i]
+                          const w = WIDTHS[i]
+                          // Forme chevron via clip-path
+                          return (
+                            <div key={l} className="flex items-center gap-2 h-6">
+                              <div
+                                className="flex items-center justify-between pl-2 pr-3 h-full text-[11px] font-bold transition-opacity"
+                                style={{
+                                  width: w,
+                                  background: color,
+                                  opacity: isActive ? 1 : 0.18,
+                                  clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%)',
+                                  color: 'white',
+                                  flexShrink: 0,
+                                }}
+                              >
+                                {l}
+                              </div>
+                              {isActive && value && (
+                                <span className="text-[11px] font-semibold text-navy whitespace-nowrap">
+                                  {value} <span className="font-normal text-navy/50">{unit}</span>
+                                </span>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+
+                  return (
+                    <div className="flex gap-6 flex-wrap">
+                      {bien.dpe && (
+                        <DpeArrows active={bien.dpe} value={bien.conso_energie} unit="kWh/m².an" title="Énergie" colors={COLORS_DPE} />
+                      )}
+                      {bien.ges && (
+                        <DpeArrows active={bien.ges} value={bien.emissions_co2} unit="kgCO2/m².an" title="Climat" colors={COLORS_GES} />
+                      )}
+                    </div>
+                  )
+                })()}
+
+                {/* Dépenses annuelles */}
+                {bien.depenses_energie_min && bien.depenses_energie_max && (
+                  <div className="mt-4 flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+                    <span className="text-sm">💡</span>
+                    <div>
+                      <span className="text-xs font-semibold text-amber-900">
+                        Entre {bien.depenses_energie_min.toLocaleString('fr-FR')} € et {bien.depenses_energie_max.toLocaleString('fr-FR')} €/an
+                      </span>
+                      <span className="text-[10px] text-amber-600 ml-1.5">estimés</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -364,17 +373,6 @@ export default async function AnnoncePage({ params }: Props) {
 
             {/* Rapport intelligent */}
             <RapportBien rapport={rapport} />
-
-            {/* Score quartier */}
-            {bien.lat && bien.lng && (
-              <QuartierScore
-                lat={bien.lat}
-                lng={bien.lng}
-                storedScore={bien.score_quartier ?? null}
-                poiWeights={getPoiWeights(siteSettings)}
-                seuils={getScoreSeuils(siteSettings)}
-              />
-            )}
 
 
             {/* Graphique évolution prix */}
@@ -403,6 +401,19 @@ export default async function AnnoncePage({ params }: Props) {
           {/* ── Right column ── */}
           <div>
             <div className="sticky top-20 space-y-4">
+
+              {/* Voir sur la carte */}
+              <Link href={`/carte?bien=${bien.id}`}
+                className="group flex items-center justify-center gap-2.5 w-full px-5 py-3 rounded-2xl bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition-all shadow-lg shadow-[#4F46E5]/25 hover:-translate-y-0.5">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+                  <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
+                </svg>
+                Voir sur la carte
+                <svg className="transition-transform group-hover:translate-x-0.5" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </Link>
 
               {/* Contact card */}
               <div className="bg-white rounded-2xl p-6 border border-navy/08">

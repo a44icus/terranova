@@ -299,13 +299,13 @@ function genererIdealPour(b: BienData, profils: ProfilMatch[]): string[] {
   const phrases: string[] = []
   const top = profils.filter(p => p.score >= 50)
 
-  if (top.some(p => p.id === 'famille')) phrases.push("Vous cherchez de l'espace pour toute la famille")
-  if (top.some(p => p.id === 'couple')) phrases.push("Vous souhaitez vous installer à deux dans un cadre agréable")
-  if (top.some(p => p.id === 'investisseur')) phrases.push("Vous souhaitez investir et générer des revenus locatifs")
+  if (top.some(p => p.id === 'famille')) phrases.push("Vous recherchez de l'espace pour toute la famille")
+  if (top.some(p => p.id === 'couple')) phrases.push("Vous envisagez de vous installer à deux dans un cadre agréable")
+  if (top.some(p => p.id === 'investisseur')) phrases.push("Vous envisagez un investissement locatif")
   if (top.some(p => p.id === 'teletravail')) phrases.push("Vous travaillez depuis chez vous et avez besoin d'espace et de connectivité")
-  if (top.some(p => p.id === 'retraite')) phrases.push("Vous recherchez un logement confortable, facile à entretenir")
-  if (top.some(p => p.id === 'etudiant')) phrases.push("Vous cherchez votre premier logement avec un budget maîtrisé")
-  if (top.some(p => p.id === 'ecolo')) phrases.push("La performance énergétique est une priorité pour vous")
+  if (top.some(p => p.id === 'retraite')) phrases.push("Vous recherchez un logement confortable et facile à entretenir")
+  if (top.some(p => p.id === 'etudiant')) phrases.push("Vous recherchez un premier logement avec un budget maîtrisé")
+  if (top.some(p => p.id === 'ecolo')) phrases.push("La performance énergétique est une priorité dans votre recherche")
 
   return phrases.slice(0, 3)
 }
