@@ -84,7 +84,7 @@ function CarteVisual({ accent }: { accent: string }) {
         container: containerRef.current,
         style: 'https://tiles.openfreemap.org/styles/liberty',
         center: [2.3400, 48.8600],
-        zoom: 11.8,
+        zoom: 10.5,
         attributionControl: false,
       })
       mapRef.current = map
@@ -239,7 +239,7 @@ function FiltresVisual({ accent }: { accent: string }) {
 /* 04 — Contact direct */
 function ContactVisual({ accent }: { accent: string }) {
   return (
-    <div className="relative w-full h-full flex flex-col justify-center px-6 gap-3">
+    <div className="relative w-full h-full flex flex-col justify-start px-6 pt-3 pb-4 gap-2">
       {/* Header conversation */}
       <div className="flex items-center gap-3 pb-3 border-b border-white/08">
         <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white"
@@ -254,7 +254,7 @@ function ContactVisual({ accent }: { accent: string }) {
       </div>
 
       {/* Messages */}
-      <div className="space-y-2.5 flex-1">
+      <div className="space-y-2 flex-1">
         {[
           { from: 'them', text: 'Bonjour, votre bien est-il encore disponible ?', delay: '0.1s' },
           { from: 'me',   text: 'Oui, tout à fait ! Quand souhaitez-vous visiter ?', delay: '0.5s' },
@@ -591,8 +591,9 @@ export default function FeaturesShowcase() {
                     className="text-xs px-3 py-1.5 rounded-full"
                     style={{
                       background: `${accent}18`,
-                      color: `${accent}CC`,
-                      border: `1px solid ${accent}30`,
+                      color: `${accent}FF`,
+                      border: `1px solid ${accent}40`,
+                      filter: 'brightness(1.4)',
                     }}>
                     {tag}
                   </span>
@@ -623,7 +624,7 @@ export default function FeaturesShowcase() {
               style={{
                 background: 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
                 border: `1px solid ${accent}25`,
-                height: 320,            /* hauteur explicite — nécessaire pour propager aux enfants en h-full */
+                height: 370,            /* hauteur explicite — nécessaire pour propager aux enfants en h-full */
                 boxShadow: `0 0 60px ${accent}12, inset 0 1px 0 rgba(255,255,255,0.06)`,
               }}
             >

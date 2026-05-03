@@ -199,19 +199,21 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
       flyTo3D([bien.lng, bien.lat], 15)
 
       // Afficher immédiatement le score stocké en DB si disponible
-      if (typeof bien.score_quartier === 'number') {
-        renderInsights({}, bien.score_quartier)
+      const hasDbScore = typeof bien.score_quartier === 'number'
+      if (hasDbScore) {
+        renderInsights({}, bien.score_quartier as number)
       }
 
       if (bien.approx) addApproxZone(bien)
+
+      // Charger les POI pour les marqueurs (CDN-caché 24h après le 1er appel)
+      // Si le score DB existe déjà, on ne bloque pas l'affichage sur ce fetch
       loadPOI(bien.id, bien.lat, bien.lng).then(result => {
-        if (!result) { console.warn('[POI] Pas de résultat'); return }
+        if (!result) return
         setPoiData(result)
         renderPOIMarkers(result.pois, bien.lng, bien.lat)
-        // Priorité au score stocké en DB — l'API ne l'écrase pas s'il existe
-        const scoreToShow = typeof bien.score_quartier === 'number'
-          ? bien.score_quartier
-          : result.score
+        // Le score DB a toujours la priorité — l'API ne l'écrase jamais
+        const scoreToShow = hasDbScore ? (bien.score_quartier as number) : result.score
         renderInsights(result.best, scoreToShow)
       })
     } else {
