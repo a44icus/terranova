@@ -208,8 +208,11 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
         if (!result) { console.warn('[POI] Pas de résultat'); return }
         setPoiData(result)
         renderPOIMarkers(result.pois, bien.lng, bien.lat)
-        // Le score API remplace le score DB une fois chargé
-        renderInsights(result.best, result.score)
+        // Priorité au score stocké en DB — l'API ne l'écrase pas s'il existe
+        const scoreToShow = typeof bien.score_quartier === 'number'
+          ? bien.score_quartier
+          : result.score
+        renderInsights(result.best, scoreToShow)
       })
     } else {
       setPoiData(null)

@@ -6,17 +6,20 @@ import { POI_CATEGORIES, scoreLabel, DEFAULT_SCORE_SEUILS, type ScoreSeuils } fr
 interface Props {
   lat: number
   lng: number
+  storedScore?: number | null   // score pré-calculé depuis biens.score_quartier
   poiWeights?: Record<string, number>
   seuils?: ScoreSeuils
 }
 
 type POIResult = { name: string; distance: number; emoji: string }
 
-export default function QuartierScore({ lat, lng, poiWeights, seuils = DEFAULT_SCORE_SEUILS }: Props) {
-  const [score, setScore]                   = useState<number | null>(null)
+export default function QuartierScore({ lat, lng, storedScore, poiWeights, seuils = DEFAULT_SCORE_SEUILS }: Props) {
+  // Si le score est déjà en base, on l'affiche immédiatement sans spinner
+  const hasStoredScore = typeof storedScore === 'number'
+  const [score, setScore]                   = useState<number | null>(hasStoredScore ? storedScore : null)
   const [bestByCategory, setBestByCategory] = useState<Record<string, POIResult>>({})
   const [radiusKm, setRadiusKm]             = useState(1)
-  const [loading, setLoading]               = useState(true)
+  const [loading, setLoading]               = useState(!hasStoredScore)
 
   useEffect(() => {
     if (!lat || !lng) { setLoading(false); return }
@@ -31,10 +34,13 @@ export default function QuartierScore({ lat, lng, poiWeights, seuils = DEFAULT_S
         const data = await res.json()
         if (cancelled) return
         setBestByCategory(data.best ?? {})
-        setScore(typeof data.score === 'number' ? data.score : 0)
         setRadiusKm(data.radiusKm ?? 1)
+        // N'écraser le score que si on n'avait pas de score stocké en base
+        if (!hasStoredScore) {
+          setScore(typeof data.score === 'number' ? data.score : 0)
+        }
       } catch {
-        if (!cancelled) setScore(0)
+        if (!cancelled && !hasStoredScore) setScore(0)
       } finally {
         if (!cancelled) setLoading(false)
       }

@@ -370,6 +370,7 @@ export default async function AnnoncePage({ params }: Props) {
               <QuartierScore
                 lat={bien.lat}
                 lng={bien.lng}
+                storedScore={bien.score_quartier ?? null}
                 poiWeights={getPoiWeights(siteSettings)}
                 seuils={getScoreSeuils(siteSettings)}
               />
