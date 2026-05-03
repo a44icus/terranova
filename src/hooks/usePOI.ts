@@ -18,6 +18,7 @@ interface POICache {
   pois: POIItem[]
   best: Record<string, POIItem>
   radiusKm: number
+  score: number
 }
 
 export function usePOI(_maxDistM = 1000) {

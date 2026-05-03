@@ -8,7 +8,7 @@ import { usePOI } from '@/hooks/usePOI'
 import { useGeolocation } from '@/hooks/useGeolocation'
 import { formatPrixCourt, metersToLngDeg, metersToLatDeg, makeCircle } from '@/lib/geo'
 import { MAP_STYLES, type MapStyleKey } from '@/lib/mapStyles'
-import { POI_CATEGORIES, computeNeighborhoodScore } from '@/lib/poi'
+import { POI_CATEGORIES } from '@/lib/poi'
 import type { Map as MapLibreMap, Marker } from 'maplibre-gl'
 import type { BienPublic } from '@/lib/types'
 import DetailPopup from '@/components/panels/DetailPopup'
@@ -203,7 +203,7 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
         if (!result) { console.warn('[POI] Pas de résultat'); return }
         setPoiData(result)
         renderPOIMarkers(result.pois, bien.lng, bien.lat)
-        renderInsights(result.best)
+        renderInsights(result.best, result.score)
       })
     } else {
       setPoiData(null)
@@ -494,8 +494,7 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
   }
 
   // ── INSIGHTS ──────────────────────────────────────────────
-  function renderInsights(bestByCategory: Record<string, any>) {
-    const score = computeNeighborhoodScore(bestByCategory)
+  function renderInsights(bestByCategory: Record<string, any>, score: number) {
     const label = score >= 8 ? { text: 'Excellent', color: '#27ae60' }
       : score >= 6 ? { text: 'Très bon', color: '#2980b9' }
       : score >= 4 ? { text: 'Correct', color: '#f39c12' }

@@ -7,6 +7,7 @@ import {
   detectCategory,
   poiEmoji,
   poiSubtype,
+  computeNeighborhoodScore,
 } from '@/lib/poi'
 
 export const runtime = 'nodejs'
@@ -64,7 +65,7 @@ async function fetchAtRadius(
       }
 
       const pois = Object.values(bestByCategory).sort((a, b) => a.distance - b.distance)
-      if (pois.length > 0) return { pois, best: bestByCategory }
+      if (pois.length > 0) return { pois, best: bestByCategory, score: computeNeighborhoodScore(bestByCategory) }
     } catch {
       continue
     }
@@ -84,7 +85,7 @@ export async function GET(req: NextRequest) {
     const result = await fetchAtRadius(lat, lng, deg, km * 1000)
     if (result) {
       return NextResponse.json(
-        { ...result, radiusKm: km },
+        { ...result, radiusKm: km, score: result.score },
         { headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' } },
       )
     }
