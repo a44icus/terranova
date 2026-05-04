@@ -8,6 +8,7 @@ import SiteFooter from '@/components/SiteFooter'
 import LatestBiens from '@/components/home/LatestBiens'
 import FeaturesShowcase from '@/components/home/FeaturesShowcase'
 import VendeurSection from '@/components/home/VendeurSection'
+import HomeHamburger from '@/components/HomeHamburger'
 
 export const metadata: Metadata = {
   title: "Terranova \u2013 L'immobilier autrement",
@@ -138,40 +139,24 @@ export default async function LandingPage() {
         {/* Actions droite */}
         <div className="flex items-center gap-2">
           {user ? (
-            <>
-              {/* Desktop : Mon compte */}
-              <Link href="/compte"
-                className="hidden lg:flex items-center gap-1.5 text-white/70 hover:text-white text-sm px-3 py-1.5 rounded-full hover:bg-white/10 transition-all">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-                </svg>
-                Mon compte
-              </Link>
-              {/* Mobile : icône seule */}
-              <Link href="/compte"
-                className="lg:hidden flex items-center justify-center w-9 h-9 rounded-full text-white/70 hover:text-white transition-all"
-                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-                </svg>
-              </Link>
-              <Link href="/publier"
-                className="bg-[#4F46E5] text-white text-xs lg:text-sm font-medium px-3 lg:px-4 py-1.5 rounded-full hover:bg-[#4338CA] transition-colors whitespace-nowrap">
-                + Publier
-              </Link>
-            </>
+            <Link href="/compte"
+              className="hidden lg:flex items-center gap-1.5 text-white/70 hover:text-white text-sm px-3 py-1.5 rounded-full hover:bg-white/10 transition-all">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              </svg>
+              Mon compte
+            </Link>
           ) : (
-            <>
-              <Link href="/auth/login"
-                className="hidden lg:block text-white/70 hover:text-white text-sm px-3 py-1.5 rounded-full hover:bg-white/10 transition-all">
-                Se connecter
-              </Link>
-              <Link href="/publier"
-                className="bg-[#4F46E5] text-white text-xs lg:text-sm font-medium px-3 lg:px-4 py-1.5 rounded-full hover:bg-[#4338CA] transition-colors whitespace-nowrap">
-                + Publier
-              </Link>
-            </>
+            <Link href="/auth/login"
+              className="hidden lg:block text-white/70 hover:text-white text-sm px-3 py-1.5 rounded-full hover:bg-white/10 transition-all">
+              Se connecter
+            </Link>
           )}
+          <Link href="/publier"
+            className="bg-[#4F46E5] text-white text-xs lg:text-sm font-medium px-3 lg:px-4 py-1.5 rounded-full hover:bg-[#4338CA] transition-colors whitespace-nowrap">
+            + Publier
+          </Link>
+          <HomeHamburger isLoggedIn={!!user} />
         </div>
 
       </header>
