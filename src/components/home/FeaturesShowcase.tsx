@@ -522,14 +522,14 @@ export default function FeaturesShowcase() {
         </div>
 
         {/* ── Tab navigation ── */}
-        <div className="flex justify-center mb-12 lg:mb-18">
-          <div className="relative flex gap-1 p-1.5 rounded-2xl"
+        <div className="flex justify-center mb-12 lg:mb-18 px-4">
+          <div className="relative flex gap-0.5 p-1 sm:gap-1 sm:p-1.5 rounded-2xl w-full sm:w-auto"
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
             {FEATURES.map((f, i) => (
               <button
                 key={f.key}
                 onClick={() => handleTab(i)}
-                className="relative px-4 py-2 rounded-xl text-sm font-medium transition-colors duration-200 overflow-hidden"
+                className="relative flex-1 sm:flex-none px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-sm font-medium transition-colors duration-200 overflow-hidden whitespace-nowrap text-center"
                 style={{ color: active === i ? 'white' : 'rgba(255,255,255,0.4)' }}
               >
                 {/* Active pill background */}

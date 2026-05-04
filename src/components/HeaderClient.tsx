@@ -44,7 +44,7 @@ export default function HeaderClient({ isLoggedIn }: Props) {
       @keyframes hc-linkFadeUp   { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
       @keyframes hc-burgerSpin   { from { transform:rotate(-90deg); opacity:0; } to { transform:rotate(0deg); opacity:1; } }
     `}</style>
-    <header className="sticky top-0 z-20 bg-navy text-white h-14 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-20 bg-navy text-white h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
 
       {/* Logo */}
       <Link href="/" className="font-serif text-[22px] tracking-wide flex-shrink-0"
