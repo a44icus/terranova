@@ -236,15 +236,15 @@ export default async function LandingPage() {
 
         {/* Gradient mobile : overlay sombre uniforme */}
         <div className="absolute inset-0 pointer-events-none lg:hidden" style={{
-          background: 'rgba(9,9,35,0.78)',
+          background: 'rgba(9,9,35,0.78)', zIndex: 5,
         }} />
         {/* Gradient desktop : gauche → droite */}
         <div className="absolute inset-0 pointer-events-none hidden lg:block" style={{
-          background: 'linear-gradient(to right, rgba(9,9,35,0.88) 0%, rgba(9,9,35,0.75) 35%, rgba(9,9,35,0.3) 60%, rgba(9,9,35,0.05) 100%)',
+          background: 'linear-gradient(to right, rgba(9,9,35,0.88) 0%, rgba(9,9,35,0.75) 35%, rgba(9,9,35,0.3) 60%, rgba(9,9,35,0.05) 100%)', zIndex: 5,
         }} />
         {/* Vignette haut & bas */}
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: 'linear-gradient(to bottom, rgba(9,9,35,0.5) 0%, transparent 25%, transparent 75%, rgba(9,9,35,0.6) 100%)',
+          background: 'linear-gradient(to bottom, rgba(9,9,35,0.5) 0%, transparent 25%, transparent 75%, rgba(9,9,35,0.6) 100%)', zIndex: 5,
         }} />
 
         {/* ── Colonne texte ── */}
