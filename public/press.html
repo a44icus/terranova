@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Terranova — Kit Presse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary:      #4F46E5;
+    --primary-dark: #4338CA;
+    --primary-soft: #818CF8;
+    --navy:         #0F172A;
+    --surface:      #F8FAFC;
+    --location:     #0891B2;
+    --amber:        #F59E0B;
+    --green:        #16A34A;
+    --red:          #DC2626;
+    --violet:       #7C3AED;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--navy); line-height: 1.6; }
+  h1, h2, h3 { font-family: 'DM Serif Display', serif; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 50%, var(--primary-dark) 100%);
+    color: white; border-radius: 24px; padding: 56px 48px; margin-bottom: 48px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 20px; position: relative; }
+  .hero-layout { display: flex; align-items: flex-start; justify-content: space-between; gap: 40px; position: relative; }
+  .hero h1 { font-size: 52px; line-height: 1.1; margin-bottom: 14px; }
+  .hero h1 span { color: var(--primary-soft); font-style: italic; }
+  .hero-tagline { font-size: 18px; opacity: 0.75; margin-bottom: 28px; max-width: 420px; }
+  .hero-stats { display: flex; gap: 32px; }
+  .hero-stat-val { font-family: 'DM Serif Display', serif; font-size: 30px; display: block; }
+  .hero-stat-lbl { font-size: 11px; opacity: 0.45; text-transform: uppercase; letter-spacing: 0.06em; }
+  .hero-logo-box { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 28px 36px; text-align: center; flex-shrink: 0; }
+  .hero-logo-text { font-family: 'DM Serif Display', serif; font-size: 36px; color: white; }
+  .hero-logo-text span { color: var(--primary-soft); font-style: italic; }
+  .hero-logo-sub { font-size: 11px; opacity: 0.4; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* Sections */
+  .section { margin-bottom: 52px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .section-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .section-title { font-size: 24px; }
+  .section-sub { font-size: 13px; color: rgba(15,23,42,0.45); margin-top: 2px; }
+
+  /* Cards */
+  .card { background: white; border-radius: 16px; border: 1px solid rgba(15,23,42,0.07); padding: 28px; }
+  .card-sm { background: white; border-radius: 14px; border: 1px solid rgba(15,23,42,0.07); padding: 20px; }
+
+  /* Grids */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media(max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } .hero-layout { flex-direction: column; } }
+
+  /* Description box */
+  .desc-box { background: white; border-radius: 16px; border: 1px solid rgba(15,23,42,0.07); padding: 28px 32px; }
+  .desc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(15,23,42,0.35); margin-bottom: 10px; }
+  .desc-text { font-size: 15px; color: var(--navy); line-height: 1.7; }
+  .desc-text + .desc-label { margin-top: 24px; }
+
+  /* Chiffres clés */
+  .kpi { background: white; border-radius: 16px; border: 1px solid rgba(15,23,42,0.07); padding: 24px; text-align: center; }
+  .kpi-val { font-family: 'DM Serif Display', serif; font-size: 40px; color: var(--primary); display: block; }
+  .kpi-lbl { font-size: 12px; color: rgba(15,23,42,0.45); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+  .kpi-sub { font-size: 11px; color: rgba(15,23,42,0.3); margin-top: 3px; }
+
+  /* Feature pills */
+  .feat-list { display: flex; flex-direction: column; gap: 10px; }
+  .feat-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: var(--surface); border-radius: 12px; }
+  .feat-row-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .feat-row-title { font-weight: 600; font-size: 13px; }
+  .feat-row-desc { font-size: 12px; color: rgba(15,23,42,0.5); margin-top: 2px; }
+
+  /* Logo showcase */
+  .logo-variants { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media(max-width: 640px) { .logo-variants { grid-template-columns: 1fr; } }
+  .logo-box { border-radius: 16px; padding: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; border: 1px solid rgba(15,23,42,0.07); }
+  .logo-box-sub { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.4; }
+
+  /* Couleurs */
+  .color-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .color-chip { display: flex; align-items: center; gap: 10px; background: white; border: 1px solid rgba(15,23,42,0.07); border-radius: 12px; padding: 10px 14px; }
+  .color-blob { width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; }
+  .color-chip-name { font-size: 12px; font-weight: 600; }
+  .color-chip-hex { font-size: 11px; font-family: monospace; color: rgba(15,23,42,0.4); }
+
+  /* Contact */
+  .contact-box { background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%); border-radius: 20px; padding: 40px; color: white; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+  @media(max-width: 640px) { .contact-box { flex-direction: column; text-align: center; } }
+  .contact-box h2 { font-size: 26px; margin-bottom: 8px; }
+  .contact-box p { font-size: 14px; opacity: 0.6; max-width: 340px; }
+  .contact-links { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+  .contact-link { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 20px; color: white; text-decoration: none; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .contact-link:hover { background: rgba(255,255,255,0.15); }
+
+  /* Footer */
+  .footer { text-align: center; padding-top: 32px; border-top: 1px solid rgba(15,23,42,0.08); margin-top: 48px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hero">
+    <div class="hero-badge">📰 Kit Presse · 2026</div>
+    <div class="hero-layout">
+      <div>
+        <h1>Terra<span>nova</span></h1>
+        <p class="hero-tagline">La plateforme immobilière pensée pour le marché français — carte interactive, outils pro, abonnements flexibles.</p>
+        <div class="hero-stats">
+          <div><span class="hero-stat-val">2026</span><span class="hero-stat-lbl">Lancement</span></div>
+          <div><span class="hero-stat-val">35+</span><span class="hero-stat-lbl">Fonctionnalités</span></div>
+          <div><span class="hero-stat-val">100%</span><span class="hero-stat-lbl">Fait en France</span></div>
+        </div>
+      </div>
+      <div class="hero-logo-box">
+        <div class="hero-logo-text">Terra<span>nova</span></div>
+        <div class="hero-logo-sub">Plateforme immobilière</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ DESCRIPTION ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(79,70,229,0.1)">📝</div>
+      <div>
+        <div class="section-title">Présentation</div>
+        <div class="section-sub">Description courte et longue pour vos articles</div>
+      </div>
+    </div>
+
+    <div class="desc-box">
+      <div class="desc-label">Description courte — 1 phrase</div>
+      <div class="desc-text">Terranova est une plateforme immobilière française combinant carte interactive MapLibre, outils d'aide à la décision et abonnements professionnels pour vendeurs, agents et agences.</div>
+
+      <div class="desc-label">Description longue — 3 phrases</div>
+      <div class="desc-text">Terranova repense l'expérience immobilière en France avec une carte interactive avancée (clustering, mode 3D, score de quartier, publicités géolocalisées) et une suite d'outils complète pour acheteurs et vendeurs. La plateforme propose la visite virtuelle 360°, la planification de rendez-vous, un simulateur de crédit, des alertes email en temps réel et des profils chercheurs actifs pour permettre aux acheteurs d'être contactés directement. Côté professionnels, Terranova offre des abonnements flexibles (mensuel ou annuel) avec statistiques avancées, badge Pro, gestion Stripe intégrée et pages agence dédiées.</div>
+
+      <div class="desc-label">Slogan</div>
+      <div class="desc-text" style="font-family:'DM Serif Display',serif;font-size:22px">"Votre bien mérite mieux qu'un intermédiaire."</div>
+    </div>
+  </div>
+
+
+  <!-- ══ CHIFFRES CLÉS ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(22,163,74,0.1)">📊</div>
+      <div>
+        <div class="section-title">Chiffres clés</div>
+        <div class="section-sub">La plateforme en quelques chiffres</div>
+      </div>
+    </div>
+
+    <div class="grid-4">
+      <div class="kpi">
+        <span class="kpi-val">3</span>
+        <div class="kpi-lbl">Plans tarifaires</div>
+        <div class="kpi-sub">Gratuit · Pro · Agence</div>
+      </div>
+      <div class="kpi">
+        <span class="kpi-val">35+</span>
+        <div class="kpi-lbl">Pages & routes</div>
+        <div class="kpi-sub">App + Admin + API</div>
+      </div>
+      <div class="kpi">
+        <span class="kpi-val">18</span>
+        <div class="kpi-lbl">API routes</div>
+        <div class="kpi-sub">Stripe · Resend · Cron</div>
+      </div>
+      <div class="kpi">
+        <span class="kpi-val">0 €</span>
+        <div class="kpi-lbl">Pour commencer</div>
+        <div class="kpi-sub">Plan gratuit sans CB</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ FONCTIONNALITÉS ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.1)">⚡</div>
+      <div>
+        <div class="section-title">Fonctionnalités phares</div>
+        <div class="section-sub">Ce qui distingue Terranova des portails immobiliers classiques</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="feat-list">
+        <div class="feat-row">
+          <div class="feat-row-icon">🗺</div>
+          <div>
+            <div class="feat-row-title">Carte interactive avancée</div>
+            <div class="feat-row-desc">MapLibre GL avec clustering adaptatif, heatmap, mode 3D, satellite, sélection au lasso et publicités géolocalisées.</div>
+          </div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-row-icon">🌐</div>
+          <div>
+            <div class="feat-row-title">Visite virtuelle 360°</div>
+            <div class="feat-row-desc">Upload de photos sphériques et visionneuse immersive multi-photos intégrée dans chaque annonce.</div>
+          </div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-row-icon">🏆</div>
+          <div>
+            <div class="feat-row-title">Score de quartier</div>
+            <div class="feat-row-desc">Score calculé en temps réel par catégorie POI (transports, santé, éducation, commerces, loisirs) depuis OpenStreetMap.</div>
+          </div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-row-icon">🧮</div>
+          <div>
+            <div class="feat-row-title">Simulateur de crédit immobilier</div>
+            <div class="feat-row-desc">Calcul en temps réel de la mensualité, coût total et assurance avec sliders interactifs pré-remplis.</div>
+          </div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-row-icon">🔭</div>
+          <div>
+            <div class="feat-row-title">Mode chercheur actif</div>
+            <div class="feat-row-desc">Les acheteurs publient leur recherche et peuvent être contactés directement par des vendeurs correspondant à leurs critères.</div>
+          </div>
+        </div>
+      </div>
+      <div class="feat-list">
+        <div class="feat-row">
+          <div class="feat-row-icon">📅</div>
+          <div>
+            <div class="feat-row-title">Planification de visites</div>
+            <div class="feat-row-desc">Demande en ligne, calendrier mensuel avec statuts, confirmations et export iCal directement depuis la fiche bien.</div>
+          </div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-row-icon">📊</div>
+          <div>
+            <div class="feat-row-title">Analyse du marché</div>
+            <div class="feat-row-desc">Prix au m² par ville, tendances historiques et comparatifs par catégorie de bien sur toute la France.</div>
+          </div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-row-icon">🏢</div>
+          <div>
+            <div class="feat-row-title">Annuaire agents & réseaux</div>
+            <div class="feat-row-desc">37 réseaux immobiliers référencés, pages dédiées par réseau avec agents groupés par ville et localisation sur carte.</div>
+          </div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-row-icon">🔔</div>
+          <div>
+            <div class="feat-row-title">Alertes intelligentes</div>
+            <div class="feat-row-desc">Notifications email pour les nouvelles annonces correspondant aux critères et les baisses de prix sur les favoris.</div>
+          </div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-row-icon">💳</div>
+          <div>
+            <div class="feat-row-title">Abonnements Pro & Agence</div>
+            <div class="feat-row-desc">Plans flexibles mensuel ou annuel avec paiement Stripe sécurisé et upgrade automatique après paiement.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ IDENTITÉ VISUELLE ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,58,237,0.1)">🎨</div>
+      <div>
+        <div class="section-title">Identité visuelle</div>
+        <div class="section-sub">Logo, couleurs et typographie officiels</div>
+      </div>
+    </div>
+
+    <!-- Logo variants -->
+    <div class="logo-variants" style="margin-bottom:20px">
+      <div class="logo-box" style="background:var(--navy)">
+        <div style="font-family:'DM Serif Display',serif;font-size:32px;color:white">Terra<span style="color:#818CF8;font-style:italic">nova</span></div>
+        <div class="logo-box-sub" style="color:rgba(255,255,255,0.4)">Sur fond sombre</div>
+      </div>
+      <div class="logo-box" style="background:white;border-color:rgba(15,23,42,0.1)">
+        <div style="font-family:'DM Serif Display',serif;font-size:32px;color:var(--navy)">Terra<span style="color:var(--primary);font-style:italic">nova</span></div>
+        <div class="logo-box-sub">Sur fond clair</div>
+      </div>
+      <div class="logo-box" style="background:linear-gradient(135deg,#0F172A,#4338CA)">
+        <div style="font-family:'DM Serif Display',serif;font-size:32px;color:white">Terra<span style="color:#818CF8;font-style:italic">nova</span></div>
+        <div class="logo-box-sub" style="color:rgba(255,255,255,0.4)">Sur gradient</div>
+      </div>
+    </div>
+
+    <!-- Couleurs -->
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:rgba(15,23,42,0.35);margin-bottom:14px">Palette principale</div>
+      <div class="color-row">
+        <div class="color-chip">
+          <div class="color-blob" style="background:#4F46E5"></div>
+          <div><div class="color-chip-name">Indigo</div><div class="color-chip-hex">#4F46E5</div></div>
+        </div>
+        <div class="color-chip">
+          <div class="color-blob" style="background:#0F172A"></div>
+          <div><div class="color-chip-name">Navy</div><div class="color-chip-hex">#0F172A</div></div>
+        </div>
+        <div class="color-chip">
+          <div class="color-blob" style="background:#818CF8"></div>
+          <div><div class="color-chip-name">Indigo doux</div><div class="color-chip-hex">#818CF8</div></div>
+        </div>
+        <div class="color-chip">
+          <div class="color-blob" style="background:#F8FAFC;border:1px solid rgba(15,23,42,0.12)"></div>
+          <div><div class="color-chip-name">Surface</div><div class="color-chip-hex">#F8FAFC</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typo -->
+    <div class="card">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:rgba(15,23,42,0.35);margin-bottom:14px">Typographie</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:baseline;gap:20px">
+          <span style="font-size:11px;color:rgba(15,23,42,0.4);width:130px;flex-shrink:0">Titres — Serif</span>
+          <span style="font-family:'DM Serif Display',serif;font-size:24px">DM Serif Display</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:20px">
+          <span style="font-size:11px;color:rgba(15,23,42,0.4);width:130px;flex-shrink:0">Corps — Sans</span>
+          <span style="font-size:16px">DM Sans — Regular / Medium / Bold</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ POSITIONNEMENT ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(8,145,178,0.1)">🎯</div>
+      <div>
+        <div class="section-title">Positionnement</div>
+        <div class="section-sub">Pour qui et pourquoi Terranova</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card-sm">
+        <div style="font-size:24px;margin-bottom:10px">🏠</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px">Particuliers vendeurs</div>
+        <div style="font-size:13px;color:rgba(15,23,42,0.55)">Publiez votre bien gratuitement sans commission, gérez vos visites et suivez l'intérêt des acheteurs depuis un tableau de bord clair.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:24px;margin-bottom:10px">🔍</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px">Acheteurs & locataires</div>
+        <div style="font-size:13px;color:rgba(15,23,42,0.55)">Trouvez le bien idéal sur une carte interactive enrichie, activez des alertes personnalisées et simulez votre crédit en temps réel.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:24px;margin-bottom:10px">🏢</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px">Agents & agences</div>
+        <div style="font-size:13px;color:rgba(15,23,42,0.55)">Gérez un volume illimité d'annonces, profitez d'une page agence dédiée, de statistiques avancées et d'un badge Pro visible sur la carte.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ CONTACT PRESSE ══ -->
+  <div class="contact-box">
+    <div>
+      <h2>Contact presse</h2>
+      <p>Pour toute demande d'interview, partenariat ou information complémentaire sur Terranova.</p>
+    </div>
+    <div class="contact-links">
+      <a href="mailto:presse@terranova.fr" class="contact-link">✉️ presse@terranova.fr</a>
+      <a href="https://terranova-beta.vercel.app" class="contact-link" target="_blank">🌐 terranova-beta.vercel.app</a>
+      <a href="https://terranova-beta.vercel.app/roadmap.html" class="contact-link" target="_blank">🗺 Voir la roadmap</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);margin-bottom:6px">Terranova</div>
+    <div style="font-size:12px;color:rgba(15,23,42,0.35)">Kit Presse · Mai 2026 · terranova-beta.vercel.app</div>
+  </div>
+
+</div>
+</body>
+</html>

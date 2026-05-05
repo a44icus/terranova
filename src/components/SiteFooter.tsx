@@ -25,6 +25,7 @@ export default function SiteFooter() {
             <Link href="/carte" className="text-xs text-white/50 hover:text-white transition-colors">Carte interactive</Link>
             <Link href="/agences" className="text-xs text-white/50 hover:text-white transition-colors">Agences</Link>
             <Link href="/blog" className="text-xs text-white/50 hover:text-white transition-colors">Blog</Link>
+            <Link href="/roadmap.html" className="text-xs text-white/50 hover:text-white transition-colors">Roadmap</Link>
           </div>
 
           {/* Col 3 — Vendeurs & Compte */}
@@ -32,6 +33,7 @@ export default function SiteFooter() {
             <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.15em] mb-1">Vendeurs & Pro</p>
             <Link href="/publier" className="text-xs text-white/50 hover:text-white transition-colors">Publier un bien</Link>
             <Link href="/publicite" className="text-xs text-white/50 hover:text-white transition-colors">Publicité</Link>
+            <Link href="/press.html" className="text-xs text-white/50 hover:text-white transition-colors">Kit presse</Link>
             <Link href="/auth/login" className="text-xs text-white/50 hover:text-white transition-colors">Connexion</Link>
             <Link href="/auth/register" className="text-xs text-white/50 hover:text-white transition-colors">Inscription</Link>
           </div>

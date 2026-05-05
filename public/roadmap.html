@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Terranova — Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary:      #4F46E5;
+    --primary-dark: #4338CA;
+    --primary-soft: #818CF8;
+    --navy:         #0F172A;
+    --surface:      #F8FAFC;
+    --location:     #0891B2;
+    --amber:        #F59E0B;
+    --green:        #16A34A;
+    --red:          #DC2626;
+    --violet:       #7C3AED;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--navy); line-height: 1.6; }
+  h1, h2, h3 { font-family: 'DM Serif Display', serif; }
+
+  .page { max-width: 1000px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 50%, var(--primary-dark) 100%);
+    color: white; border-radius: 24px; padding: 52px 48px 44px; margin-bottom: 48px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 16px; position: relative; }
+  .hero h1 { font-size: 46px; margin-bottom: 10px; position: relative; }
+  .hero h1 span { color: var(--primary-soft); }
+  .hero-sub { font-size: 16px; opacity: 0.65; max-width: 480px; margin-bottom: 28px; position: relative; }
+  .hero-note { font-size: 12px; opacity: 0.4; position: relative; }
+
+  /* Legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 40px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; background: white; border: 1px solid rgba(15,23,42,0.08); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Columns */
+  .board { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 48px; }
+  @media(max-width: 768px) { .board { grid-template-columns: 1fr; } }
+
+  .col-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 2px solid; }
+  .col-title { font-weight: 700; font-size: 14px; }
+  .col-count { font-size: 11px; font-weight: 600; background: rgba(15,23,42,0.06); color: rgba(15,23,42,0.4); padding: 2px 8px; border-radius: 10px; margin-left: auto; }
+
+  .card { background: white; border-radius: 14px; border: 1px solid rgba(15,23,42,0.07); padding: 16px 18px; margin-bottom: 10px; transition: transform 0.15s, box-shadow 0.15s; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(15,23,42,0.08); }
+  .card-icon { font-size: 20px; margin-bottom: 8px; }
+  .card-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: var(--navy); }
+  .card-desc { font-size: 12px; color: rgba(15,23,42,0.5); line-height: 1.5; }
+  .card-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 8px; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* Section idées */
+  .ideas { background: white; border-radius: 20px; border: 1px solid rgba(15,23,42,0.07); padding: 32px; }
+  .ideas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+  @media(max-width: 640px) { .ideas-grid { grid-template-columns: 1fr 1fr; } }
+  .idea-pill { background: var(--surface); border: 1px solid rgba(15,23,42,0.08); border-radius: 12px; padding: 12px 14px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .idea-pill:hover { border-color: var(--primary-soft); background: rgba(79,70,229,0.04); }
+
+  /* CTA */
+  .cta-box { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: 20px; padding: 36px 40px; text-align: center; color: white; margin-top: 48px; }
+  .cta-box h2 { font-size: 28px; margin-bottom: 10px; }
+  .cta-box p { font-size: 14px; opacity: 0.75; margin-bottom: 24px; }
+  .cta-btn { display: inline-block; background: white; color: var(--primary); font-weight: 700; font-size: 14px; padding: 12px 28px; border-radius: 12px; text-decoration: none; }
+
+  /* Footer */
+  .footer { text-align: center; padding-top: 32px; border-top: 1px solid rgba(15,23,42,0.08); margin-top: 48px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-badge">🗺 Roadmap · 2026</div>
+    <h1>Terra<span>nova</span></h1>
+    <p class="hero-sub">Ce que nous construisons pour vous — les fonctionnalités déjà disponibles et celles qui arrivent prochainement.</p>
+    <p class="hero-note">Mise à jour : mai 2026 · La roadmap peut évoluer selon les retours utilisateurs.</p>
+  </div>
+
+  <!-- Légende -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Disponible</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--primary)"></div> En développement</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> Prochainement</div>
+  </div>
+
+  <!-- Board -->
+  <div class="board">
+
+    <!-- Colonne Disponible -->
+    <div>
+      <div class="col-header" style="border-color:var(--green)">
+        <div class="legend-dot" style="background:var(--green)"></div>
+        <span class="col-title" style="color:var(--green)">Disponible</span>
+        <span class="col-count">16</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🗺</div>
+        <div class="card-title">Carte interactive</div>
+        <div class="card-desc">MapLibre avec clustering, heatmap, mode 3D, satellite et sélection au lasso.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Core</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🏠</div>
+        <div class="card-title">Publication d'annonces</div>
+        <div class="card-desc">Formulaire complet avec photos, géocodage automatique, DPE, équipements.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Core</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <div class="card-title">Recherche & filtres avancés</div>
+        <div class="card-desc">Type, catégorie, ville, prix, surface, pièces, DPE, options, rayon géographique.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Core</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <div class="card-title">Visite virtuelle 360°</div>
+        <div class="card-desc">Upload photos sphériques et visionneuse immersive multi-photos sur chaque fiche.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Vendeur</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">📅</div>
+        <div class="card-title">Planification de visites</div>
+        <div class="card-desc">Demande en ligne, calendrier mensuel, confirmations et export iCal.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Vendeur</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🧮</div>
+        <div class="card-title">Simulateur de crédit</div>
+        <div class="card-desc">Sliders interactifs pour apport, durée, taux et assurance. Calcul en temps réel.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Acheteur</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">📉</div>
+        <div class="card-title">Alertes baisse de prix</div>
+        <div class="card-desc">Notification email automatique quand un bien en favori baisse de prix.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Acheteur</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🔔</div>
+        <div class="card-title">Alertes nouveaux biens</div>
+        <div class="card-desc">Email automatique à la publication d'un bien correspondant à tes critères.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Acheteur</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🔭</div>
+        <div class="card-title">Mode chercheur actif</div>
+        <div class="card-desc">Profil public acheteur consultable par les vendeurs pour être contacté directement.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Acheteur</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">⭐</div>
+        <div class="card-title">Avis & notations des agents</div>
+        <div class="card-desc">Notes et avis vérifiés sur chaque fiche agent pour choisir en confiance.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Confiance</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🏆</div>
+        <div class="card-title">Score de quartier</div>
+        <div class="card-desc">Score calculé par catégorie POI (transports, santé, commerces, écoles, loisirs).</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Info</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Analyse du marché</div>
+        <div class="card-desc">Prix au m² par ville, tendances historiques et comparatifs par catégorie.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Info</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🏢</div>
+        <div class="card-title">Annuaire agents & réseaux</div>
+        <div class="card-desc">37 réseaux immobiliers, pages dédiées par réseau, localisation sur carte.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Pro</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">💳</div>
+        <div class="card-title">Abonnements Pro & Agence</div>
+        <div class="card-desc">3 tiers tarifaires (Gratuit, Pro, Agence) en mensuel ou annuel via Stripe.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Pro</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🔑</div>
+        <div class="card-title">Connexion Google</div>
+        <div class="card-desc">Inscription et connexion en un clic via compte Google.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Auth</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🌙</div>
+        <div class="card-title">Mode sombre</div>
+        <div class="card-desc">Thème sombre complet avec anti-flash et persistance de préférence.</div>
+        <span class="card-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">UX</span>
+      </div>
+    </div>
+
+    <!-- Colonne En développement -->
+    <div>
+      <div class="col-header" style="border-color:var(--primary)">
+        <div class="legend-dot" style="background:var(--primary)"></div>
+        <span class="col-title" style="color:var(--primary)">En développement</span>
+        <span class="col-count">3</span>
+      </div>
+
+      <div class="card" style="border-color:rgba(79,70,229,0.2)">
+        <div class="card-icon">💬</div>
+        <div class="card-title">Messagerie temps réel</div>
+        <div class="card-desc">Chat instantané entre acheteurs et vendeurs directement sur la plateforme, sans passer par email.</div>
+        <span class="card-tag" style="background:rgba(79,70,229,0.1);color:var(--primary)">Communication</span>
+      </div>
+
+      <div class="card" style="border-color:rgba(79,70,229,0.2)">
+        <div class="card-icon">📱</div>
+        <div class="card-title">Notifications push</div>
+        <div class="card-desc">Alertes en temps réel sur navigateur et mobile pour les nouvelles visites, messages et baisses de prix.</div>
+        <span class="card-tag" style="background:rgba(79,70,229,0.1);color:var(--primary)">UX</span>
+      </div>
+
+      <div class="card" style="border-color:rgba(79,70,229,0.2)">
+        <div class="card-icon">📄</div>
+        <div class="card-title">Rapport de visite PDF</div>
+        <div class="card-desc">Génération automatique d'un compte-rendu PDF après chaque visite confirmée.</div>
+        <span class="card-tag" style="background:rgba(79,70,229,0.1);color:var(--primary)">Vendeur</span>
+      </div>
+    </div>
+
+    <!-- Colonne Prochainement -->
+    <div>
+      <div class="col-header" style="border-color:var(--amber)">
+        <div class="legend-dot" style="background:var(--amber)"></div>
+        <span class="col-title" style="color:var(--amber)">Prochainement</span>
+        <span class="col-count">5</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <div class="card-title">Application mobile</div>
+        <div class="card-desc">App iOS & Android pour gérer ses annonces et recherches où que vous soyez.</div>
+        <span class="card-tag" style="background:rgba(245,158,11,0.1);color:var(--amber)">Mobile</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <div class="card-title">Matching IA acheteur/vendeur</div>
+        <div class="card-desc">Algorithme qui suggère automatiquement les biens les plus pertinents selon le profil chercheur.</div>
+        <span class="card-tag" style="background:rgba(245,158,11,0.1);color:var(--amber)">IA</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">✍️</div>
+        <div class="card-title">Signature électronique</div>
+        <div class="card-desc">Signature de documents (offre d'achat, mandat) directement depuis la plateforme.</div>
+        <span class="card-tag" style="background:rgba(245,158,11,0.1);color:var(--amber)">Pro</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">📤</div>
+        <div class="card-title">Export statistiques CSV</div>
+        <div class="card-desc">Téléchargement des statistiques de vos annonces (vues, contacts, conversions) en CSV.</div>
+        <span class="card-tag" style="background:rgba(245,158,11,0.1);color:var(--amber)">Pro</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🌍</div>
+        <div class="card-title">Multi-langues</div>
+        <div class="card-desc">Interface disponible en anglais et espagnol pour les acheteurs étrangers.</div>
+        <span class="card-tag" style="background:rgba(245,158,11,0.1);color:var(--amber)">International</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Idées à l'étude -->
+  <div class="ideas">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+      <div style="font-size:22px">💡</div>
+      <div>
+        <div style="font-family:'DM Serif Display',serif;font-size:20px">Idées à l'étude</div>
+        <div style="font-size:13px;color:rgba(15,23,42,0.45);margin-top:2px">En cours d'évaluation — vos retours nous aident à prioriser</div>
+      </div>
+    </div>
+    <div class="ideas-grid">
+      <div class="idea-pill">🏗 Suivi de chantier</div>
+      <div class="idea-pill">📐 Plan interactif du bien</div>
+      <div class="idea-pill">🔄 Échange de biens</div>
+      <div class="idea-pill">🧾 Estimation de frais de notaire</div>
+      <div class="idea-pill">🏘 Comparateur de villes</div>
+      <div class="idea-pill">📡 Veille concurrentielle</div>
+      <div class="idea-pill">🎥 Visite vidéo live</div>
+      <div class="idea-pill">🤝 Mise en relation notaire</div>
+      <div class="idea-pill">🌡 Diagnostic énergétique intégré</div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <h2>Une idée ou une suggestion ?</h2>
+    <p>Vos retours guident directement nos priorités de développement. Partagez-nous ce qui vous manque.</p>
+    <a href="mailto:contact@terranova.fr" class="cta-btn">Nous écrire →</a>
+  </div>
+
+  <div class="footer">
+    <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);margin-bottom:6px">Terranova</div>
+    <div style="font-size:12px;color:rgba(15,23,42,0.35)">Roadmap · Mise à jour mai 2026 · terranova-beta.vercel.app</div>
+  </div>
+
+</div>
+</body>
+</html>
