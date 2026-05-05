@@ -413,6 +413,48 @@
       </div>
     </div>
 
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="feat-card">
+        <div class="feat-card-icon">📅</div>
+        <div class="feat-card-title">Planification de visites</div>
+        <div class="feat-card-desc">Formulaire de demande sur chaque fiche bien. Calendrier mensuel avec pills par statut, panneau détail au clic. Actions confirmer/refuser/rouvrir. Export iCal (.ics) RFC 5545 valide.</div>
+        <span class="feat-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">📝</div>
+        <div class="feat-card-title">Blog SEO</div>
+        <div class="feat-card-desc">Page liste avec article à la une, grille 3 colonnes, filtres par catégorie (Guide, Actualité, Conseil, Marché). Page article avec metadata/OG complets. Admin avec éditeur HTML riche et gestion brouillons.</div>
+        <span class="feat-tag" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">🧮</div>
+        <div class="feat-card-title">Simulateur de crédit</div>
+        <div class="feat-card-desc">Accordéon sur les fiches vente. Sliders apport, durée (10–30 ans), taux, assurance. Calcul en temps réel : mensualité, coût total, coût assurance. Pré-rempli avec le prix du bien.</div>
+        <span class="feat-tag" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="feat-card">
+        <div class="feat-card-icon">⭐</div>
+        <div class="feat-card-title">Avis & notations des agents</div>
+        <div class="feat-card-desc">Note moyenne avec étoiles sur chaque fiche vendeur, répartition par note, liste des avis. Formulaire pour utilisateurs connectés (1 avis max/agent, anti-auto-notation).</div>
+        <span class="feat-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">🌙</div>
+        <div class="feat-card-title">Mode sombre</div>
+        <div class="feat-card-desc">Script anti-flash dans &lt;head&gt; avant le premier rendu. Variables CSS dark dans globals.css. Toggle ThemeToggle (icon + pill). Persistance localStorage. Respect de prefers-color-scheme.</div>
+        <span class="feat-tag" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-card-icon">🔔</div>
+        <div class="feat-card-title">Alertes nouveaux biens</div>
+        <div class="feat-card-desc">Sauvegarde de critères de recherche (type, catégorie, ville, prix, surface). Cron job <code>/api/cron/new-biens</code> toutes les heures : email Resend aux abonnés dont les critères matchent.</div>
+        <span class="feat-tag" style="background:rgba(22,163,74,0.1);color:var(--green)">Connecté</span>
+      </div>
+    </div>
+
     <div class="grid-3">
       <div class="feat-card">
         <div class="feat-card-icon">🏆</div>
@@ -467,6 +509,7 @@
         <tr><td><span class="route">/carte</span></td><td>Carte interactive MapLibre</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
         <tr><td><span class="route">/annonce/[id]</span></td><td>Fiche détail bien (photos, 360°, score quartier)</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
         <tr><td><span class="route">/marche</span></td><td>Analyse du marché immobilier par ville</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
+        <tr><td><span class="route">/marche/[ville]</span></td><td>Page marché par ville — prix au m², tendances, comparatifs</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
         <tr><td><span class="route">/estimer</span></td><td>Outil d'estimation gratuit</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
         <tr><td><span class="route">/chercheurs</span></td><td>Répertoire des acheteurs actifs</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
         <tr><td><span class="route">/chercheurs/[id]</span></td><td>Profil chercheur + formulaire de contact</td><td><span class="access-badge" style="background:rgba(8,145,178,0.1);color:var(--location)">Tous</span></td></tr>
