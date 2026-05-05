@@ -44,6 +44,7 @@ export default function SiteFooter() {
             <Link href="/legal/cookies" className="text-xs text-white/50 hover:text-white transition-colors">Cookies</Link>
             <Link href="/legal/cgu" className="text-xs text-white/50 hover:text-white transition-colors">CGU</Link>
             <Link href="/legal/cgv" className="text-xs text-white/50 hover:text-white transition-colors">CGV</Link>
+            <Link href="/changelog.html" className="text-xs text-white/50 hover:text-white transition-colors">Changelog</Link>
           </div>
 
         </div>
