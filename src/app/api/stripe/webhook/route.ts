@@ -6,7 +6,7 @@ import type { PlanType } from '@/lib/types'
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error('STRIPE_SECRET_KEY non configuré')
-  return new Stripe(key, { apiVersion: '2026-03-25.dahlia' })
+  return new Stripe(key, { apiVersion: '2026-04-22.dahlia' })
 }
 
 export async function POST(req: NextRequest) {
@@ -42,7 +42,16 @@ export async function POST(req: NextRequest) {
 
         const subscriptionId = session.subscription as string
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-        const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000).toISOString()
+        // current_period_end a changé de place dans les nouvelles versions de l'API Stripe
+        const sub = subscription as any
+        const rawEnd = sub.current_period_end
+          ?? sub.items?.data?.[0]?.current_period_end
+        const dureeFallback = plan.includes('annuel') ? 365 : 30
+        const periodEnd = (typeof rawEnd === 'number' && rawEnd > 0)
+          ? rawEnd
+          : Math.floor(Date.now() / 1000) + dureeFallback * 24 * 3600
+        const currentPeriodEnd = new Date(periodEnd * 1000).toISOString()
+        console.log(`[Webhook] periodEnd source: ${typeof rawEnd === 'number' ? 'stripe' : 'fallback'}, value: ${periodEnd}`)
 
         await supabase.from('profiles').update({
           plan,
@@ -68,7 +77,11 @@ export async function POST(req: NextRequest) {
         const plan = subscription.metadata?.plan as PlanType
         if (!userId || !plan) break
 
-        const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000).toISOString()
+        const sub2 = subscription as any
+        const periodEnd2 = sub2.current_period_end
+          ?? sub2.items?.data?.[0]?.current_period_end
+          ?? Math.floor(Date.now() / 1000) + 30 * 24 * 3600
+        const currentPeriodEnd = new Date(periodEnd2 * 1000).toISOString()
 
         await supabase.from('profiles').update({
           plan,
