@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function AdminHeroPage() {
   const supabase = createAdminClient()
-  const { data: photos } = await supabase
+  const { data: photos, error: tableError } = await supabase
     .from('hero_photos')
     .select('*')
     .order('ordre', { ascending: true })
@@ -25,8 +25,16 @@ export default async function AdminHeroPage() {
         </p>
       </div>
 
+      {/* Erreur table manquante */}
+      {tableError && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+          <strong>Table manquante</strong> — Exécutez d'abord le SQL ci-dessous dans Supabase → SQL Editor.
+          <br /><code className="text-xs mt-1 block opacity-70">{tableError.message}</code>
+        </div>
+      )}
+
       {/* SQL hint */}
-      {process.env.NODE_ENV !== 'production' && (
+      {(process.env.NODE_ENV !== 'production' || tableError) && (
         <details className="mb-8 bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs">
           <summary className="font-semibold cursor-pointer text-slate-600">SQL — Créer la table & le bucket</summary>
           <pre className="mt-3 text-slate-500 overflow-x-auto whitespace-pre-wrap">{`-- Table
