@@ -9,8 +9,9 @@ import type { BienCategorie, BienType } from '@/lib/types'
 const PAGE_SIZE = 24
 
 const CAT_LABEL: Record<string, string> = {
-  appartement: 'Appartement', maison: 'Maison', bureau: 'Bureau',
-  terrain: 'Terrain', parking: 'Parking', local: 'Local commercial',
+  appartement: 'Appartement', maison: 'Maison', studio: 'Studio / T1', villa: 'Villa', chalet: 'Chalet', loft: 'Loft / Atelier', colocation: 'Colocation',
+  bureau: 'Bureau', local: 'Local commercial', restaurant: 'Restaurant', entrepot: 'Entrepôt', hotel: 'Hôtel', fonds_commerce: 'Fonds de commerce', murs_commerciaux: 'Murs commerciaux',
+  terrain: 'Terrain', terrain_agricole: 'Terrain agricole', terrain_constructible: 'Terrain constructible', parking: 'Parking',
 }
 
 interface Props {

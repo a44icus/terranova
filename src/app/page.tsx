@@ -9,6 +9,8 @@ import LatestBiens from '@/components/home/LatestBiens'
 import FeaturesShowcase from '@/components/home/FeaturesShowcase'
 import VendeurSection from '@/components/home/VendeurSection'
 import HomeHamburger from '@/components/HomeHamburger'
+import { getPlanConfig, ALL_FEATURES } from '@/lib/plan'
+import type { PlanConfig } from '@/lib/plan'
 
 export const metadata: Metadata = {
   title: "Terranova \u2013 L'immobilier autrement",
@@ -27,6 +29,20 @@ const MARQUEE_ITEMS = [
   'Filtres avanc\u00e9s', 'Comparateur de biens', 'Score de quartier',
   'DPE & GES', 'S\u00e9lection au lasso', 'Annonce gratuite',
 ]
+
+// Construit 4-5 features lisibles pour une carte de plan sur la homepage
+function buildHomePlanFeatures(config: PlanConfig): string[] {
+  const lines: string[] = []
+  if (config.annonces >= 999) lines.push('Annonces illimitées')
+  else lines.push(`${config.annonces} annonce${config.annonces > 1 ? 's' : ''} active${config.annonces > 1 ? 's' : ''}`)
+  lines.push(`${config.photos} photos par annonce`)
+  for (const key of config.features) {
+    const def = ALL_FEATURES.find(f => f.key === key)
+    if (def) lines.push(def.label)
+    if (lines.length >= 5) break
+  }
+  return lines
+}
 
 export default async function LandingPage() {
   const supabase = await createClient()
@@ -48,6 +64,7 @@ export default async function LandingPage() {
     { count: totalBiens },
     { count: totalVilles },
     { count: totalAnnonceurs },
+    planConfig,
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from('biens_publics').select('*')
@@ -57,7 +74,50 @@ export default async function LandingPage() {
     supabase.from('biens_publics').select('*', { count: 'exact', head: true }),
     supabase.from('biens').select('ville', { count: 'exact', head: true }).eq('statut', 'publie'),
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    getPlanConfig(),
   ])
+
+  // ── Plans homepage : 3 tiers (Gratuit / Pro / Agence) ─────────────────────
+  // On utilise pro_mensuel et agence_mensuel comme référence pour les features/limites.
+  // Le prix annuel est affiché en sous-info.
+  const homePlans = [
+    {
+      key:  'gratuit' as const,
+      name: planConfig.gratuit.label ?? 'Gratuit',
+      desc: planConfig.gratuit.description ?? 'Publiez votre premier bien sans engagement.',
+      price:     '0',
+      priceSuffix: '/ toujours',
+      priceAnnuel: null,
+      cta:  'Commencer gratuitement',
+      href: '/auth/register',
+      features: buildHomePlanFeatures(planConfig.gratuit),
+      actif: planConfig.gratuit.actif !== false,
+    },
+    {
+      key:  'pro' as const,
+      name: planConfig.pro_mensuel.label ?? 'Pro',
+      desc: planConfig.pro_mensuel.description ?? 'Visibilité maximale, stats avancées.',
+      price:       String(planConfig.pro_mensuel.prix),
+      priceSuffix: '/ mois',
+      priceAnnuel: planConfig.pro_annuel.prix > 0 ? `ou ${planConfig.pro_annuel.prix} €/an` : null,
+      cta:  'Choisir ce plan',
+      href: '/compte/plan',
+      features: buildHomePlanFeatures(planConfig.pro_mensuel),
+      actif: planConfig.pro_mensuel.actif !== false,
+    },
+    {
+      key:  'agence' as const,
+      name: planConfig.agence_mensuel.label ?? 'Agence',
+      desc: planConfig.agence_mensuel.description ?? 'La solution complète pour les professionnels.',
+      price:       String(planConfig.agence_mensuel.prix),
+      priceSuffix: '/ mois',
+      priceAnnuel: planConfig.agence_annuel.prix > 0 ? `ou ${planConfig.agence_annuel.prix} €/an` : null,
+      cta:  'Choisir ce plan',
+      href: '/compte/plan',
+      features: buildHomePlanFeatures(planConfig.agence_mensuel),
+      actif: planConfig.agence_mensuel.actif !== false,
+    },
+  ].filter(p => p.actif)
 
   // Tri par proximité si géoloc disponible (distance euclidienne — assez précis à l'échelle ville)
   const biens = hasGeo
@@ -270,7 +330,7 @@ export default async function LandingPage() {
       <FeaturesShowcase />
 
       {/* ── Vendeurs & Tarifs ────────────────────────────────────── */}
-      <VendeurSection totalAnnonceurs={totalAnnonceurs ?? 0} />
+      <VendeurSection totalAnnonceurs={totalAnnonceurs ?? 0} homePlans={homePlans} />
 
       <SiteFooter />
 

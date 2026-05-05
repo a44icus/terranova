@@ -26,12 +26,14 @@ const DPE_COLORS: Record<string, string> = {
   D: '#F9A825', E: '#EF6C00', F: '#D84315', G: '#B71C1C',
 }
 const CAT_LABEL: Record<string, string> = {
-  appartement: 'Appartement', maison: 'Maison', bureau: 'Bureau',
-  terrain: 'Terrain', parking: 'Parking', local: 'Local commercial',
+  appartement: 'Appartement', maison: 'Maison', studio: 'Studio / T1', villa: 'Villa', chalet: 'Chalet', loft: 'Loft / Atelier', colocation: 'Colocation',
+  bureau: 'Bureau', local: 'Local commercial', restaurant: 'Restaurant', entrepot: 'Entrepôt', hotel: 'Hôtel', fonds_commerce: 'Fonds de commerce', murs_commerciaux: 'Murs commerciaux',
+  terrain: 'Terrain', terrain_agricole: 'Terrain agricole', terrain_constructible: 'Terrain constructible', parking: 'Parking',
 }
 const CAT_ICON: Record<string, string> = {
-  appartement: '🏛️', maison: '🌿', bureau: '🏢',
-  terrain: '🌱', parking: '🅿️', local: '🏪',
+  appartement: '🏛️', maison: '🌿', studio: '🛋️', villa: '🏰', chalet: '🏔️', loft: '🎨', colocation: '👥',
+  bureau: '🏢', local: '🏪', restaurant: '🍽️', entrepot: '🏭', hotel: '🏨', fonds_commerce: '💼', murs_commerciaux: '🧱',
+  terrain: '🌱', terrain_agricole: '🌾', terrain_constructible: '🏗️', parking: '🅿️',
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

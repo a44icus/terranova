@@ -10,8 +10,9 @@ export const metadata: Metadata = {
 }
 
 const CAT_LABEL: Record<string, string> = {
-  appartement: 'Appt', maison: 'Maison', bureau: 'Bureau',
-  terrain: 'Terrain', parking: 'Parking', local: 'Local',
+  appartement: 'Appt', maison: 'Maison', studio: 'Studio', villa: 'Villa', chalet: 'Chalet', loft: 'Loft', colocation: 'Coloc.',
+  bureau: 'Bureau', local: 'Local', restaurant: 'Resto', entrepot: 'Entrepôt', hotel: 'Hôtel', fonds_commerce: 'Fonds comm.', murs_commerciaux: 'Murs comm.',
+  terrain: 'Terrain', terrain_agricole: 'T. agricole', terrain_constructible: 'T. constructible', parking: 'Parking',
 }
 
 function formatBudget(min?: number | null, max?: number | null): string {

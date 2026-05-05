@@ -113,11 +113,32 @@ export default function Filters({ hideReset, hideTabs }: { hideReset?: boolean; 
         <select value={filtres.categorie} onChange={e => setFiltreCategorie(e.target.value as any)}
           className="flex-1 border border-navy/12 bg-white rounded-md px-2 py-1.5 text-xs text-navy appearance-none cursor-pointer focus:outline-none focus:border-primary">
           <option value="">Tous types</option>
-          <option value="appartement">Appartement</option>
-          <option value="maison">Maison</option>
-          <option value="bureau">Bureau / Local</option>
-          <option value="terrain">Terrain</option>
-          <option value="parking">Parking</option>
+          <optgroup label="Résidentiel">
+            <option value="appartement">Appartement</option>
+            <option value="maison">Maison</option>
+            <option value="studio">Studio / T1</option>
+            <option value="villa">Villa</option>
+            <option value="chalet">Chalet</option>
+            <option value="loft">Loft / Atelier</option>
+            <option value="colocation">Colocation</option>
+          </optgroup>
+          <optgroup label="Commercial / Pro">
+            <option value="bureau">Bureau</option>
+            <option value="local">Local commercial</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="entrepot">Entrepôt</option>
+            <option value="hotel">Hôtel</option>
+            <option value="fonds_commerce">Fonds de commerce</option>
+            <option value="murs_commerciaux">Murs commerciaux</option>
+          </optgroup>
+          <optgroup label="Foncier">
+            <option value="terrain">Terrain</option>
+            <option value="terrain_agricole">Terrain agricole</option>
+            <option value="terrain_constructible">Terrain constructible</option>
+          </optgroup>
+          <optgroup label="Autre">
+            <option value="parking">Parking</option>
+          </optgroup>
         </select>
         <select value={filtres.surface} onChange={e => setFiltreSurface(e.target.value)}
           className="flex-1 border border-navy/12 bg-white rounded-md px-2 py-1.5 text-xs text-navy appearance-none cursor-pointer focus:outline-none focus:border-primary">

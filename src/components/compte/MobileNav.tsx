@@ -26,9 +26,11 @@ const BOTTOM_NAV = [
 ]
 
 const PLAN_LABEL: Record<string, { label: string; color: string }> = {
-  gratuit:     { label: 'Gratuit',    color: '#94A3B8' },
-  pro_mensuel: { label: 'Pro',        color: '#4F46E5' },
-  pro_annuel:  { label: 'Pro Annuel', color: '#4F46E5' },
+  gratuit:        { label: 'Gratuit', color: '#94A3B8' },
+  pro_mensuel:    { label: 'Pro',     color: '#4F46E5' },
+  pro_annuel:     { label: 'Pro',     color: '#4F46E5' },
+  agence_mensuel: { label: 'Agence',  color: '#0891b2' },
+  agence_annuel:  { label: 'Agence',  color: '#0891b2' },
 }
 
 export default function MobileNav({ profile, counts }: Props) {

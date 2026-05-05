@@ -123,6 +123,7 @@ const PROFILS = [
 
       if (['appartement', 'studio'].includes(b.categorie)) { s += 20; raisons.push('Appartement : forte demande locative') }
       if (b.categorie === 'local') { s += 15; raisons.push('Local commercial — bail 3/6/9') }
+      if (b.categorie === 'restaurant') { s += 20; raisons.push('Restaurant — forte valeur commerciale') }
 
       if (b.meuble) { s += 15; raisons.push('Meublé — rendement supérieur et fiscalité LMNP') }
       if (b.fibre) { s += 8; raisons.push('Fibre — attractif pour les locataires') }

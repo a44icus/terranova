@@ -116,7 +116,7 @@ export default function AgencesClient({ reseaux, independants }: Props) {
               <Link key={reseau.id} href={`/agences/reseau/${reseau.slug}`} prefetch={false}
                 className="group bg-white rounded-2xl border border-navy/08 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
                 {/* Header card */}
-                <div className="px-5 pt-5 pb-4 flex items-center gap-4" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)' }}>
+                <div className="px-5 pt-5 pb-4 flex items-center gap-4" style={{ background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)' }}>
                   <div className="w-14 h-14 rounded-xl bg-white shadow-sm border border-navy/06 flex items-center justify-center overflow-hidden flex-shrink-0 p-1.5">
                     {reseau.logo_url
                       ? <img src={reseau.logo_url} alt={reseau.nom} className="w-full h-full object-contain" />

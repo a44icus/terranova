@@ -24,13 +24,15 @@ import { getSiteSettings, getPoiWeights, getScoreSeuils } from '@/lib/siteSettin
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
 
 const CAT_ICON: Record<string, string> = {
-  appartement: '🏛️', maison: '🌿', bureau: '🏢',
-  terrain: '🌱', parking: '🅿️', local: '🏪',
+  appartement: '🏛️', maison: '🌿', studio: '🛋️', villa: '🏰', chalet: '🏔️', loft: '🎨', colocation: '👥',
+  bureau: '🏢', local: '🏪', restaurant: '🍽️', entrepot: '🏭', hotel: '🏨', fonds_commerce: '💼', murs_commerciaux: '🧱',
+  terrain: '🌱', terrain_agricole: '🌾', terrain_constructible: '🏗️', parking: '🅿️',
 }
 
 const CAT_LABEL: Record<string, string> = {
-  appartement: 'Appartement', maison: 'Maison', bureau: 'Bureau',
-  terrain: 'Terrain', parking: 'Parking', local: 'Local commercial',
+  appartement: 'Appartement', maison: 'Maison', studio: 'Studio / T1', villa: 'Villa', chalet: 'Chalet', loft: 'Loft / Atelier', colocation: 'Colocation',
+  bureau: 'Bureau', local: 'Local commercial', restaurant: 'Restaurant', entrepot: 'Entrepôt', hotel: 'Hôtel', fonds_commerce: 'Fonds de commerce', murs_commerciaux: 'Murs commerciaux',
+  terrain: 'Terrain', terrain_agricole: 'Terrain agricole', terrain_constructible: 'Terrain constructible', parking: 'Parking',
 }
 
 const OPTIONS_LABELS: Record<string, string> = {
@@ -264,6 +266,148 @@ export default async function AnnoncePage({ params }: Props) {
                 {bien.annee_construction && <Fact icon="📅" label="Année de construction" value={String(bien.annee_construction)} />}
                 {bien.departement && <Fact icon="🗺" label="Département" value={bien.departement} />}
               </div>
+
+              {/* Caractéristiques universelles : chauffage / charges copro / exposition */}
+              {(bien.type_chauffage || bien.charges_copro || bien.exposition) && (
+                <div className="mt-5 pt-5 border-t border-navy/06">
+                  <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">Informations complémentaires</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    {bien.type_chauffage && <Fact icon="🔥" label="Chauffage" value={
+                      bien.type_chauffage === 'electrique' ? 'Électrique'
+                      : bien.type_chauffage === 'gaz' ? 'Gaz'
+                      : bien.type_chauffage === 'pac' ? 'PAC (pompe à chaleur)'
+                      : bien.type_chauffage === 'fioul' ? 'Fioul'
+                      : bien.type_chauffage === 'bois' ? 'Bois / Pellets'
+                      : bien.type_chauffage === 'collectif' ? 'Collectif'
+                      : bien.type_chauffage
+                    } />}
+                    {bien.charges_copro && <Fact icon="🏘️" label="Charges copro" value={`${bien.charges_copro} €/mois`} />}
+                    {bien.exposition && <Fact icon="🧭" label="Exposition" value={bien.exposition} />}
+                  </div>
+                </div>
+              )}
+
+              {/* Caractéristiques spécifiques restaurant */}
+              {bien.categorie === 'restaurant' && (bien.couverts || bien.licence_restaurant || bien.fonds_commerce || bien.cuisine_pro || bien.terrasse_ext) && (
+                <div className="mt-5 pt-5 border-t border-navy/06">
+                  <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">🍽️ Informations restaurant</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    {bien.licence_restaurant && <Fact icon="🍷" label="Licence" value={`Licence ${bien.licence_restaurant}`} />}
+                    {bien.couverts && <Fact icon="🪑" label="Capacité" value={`${bien.couverts} couverts`} />}
+                    {bien.fonds_commerce && <Fact icon="💼" label="Fonds de commerce" value="Inclus" />}
+                    {bien.cuisine_pro && <Fact icon="👨‍🍳" label="Cuisine professionnelle" value="Équipée" />}
+                    {bien.terrasse_ext && <Fact icon="☀️" label="Terrasse extérieure" value="Droits inclus" />}
+                  </div>
+                </div>
+              )}
+
+              {/* Caractéristiques spécifiques colocation */}
+              {bien.categorie === 'colocation' && (bien.loyer_par_chambre || bien.charges_incluses) && (
+                <div className="mt-5 pt-5 border-t border-navy/06">
+                  <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">👥 Informations colocation</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    {bien.loyer_par_chambre && <Fact icon="🛏️" label="Loyer par chambre" value={`${bien.loyer_par_chambre} €/mois`} />}
+                    {bien.charges_incluses && <Fact icon="✅" label="Charges" value="Incluses" />}
+                  </div>
+                </div>
+              )}
+
+              {/* Caractéristiques spécifiques bureau */}
+              {bien.categorie === 'bureau' && (bien.nb_postes_travail || bien.open_space || bien.bail_commercial) && (
+                <div className="mt-5 pt-5 border-t border-navy/06">
+                  <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">🏢 Informations bureau</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    {bien.nb_postes_travail && <Fact icon="💺" label="Postes de travail" value={String(bien.nb_postes_travail)} />}
+                    {bien.open_space && <Fact icon="🔓" label="Configuration" value="Open space" />}
+                    {bien.bail_commercial && <Fact icon="📋" label="Bail" value="Bail commercial" />}
+                  </div>
+                </div>
+              )}
+
+              {/* Caractéristiques spécifiques local commercial */}
+              {bien.categorie === 'local' && (bien.droit_au_bail || bien.bail_commercial) && (
+                <div className="mt-5 pt-5 border-t border-navy/06">
+                  <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">🏪 Informations local commercial</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    {bien.droit_au_bail && <Fact icon="🔑" label="Droit au bail" value={`${bien.droit_au_bail.toLocaleString('fr-FR')} €`} />}
+                    {bien.bail_commercial && <Fact icon="📋" label="Bail" value="Bail commercial" />}
+                  </div>
+                </div>
+              )}
+
+              {/* Caractéristiques spécifiques entrepôt */}
+              {bien.categorie === 'entrepot' && (bien.hauteur_sous_plafond || bien.quai_chargement || bien.porte_sectionnelle || bien.surface_bureau_incluse) && (
+                <div className="mt-5 pt-5 border-t border-navy/06">
+                  <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">🏭 Informations entrepôt</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    {bien.hauteur_sous_plafond && <Fact icon="📏" label="Hauteur sous plafond" value={`${bien.hauteur_sous_plafond} m`} />}
+                    {bien.surface_bureau_incluse && <Fact icon="🗂️" label="Surface bureaux incluse" value={`${bien.surface_bureau_incluse} m²`} />}
+                    {bien.quai_chargement && <Fact icon="🚚" label="Quai de chargement" value="Oui" />}
+                    {bien.porte_sectionnelle && <Fact icon="🚪" label="Porte sectionnelle" value="Oui" />}
+                  </div>
+                </div>
+              )}
+
+              {/* Caractéristiques spécifiques fonds de commerce */}
+              {bien.categorie === 'fonds_commerce' && (bien.chiffre_affaires || bien.loyer_annuel || bien.duree_bail_restant || bien.effectif) && (
+                <div className="mt-5 pt-5 border-t border-navy/06">
+                  <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">💼 Informations fonds de commerce</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    {bien.chiffre_affaires && <Fact icon="📈" label="Chiffre d'affaires" value={`${bien.chiffre_affaires.toLocaleString('fr-FR')} €/an`} />}
+                    {bien.loyer_annuel && <Fact icon="🏷️" label="Loyer annuel" value={`${bien.loyer_annuel.toLocaleString('fr-FR')} €/an`} />}
+                    {bien.duree_bail_restant && <Fact icon="📅" label="Durée bail restant" value={`${bien.duree_bail_restant} an${bien.duree_bail_restant > 1 ? 's' : ''}`} />}
+                    {bien.effectif && <Fact icon="👥" label="Effectif" value={`${bien.effectif} salarié${bien.effectif > 1 ? 's' : ''}`} />}
+                    {bien.bail_commercial && <Fact icon="📋" label="Bail" value="Bail commercial" />}
+                  </div>
+                </div>
+              )}
+
+              {/* Caractéristiques spécifiques murs commerciaux */}
+              {bien.categorie === 'murs_commerciaux' && (bien.loyer_annuel || bien.rendement_locatif || bien.bail_en_cours || bien.bail_commercial) && (
+                <div className="mt-5 pt-5 border-t border-navy/06">
+                  <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">🏬 Informations murs commerciaux</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    {bien.loyer_annuel && <Fact icon="🏷️" label="Loyer annuel" value={`${bien.loyer_annuel.toLocaleString('fr-FR')} €/an`} />}
+                    {bien.rendement_locatif && <Fact icon="📊" label="Rendement locatif" value={`${bien.rendement_locatif} %`} />}
+                    {bien.bail_en_cours && <Fact icon="✅" label="Bail" value="Bail en cours" />}
+                    {bien.bail_commercial && <Fact icon="📋" label="Type bail" value="Bail commercial" />}
+                  </div>
+                </div>
+              )}
+
+              {/* Caractéristiques spécifiques terrains */}
+              {['terrain','terrain_agricole','terrain_constructible'].includes(bien.categorie) && (bien.viabilise || bien.nature_terrain || bien.zone_plu) && (
+                <div className="mt-5 pt-5 border-t border-navy/06">
+                  <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">🌱 Informations terrain</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    {bien.viabilise !== undefined && bien.viabilise !== null && <Fact icon="🔌" label="Viabilisé" value={bien.viabilise ? 'Oui' : 'Non'} />}
+                    {bien.nature_terrain && <Fact icon="🌾" label="Nature" value={
+                      bien.nature_terrain === 'terres' ? 'Terres arables'
+                      : bien.nature_terrain === 'prairies' ? 'Prairies'
+                      : bien.nature_terrain === 'bois' ? 'Bois / Forêt'
+                      : bien.nature_terrain === 'vignes' ? 'Vignes'
+                      : bien.nature_terrain
+                    } />}
+                    {bien.zone_plu && <Fact icon="🗺️" label="Zone PLU" value={bien.zone_plu} />}
+                  </div>
+                </div>
+              )}
+
+              {/* Caractéristiques spécifiques parking */}
+              {bien.categorie === 'parking' && (bien.type_parking || bien.acces_24h) && (
+                <div className="mt-5 pt-5 border-t border-navy/06">
+                  <p className="text-xs font-semibold text-navy/40 uppercase tracking-wider mb-3">🅿️ Informations parking</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                    {bien.type_parking && <Fact icon="🚗" label="Type" value={
+                      bien.type_parking === 'box_ferme' ? 'Box fermé'
+                      : bien.type_parking === 'place_ouverte' ? 'Place ouverte'
+                      : bien.type_parking === 'souterrain' ? 'Parking souterrain'
+                      : bien.type_parking
+                    } />}
+                    {bien.acces_24h && <Fact icon="🕐" label="Accès" value="24h/24" />}
+                  </div>
+                </div>
+              )}
 
             </div>
 

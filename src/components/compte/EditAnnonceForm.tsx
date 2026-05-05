@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { BienType, BienCategorie, DpeClasse, Profile } from '@/lib/types'
-import { LIMITES_PLAN } from '@/lib/types'
 import LocationPicker from '@/components/LocationPicker'
 
 interface Photo { id: string; url: string; storage_path: string; ordre: number; principale: boolean }
@@ -13,15 +12,39 @@ interface Props {
   bien: any
   photos: Photo[]
   profile: Profile
+  planPhotosMax?: number   // limite photos du plan (live depuis DB)
 }
 
 const CATEGORIES: { value: BienCategorie; label: string; icon: string }[] = [
-  { value: 'appartement', label: 'Appartement', icon: '🏢' },
-  { value: 'maison',      label: 'Maison',       icon: '🏠' },
-  { value: 'bureau',      label: 'Bureau/Local',  icon: '🏗️' },
-  { value: 'terrain',     label: 'Terrain',       icon: '🌱' },
-  { value: 'parking',     label: 'Parking',       icon: '🅿️' },
-  { value: 'local',       label: 'Local comm.',   icon: '🏪' },
+  // Résidentiel
+  { value: 'appartement',           label: 'Appartement',      icon: '🏢' },
+  { value: 'maison',                label: 'Maison',            icon: '🏠' },
+  { value: 'studio',                label: 'Studio / T1',       icon: '🛏️' },
+  { value: 'villa',                 label: 'Villa',             icon: '🏡' },
+  { value: 'chalet',                label: 'Chalet',            icon: '🏔️' },
+  { value: 'loft',                  label: 'Loft / Atelier',    icon: '🏭' },
+  { value: 'colocation',            label: 'Colocation',        icon: '👥' },
+  // Commercial / Pro
+  { value: 'bureau',                label: 'Bureau',            icon: '🏗️' },
+  { value: 'local',                 label: 'Local comm.',       icon: '🏪' },
+  { value: 'restaurant',            label: 'Restaurant',        icon: '🍽️' },
+  { value: 'entrepot',              label: 'Entrepôt',          icon: '🏭' },
+  { value: 'hotel',                 label: 'Hôtel',             icon: '🏨' },
+  { value: 'fonds_commerce',        label: 'Fonds commerce',    icon: '💼' },
+  { value: 'murs_commerciaux',      label: 'Murs commerciaux',  icon: '🏬' },
+  // Foncier
+  { value: 'terrain',               label: 'Terrain',           icon: '🌱' },
+  { value: 'terrain_agricole',      label: 'Terrain agricole',  icon: '🌾' },
+  { value: 'terrain_constructible', label: 'Terrain construct.', icon: '🏗️' },
+  // Autre
+  { value: 'parking',               label: 'Parking',           icon: '🅿️' },
+]
+
+const LICENCES_RESTO = [
+  { value: '', label: 'Sans licence' },
+  { value: 'II',  label: 'Licence II (bières, vins, cidres)' },
+  { value: 'III', label: 'Licence III (bières + alcools fermentés)' },
+  { value: 'IV',  label: 'Licence IV (tous alcools)' },
 ]
 
 const OPTIONS = [
@@ -39,11 +62,23 @@ const DPE_COLORS: Record<DpeClasse, string> = {
   A:'#2E7D32', B:'#558B2F', C:'#9E9D24',
   D:'#F9A825', E:'#EF6C00', F:'#D84315', G:'#B71C1C',
 }
+// Couleurs officielles GES (bleu clair → bleu très foncé, comme sur la page annonce)
+const GES_COLORS: Record<DpeClasse, string> = {
+  A:'#9DD4E8', B:'#76B8D8', C:'#4D9DC4',
+  D:'#2E7BAE', E:'#1B5C94', F:'#0F3D72', G:'#071E45'
+}
 
-export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }: Props) {
+const CAT_GROUPS = [
+  { label: 'Résidentiel',      values: ['appartement','maison','studio','villa','chalet','loft','colocation'] },
+  { label: 'Commercial / Pro', values: ['bureau','local','restaurant','entrepot','hotel','fonds_commerce','murs_commerciaux'] },
+  { label: 'Foncier',          values: ['terrain','terrain_agricole','terrain_constructible'] },
+  { label: 'Autre',            values: ['parking'] },
+]
+
+export default function EditAnnonceForm({ bien, photos: initialPhotos, profile, planPhotosMax }: Props) {
   const router = useRouter()
   const supabase = createClient()
-  const limite = LIMITES_PLAN[profile.plan]
+  const photoLimit = planPhotosMax ?? 10
 
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -85,6 +120,49 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
     meuble:             bien.meuble ?? false,
     neuf:               bien.neuf ?? false,
     options:            (bien.options ?? []) as string[],
+    // Champs restaurant
+    licence_restaurant: bien.licence_restaurant ?? '',
+    couverts:           String(bien.couverts ?? ''),
+    fonds_commerce:     bien.fonds_commerce ?? false,
+    cuisine_pro:        bien.cuisine_pro ?? false,
+    terrasse_ext:       bien.terrasse_ext ?? false,
+    // Champs hôtel
+    nb_chambres_hotel:  String(bien.nb_chambres_hotel ?? ''),
+    nb_etoiles:         String(bien.nb_etoiles ?? ''),
+    // Champs colocation
+    nb_colocataires:    String(bien.nb_colocataires ?? ''),
+    // Universal category fields
+    type_chauffage:     bien.type_chauffage ?? '',
+    exposition:         bien.exposition ?? '',
+    charges_copro:      String(bien.charges_copro ?? ''),
+    // Colocation extras
+    loyer_par_chambre:  String(bien.loyer_par_chambre ?? ''),
+    charges_incluses:   bien.charges_incluses ?? false,
+    // Bureau / Local
+    open_space:         bien.open_space ?? false,
+    nb_postes_travail:  String(bien.nb_postes_travail ?? ''),
+    bail_commercial:    bien.bail_commercial ?? false,
+    droit_au_bail:      String(bien.droit_au_bail ?? ''),
+    // Entrepôt
+    hauteur_sous_plafond: String(bien.hauteur_sous_plafond ?? ''),
+    quai_chargement:    bien.quai_chargement ?? false,
+    porte_sectionnelle: bien.porte_sectionnelle ?? false,
+    surface_bureau_incluse: String(bien.surface_bureau_incluse ?? ''),
+    // Fonds de commerce
+    chiffre_affaires:   String(bien.chiffre_affaires ?? ''),
+    loyer_annuel:       String(bien.loyer_annuel ?? ''),
+    duree_bail_restant: String(bien.duree_bail_restant ?? ''),
+    effectif:           String(bien.effectif ?? ''),
+    // Murs commerciaux
+    bail_en_cours:      bien.bail_en_cours ?? false,
+    rendement_locatif:  String(bien.rendement_locatif ?? ''),
+    // Terrains
+    viabilise:          bien.viabilise ?? false,
+    nature_terrain:     bien.nature_terrain ?? '',
+    zone_plu:           bien.zone_plu ?? '',
+    // Parking
+    type_parking:       bien.type_parking ?? '',
+    acces_24h:          bien.acces_24h ?? false,
     adresse:            bien.adresse ?? '',
     complement:         bien.complement ?? '',
     ville:              bien.ville ?? '',
@@ -157,7 +235,7 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
       return true
     })
     const totalExisting = existingPhotos.length - deletedPhotoIds.length
-    const canAdd = limite.photos - totalExisting - newPhotos.length
+    const canAdd = photoLimit - totalExisting - newPhotos.length
     const selected = valid.slice(0, Math.max(canAdd, 0))
     setNewPhotos(p => [...p, ...selected])
     selected.forEach(f => {
@@ -224,6 +302,83 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
           approx:             form.approx,
           neuf:               form.neuf,
           ref_agence:         form.ref_agence || null,
+          // Champs restaurant
+          ...(form.categorie === 'restaurant' ? {
+            licence_restaurant: form.licence_restaurant || null,
+            couverts:           form.couverts ? parseInt(form.couverts) : null,
+            fonds_commerce:     form.fonds_commerce,
+            cuisine_pro:        form.cuisine_pro,
+            terrasse_ext:       form.terrasse_ext,
+          } : {}),
+          // Champs hôtel
+          ...(form.categorie === 'hotel' ? {
+            nb_chambres_hotel: form.nb_chambres_hotel ? parseInt(form.nb_chambres_hotel) : null,
+            nb_etoiles:        form.nb_etoiles ? parseInt(form.nb_etoiles) : null,
+          } : {}),
+          // Champs colocation
+          ...(form.categorie === 'colocation' ? {
+            nb_colocataires: form.nb_colocataires ? parseInt(form.nb_colocataires) : null,
+            loyer_par_chambre: form.loyer_par_chambre ? parseInt(form.loyer_par_chambre) : null,
+            charges_incluses: form.charges_incluses,
+          } : {}),
+          // Champs universels chauffage/exposition/charges_copro
+          ...(['appartement','maison','studio','villa','chalet','loft','colocation','bureau'].includes(form.categorie) ? {
+            type_chauffage: form.type_chauffage || null,
+          } : {}),
+          ...(['appartement','studio','loft'].includes(form.categorie) ? {
+            charges_copro: form.charges_copro ? parseInt(form.charges_copro) : null,
+          } : {}),
+          ...(['appartement','maison','studio','villa','chalet','loft','colocation'].includes(form.categorie) ? {
+            exposition: form.exposition || null,
+          } : {}),
+          // Champs bureau
+          ...(form.categorie === 'bureau' ? {
+            open_space: form.open_space,
+            nb_postes_travail: form.nb_postes_travail ? parseInt(form.nb_postes_travail) : null,
+            bail_commercial: form.bail_commercial,
+          } : {}),
+          // Champs local
+          ...(form.categorie === 'local' ? {
+            droit_au_bail: form.droit_au_bail ? parseInt(form.droit_au_bail) : null,
+            bail_commercial: form.bail_commercial,
+          } : {}),
+          // Champs entrepôt
+          ...(form.categorie === 'entrepot' ? {
+            hauteur_sous_plafond: form.hauteur_sous_plafond ? parseFloat(form.hauteur_sous_plafond) : null,
+            quai_chargement: form.quai_chargement,
+            porte_sectionnelle: form.porte_sectionnelle,
+            surface_bureau_incluse: form.surface_bureau_incluse ? parseInt(form.surface_bureau_incluse) : null,
+          } : {}),
+          // Champs fonds de commerce
+          ...(form.categorie === 'fonds_commerce' ? {
+            chiffre_affaires: form.chiffre_affaires ? parseInt(form.chiffre_affaires) : null,
+            loyer_annuel: form.loyer_annuel ? parseInt(form.loyer_annuel) : null,
+            duree_bail_restant: form.duree_bail_restant ? parseInt(form.duree_bail_restant) : null,
+            effectif: form.effectif ? parseInt(form.effectif) : null,
+            bail_commercial: form.bail_commercial,
+          } : {}),
+          // Champs murs commerciaux
+          ...(form.categorie === 'murs_commerciaux' ? {
+            bail_en_cours: form.bail_en_cours,
+            rendement_locatif: form.rendement_locatif ? parseFloat(form.rendement_locatif) : null,
+            loyer_annuel: form.loyer_annuel ? parseInt(form.loyer_annuel) : null,
+            bail_commercial: form.bail_commercial,
+          } : {}),
+          // Champs terrains
+          ...(['terrain','terrain_agricole','terrain_constructible'].includes(form.categorie) ? {
+            viabilise: form.viabilise,
+          } : {}),
+          ...(form.categorie === 'terrain_agricole' ? {
+            nature_terrain: form.nature_terrain || null,
+          } : {}),
+          ...(form.categorie === 'terrain_constructible' ? {
+            zone_plu: form.zone_plu || null,
+          } : {}),
+          // Champs parking
+          ...(form.categorie === 'parking' ? {
+            type_parking: form.type_parking || null,
+            acces_24h: form.acces_24h,
+          } : {}),
         })
         .eq('id', bien.id)
 
@@ -350,14 +505,21 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
               ))}
             </div>
 
-            {/* Catégorie */}
-            <div className="grid grid-cols-3 gap-2">
-              {CATEGORIES.map(c => (
-                <button key={c.value} type="button" onClick={() => update('categorie', c.value)}
-                  className={`py-2.5 rounded-xl text-sm border transition-all flex flex-col items-center gap-1 ${form.categorie === c.value ? 'bg-navy text-white border-navy' : 'bg-white text-navy/60 border-navy/15 hover:border-navy/30'}`}>
-                  <span className="text-lg">{c.icon}</span>
-                  <span className="text-xs font-medium">{c.label}</span>
-                </button>
+            {/* Catégorie — groupée */}
+            <div className="space-y-2">
+              {CAT_GROUPS.map(group => (
+                <div key={group.label}>
+                  <p className="text-[9px] font-semibold text-navy/30 uppercase tracking-wider mb-1">{group.label}</p>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {CATEGORIES.filter(c => group.values.includes(c.value)).map(c => (
+                      <button key={c.value} type="button" onClick={() => update('categorie', c.value)}
+                        className={`py-1.5 px-1 rounded-lg text-xs border transition-all flex items-center gap-1.5 ${form.categorie === c.value ? 'bg-navy text-white border-navy' : 'bg-white text-navy/60 border-navy/15 hover:border-navy/30'}`}>
+                        <span className="text-sm flex-shrink-0">{c.icon}</span>
+                        <span className="font-medium leading-tight">{c.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
 
@@ -423,7 +585,7 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
                 <div className="flex gap-1.5 flex-wrap">
                   {DPE_CLASSES.map(d => (
                     <button key={d} type="button" onClick={() => update('ges', form.ges === d ? '' : d)}
-                      style={{ background: form.ges === d ? DPE_COLORS[d] : '#f5f5f5' }}
+                      style={{ background: form.ges === d ? GES_COLORS[d] : '#f5f5f5' }}
                       className={`w-9 h-8 rounded-md text-sm font-bold transition-all ${form.ges === d ? 'text-white scale-110' : 'text-navy/50'}`}>
                       {d}
                     </button>
@@ -481,6 +643,284 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
               ))}
             </div>
           </div>
+
+          {/* ── Champs spécifiques restaurant ── */}
+          {form.categorie === 'restaurant' && (
+            <div className="bg-white rounded-2xl p-5 border border-amber-200 space-y-4">
+              <h3 className="text-xs font-semibold text-amber-700 flex items-center gap-1.5">🍽️ Informations restaurant</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Licence alcool</label>
+                  <select value={form.licence_restaurant} onChange={e => update('licence_restaurant', e.target.value)} className={inputCls}>
+                    {LICENCES_RESTO.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>Capacité (couverts)</label>
+                  <input type="number" min="0" placeholder="40" value={form.couverts} onChange={e => update('couverts', e.target.value)} className={inputCls} />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {[
+                  { field: 'fonds_commerce', label: 'Vente du fonds de commerce' },
+                  { field: 'cuisine_pro',    label: 'Cuisine pro équipée' },
+                  { field: 'terrasse_ext',   label: 'Terrasse extérieure (droits inclus)' },
+                ].map(({ field, label }) => (
+                  <label key={field} className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={(form as any)[field]} onChange={e => update(field, e.target.checked)} className="accent-primary" />
+                    <span className="text-sm text-navy/70">{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Champs spécifiques hôtel ── */}
+          {form.categorie === 'hotel' && (
+            <div className="bg-white rounded-2xl p-5 border border-blue-200 space-y-4">
+              <h3 className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">🏨 Informations hôtel</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Nombre de chambres</label>
+                  <input type="number" min="0" placeholder="20" value={form.nb_chambres_hotel} onChange={e => update('nb_chambres_hotel', e.target.value)} className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>Classement étoiles (1–5)</label>
+                  <input type="number" min="1" max="5" placeholder="3" value={form.nb_etoiles} onChange={e => update('nb_etoiles', e.target.value)} className={inputCls} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Champs spécifiques colocation ── */}
+          {form.categorie === 'colocation' && (
+            <div className="bg-white rounded-2xl p-5 border border-purple-200 space-y-4">
+              <h3 className="text-xs font-semibold text-purple-700 flex items-center gap-1.5">👥 Informations colocation</h3>
+              <div>
+                <label className={labelCls}>Nombre de colocataires max</label>
+                <input type="number" min="2" placeholder="4" value={form.nb_colocataires} onChange={e => update('nb_colocataires', e.target.value)} className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>Loyer par chambre (€/mois)</label>
+                <input type="number" min="0" placeholder="450" value={form.loyer_par_chambre} onChange={e => update('loyer_par_chambre', e.target.value)} className={inputCls} />
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={(form as any).charges_incluses} onChange={e => update('charges_incluses', e.target.checked)} className="accent-primary" />
+                <span className="text-sm text-navy/70">Charges incluses</span>
+              </label>
+            </div>
+          )}
+
+          {/* ── Champs universels : chauffage / charges copro / exposition ── */}
+          {['appartement','maison','studio','villa','chalet','loft','colocation','bureau'].includes(form.categorie) && (
+            <div className="bg-white rounded-2xl p-5 border border-navy/08 space-y-4">
+              <h3 className="text-xs font-medium text-navy/50 uppercase tracking-wider">Informations complémentaires</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Type de chauffage</label>
+                  <select value={form.type_chauffage} onChange={e => update('type_chauffage', e.target.value)} className={inputCls}>
+                    <option value="">— Non précisé —</option>
+                    <option value="electrique">Électrique</option>
+                    <option value="gaz">Gaz</option>
+                    <option value="pac">PAC (pompe à chaleur)</option>
+                    <option value="fioul">Fioul</option>
+                    <option value="bois">Bois / Pellets</option>
+                    <option value="collectif">Collectif / Réseau de chaleur</option>
+                  </select>
+                </div>
+                {['appartement','studio','loft'].includes(form.categorie) && (
+                  <div>
+                    <label className={labelCls}>Charges de copropriété (€/mois)</label>
+                    <input type="number" min="0" placeholder="150" value={form.charges_copro} onChange={e => update('charges_copro', e.target.value)} className={inputCls} />
+                  </div>
+                )}
+                {['appartement','maison','studio','villa','chalet','loft','colocation'].includes(form.categorie) && (
+                  <div>
+                    <label className={labelCls}>Exposition</label>
+                    <select value={form.exposition} onChange={e => update('exposition', e.target.value)} className={inputCls}>
+                      <option value="">— Non précisé —</option>
+                      <option value="N">Nord</option>
+                      <option value="NE">Nord-Est</option>
+                      <option value="E">Est</option>
+                      <option value="SE">Sud-Est</option>
+                      <option value="S">Sud</option>
+                      <option value="SW">Sud-Ouest</option>
+                      <option value="O">Ouest</option>
+                      <option value="NO">Nord-Ouest</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Champs spécifiques bureau ── */}
+          {form.categorie === 'bureau' && (
+            <div className="bg-white rounded-2xl p-5 border border-blue-200 space-y-4">
+              <h3 className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">🏢 Informations bureau</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Nb postes de travail</label>
+                  <input type="number" min="0" placeholder="10" value={form.nb_postes_travail} onChange={e => update('nb_postes_travail', e.target.value)} className={inputCls} />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {[
+                  { key: 'open_space', label: 'Open space' },
+                  { key: 'bail_commercial', label: 'Bail commercial' },
+                ].map(({ key, label }) => (
+                  <label key={key} className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={(form as any)[key]} onChange={e => update(key, e.target.checked)} className="accent-primary" />
+                    <span className="text-sm text-navy/70">{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Champs spécifiques local commercial ── */}
+          {form.categorie === 'local' && (
+            <div className="bg-white rounded-2xl p-5 border border-blue-200 space-y-4">
+              <h3 className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">🏪 Informations local commercial</h3>
+              <div>
+                <label className={labelCls}>Droit au bail (€)</label>
+                <input type="number" min="0" placeholder="15000" value={form.droit_au_bail} onChange={e => update('droit_au_bail', e.target.value)} className={inputCls} />
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={(form as any).bail_commercial} onChange={e => update('bail_commercial', e.target.checked)} className="accent-primary" />
+                <span className="text-sm text-navy/70">Bail commercial</span>
+              </label>
+            </div>
+          )}
+
+          {/* ── Champs spécifiques entrepôt ── */}
+          {form.categorie === 'entrepot' && (
+            <div className="bg-white rounded-2xl p-5 border border-orange-200 space-y-4">
+              <h3 className="text-xs font-semibold text-orange-700 flex items-center gap-1.5">🏭 Informations entrepôt</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Hauteur sous plafond (m)</label>
+                  <input type="number" min="0" step="0.1" placeholder="6.0" value={form.hauteur_sous_plafond} onChange={e => update('hauteur_sous_plafond', e.target.value)} className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>Surface bureaux incluse (m²)</label>
+                  <input type="number" min="0" placeholder="50" value={form.surface_bureau_incluse} onChange={e => update('surface_bureau_incluse', e.target.value)} className={inputCls} />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {[
+                  { key: 'quai_chargement', label: 'Quai de chargement' },
+                  { key: 'porte_sectionnelle', label: 'Porte sectionnelle' },
+                ].map(({ key, label }) => (
+                  <label key={key} className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={(form as any)[key]} onChange={e => update(key, e.target.checked)} className="accent-primary" />
+                    <span className="text-sm text-navy/70">{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Champs spécifiques fonds de commerce ── */}
+          {form.categorie === 'fonds_commerce' && (
+            <div className="bg-white rounded-2xl p-5 border border-yellow-200 space-y-4">
+              <h3 className="text-xs font-semibold text-yellow-700 flex items-center gap-1.5">💼 Informations fonds de commerce</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { key: 'chiffre_affaires', label: "Chiffre d'affaires (€/an)", placeholder: '200000' },
+                  { key: 'loyer_annuel', label: 'Loyer annuel (€/an)', placeholder: '24000' },
+                  { key: 'duree_bail_restant', label: 'Durée bail restant (années)', placeholder: '7' },
+                  { key: 'effectif', label: 'Effectif (salariés)', placeholder: '5' },
+                ].map(({ key, label, placeholder }) => (
+                  <div key={key}>
+                    <label className={labelCls}>{label}</label>
+                    <input type="number" min="0" placeholder={placeholder} value={(form as any)[key]} onChange={e => update(key, e.target.value)} className={inputCls} />
+                  </div>
+                ))}
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={(form as any).bail_commercial} onChange={e => update('bail_commercial', e.target.checked)} className="accent-primary" />
+                <span className="text-sm text-navy/70">Bail commercial</span>
+              </label>
+            </div>
+          )}
+
+          {/* ── Champs spécifiques murs commerciaux ── */}
+          {form.categorie === 'murs_commerciaux' && (
+            <div className="bg-white rounded-2xl p-5 border border-indigo-200 space-y-4">
+              <h3 className="text-xs font-semibold text-indigo-700 flex items-center gap-1.5">🏬 Informations murs commerciaux</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Loyer annuel (€/an)</label>
+                  <input type="number" min="0" placeholder="24000" value={form.loyer_annuel} onChange={e => update('loyer_annuel', e.target.value)} className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>Rendement locatif (%)</label>
+                  <input type="number" min="0" step="0.1" placeholder="5.5" value={form.rendement_locatif} onChange={e => update('rendement_locatif', e.target.value)} className={inputCls} />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {[
+                  { key: 'bail_en_cours', label: 'Bail en cours' },
+                  { key: 'bail_commercial', label: 'Bail commercial' },
+                ].map(({ key, label }) => (
+                  <label key={key} className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={(form as any)[key]} onChange={e => update(key, e.target.checked)} className="accent-primary" />
+                    <span className="text-sm text-navy/70">{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Champs spécifiques terrains ── */}
+          {['terrain','terrain_agricole','terrain_constructible'].includes(form.categorie) && (
+            <div className="bg-white rounded-2xl p-5 border border-green-200 space-y-4">
+              <h3 className="text-xs font-semibold text-green-700 flex items-center gap-1.5">🌱 Informations terrain</h3>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={(form as any).viabilise} onChange={e => update('viabilise', e.target.checked)} className="accent-primary" />
+                <span className="text-sm text-navy/70">Terrain viabilisé</span>
+              </label>
+              {form.categorie === 'terrain_agricole' && (
+                <div>
+                  <label className={labelCls}>Nature du terrain</label>
+                  <select value={form.nature_terrain} onChange={e => update('nature_terrain', e.target.value)} className={inputCls}>
+                    <option value="">— Non précisé —</option>
+                    <option value="terres">Terres arables</option>
+                    <option value="prairies">Prairies</option>
+                    <option value="bois">Bois / Forêt</option>
+                    <option value="vignes">Vignes</option>
+                  </select>
+                </div>
+              )}
+              {form.categorie === 'terrain_constructible' && (
+                <div>
+                  <label className={labelCls}>Zone PLU</label>
+                  <input type="text" placeholder="Ex: UA, UB, AU, N" value={form.zone_plu} onChange={e => update('zone_plu', e.target.value)} className={inputCls} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Champs spécifiques parking ── */}
+          {form.categorie === 'parking' && (
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 space-y-4">
+              <h3 className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">🅿️ Informations parking</h3>
+              <div>
+                <label className={labelCls}>Type de parking</label>
+                <select value={form.type_parking} onChange={e => update('type_parking', e.target.value)} className={inputCls}>
+                  <option value="">— Non précisé —</option>
+                  <option value="box_ferme">Box fermé</option>
+                  <option value="place_ouverte">Place ouverte</option>
+                  <option value="souterrain">Parking souterrain</option>
+                </select>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={(form as any).acces_24h} onChange={e => update('acces_24h', e.target.checked)} className="accent-primary" />
+                <span className="text-sm text-navy/70">Accès 24h/24</span>
+              </label>
+            </div>
+          )}
 
           <button onClick={() => setStep(2)} disabled={!form.titre || !form.prix}
             className="w-full bg-navy text-white rounded-xl py-3 text-sm font-medium hover:bg-primary transition-colors disabled:opacity-40">
@@ -541,7 +981,7 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
         <div className="space-y-5">
           <div className="bg-white rounded-2xl p-5 border border-navy/08">
             <h3 className="text-xs font-medium text-navy/50 uppercase tracking-wider mb-1">Photos</h3>
-            <p className="text-xs text-navy/40 mb-4">{totalPhotos}/{limite.photos} photos</p>
+            <p className="text-xs text-navy/40 mb-4">{totalPhotos}/{photoLimit} photos</p>
 
             {/* Photos existantes */}
             {existingPhotos.length > 0 && (
@@ -575,7 +1015,7 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile }
             )}
 
             {/* Nouvelles photos */}
-            {totalPhotos < limite.photos && (
+            {totalPhotos < photoLimit && (
               <label className="block border-2 border-dashed border-navy/15 rounded-xl p-6 text-center cursor-pointer hover:border-primary transition-colors mb-3">
                 <div className="text-2xl mb-1">📷</div>
                 <p className="text-xs text-navy/50">Ajouter des photos</p>

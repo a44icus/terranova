@@ -48,7 +48,7 @@ export async function changeUserType(userId: string, newType: 'pro' | 'particuli
 
 export async function grantPlan(
   userId: string,
-  plan: 'gratuit' | 'pro_mensuel' | 'pro_annuel',
+  plan: 'gratuit' | 'pro_mensuel' | 'pro_annuel' | 'agence_mensuel' | 'agence_annuel',
   expireAt: string | null,
 ) {
   await assertAdmin()

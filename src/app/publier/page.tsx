@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import PublierForm from '@/components/PublierForm'
 import Link from 'next/link'
-import { getPlanConfig, getEffectivePlan } from '@/lib/plan'
+import { getPlanConfig, getEffectivePlan, PLAN_LABEL } from '@/lib/plan'
 import { getSiteSettings } from '@/lib/siteSettings'
 import type { PlanType } from '@/lib/types'
 
@@ -37,7 +37,7 @@ export default async function PublierPage() {
           <div className="text-5xl mb-4">🔒</div>
           <h2 className="font-serif text-2xl text-[#0F172A] mb-2">Limite atteinte</h2>
           <p className="text-[#0F172A]/60 text-sm mb-2">
-            Votre plan <strong>{effectivePlan === 'gratuit' ? 'Gratuit' : effectivePlan === 'pro_mensuel' ? 'Pro Mensuel' : 'Pro Annuel'}</strong> autorise{' '}
+            Votre plan <strong>{limite.label ?? PLAN_LABEL[effectivePlan]}</strong> autorise{' '}
             <strong>{limite.annonces} annonce{limite.annonces > 1 ? 's' : ''}</strong> simultanée{limite.annonces > 1 ? 's' : ''}.
           </p>
           <p className="text-[#0F172A]/60 text-sm mb-8">
@@ -46,7 +46,7 @@ export default async function PublierPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/compte/plan" className="bg-[#4F46E5] text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-[#4338CA] transition-colors">
-              ⭐ Passer Pro →
+              ⭐ Changer de plan →
             </Link>
             <Link href="/compte/mes-annonces" className="border border-[#0F172A]/15 text-[#0F172A]/70 px-6 py-3 rounded-xl text-sm font-medium hover:border-[#0F172A]/30 transition-colors">
               Gérer mes annonces
@@ -70,5 +70,12 @@ export default async function PublierPage() {
     devise:                settings.marche_devise,
   }
 
-  return <PublierForm profile={profile} userEmail={user.email ?? ''} siteSettings={siteSettings} />
+  return (
+    <PublierForm
+      profile={profile}
+      userEmail={user.email ?? ''}
+      siteSettings={siteSettings}
+      planPhotosMax={limite.photos}
+    />
+  )
 }

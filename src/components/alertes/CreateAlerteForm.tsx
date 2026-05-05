@@ -5,10 +5,24 @@ import { createAlerte } from '@/app/api/alertes/actions'
 const TYPES = [{ value: '', label: 'Tout' }, { value: 'vente', label: 'Vente' }, { value: 'location', label: 'Location' }]
 const CATS = [
   { value: '', label: 'Toutes' },
-  { value: 'appartement', label: 'Appartement' },
-  { value: 'maison', label: 'Maison' },
-  { value: 'bureau', label: 'Bureau' },
-  { value: 'terrain', label: 'Terrain' },
+  { value: 'appartement',           label: 'Appartement'          },
+  { value: 'maison',                label: 'Maison'               },
+  { value: 'studio',                label: 'Studio / T1'          },
+  { value: 'villa',                 label: 'Villa'                },
+  { value: 'chalet',                label: 'Chalet'               },
+  { value: 'loft',                  label: 'Loft / Atelier'       },
+  { value: 'colocation',            label: 'Colocation'           },
+  { value: 'bureau',                label: 'Bureau'               },
+  { value: 'local',                 label: 'Local comm.'          },
+  { value: 'restaurant',            label: 'Restaurant'           },
+  { value: 'entrepot',              label: 'Entrepôt'             },
+  { value: 'hotel',                 label: 'Hôtel'                },
+  { value: 'fonds_commerce',        label: 'Fonds de commerce'    },
+  { value: 'murs_commerciaux',      label: 'Murs commerciaux'     },
+  { value: 'terrain',               label: 'Terrain'              },
+  { value: 'terrain_agricole',      label: 'Terrain agricole'     },
+  { value: 'terrain_constructible', label: 'Terrain constructible'},
+  { value: 'parking',               label: 'Parking'              },
 ]
 
 export default function CreateAlerteForm({ userEmail }: { userEmail: string }) {

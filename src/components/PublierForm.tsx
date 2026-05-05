@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile, BienType, BienCategorie, DpeClasse } from '@/lib/types'
-import { LIMITES_PLAN } from '@/lib/types'
 import LocationPicker from '@/components/LocationPicker'
 import { computeScoreApresPublication } from '@/app/publier/actions'
 
@@ -25,15 +24,39 @@ interface Props {
   profile: Profile
   userEmail: string
   siteSettings: SiteSettings
+  planPhotosMax?: number   // limite photos du plan courant (live depuis DB)
 }
 
 const CATEGORIES: { value: BienCategorie; label: string; icon: string }[] = [
-  { value: 'appartement', label: 'Appartement', icon: '🏢' },
-  { value: 'maison',      label: 'Maison',       icon: '🏠' },
-  { value: 'bureau',      label: 'Bureau/Local',  icon: '🏗️' },
-  { value: 'terrain',     label: 'Terrain',       icon: '🌱' },
-  { value: 'parking',     label: 'Parking',       icon: '🅿️' },
-  { value: 'local',       label: 'Local comm.',   icon: '🏪' },
+  // Résidentiel
+  { value: 'appartement',           label: 'Appartement',      icon: '🏢' },
+  { value: 'maison',                label: 'Maison',            icon: '🏠' },
+  { value: 'studio',                label: 'Studio / T1',       icon: '🛏️' },
+  { value: 'villa',                 label: 'Villa',             icon: '🏡' },
+  { value: 'chalet',                label: 'Chalet',            icon: '🏔️' },
+  { value: 'loft',                  label: 'Loft / Atelier',    icon: '🏭' },
+  { value: 'colocation',            label: 'Colocation',        icon: '👥' },
+  // Commercial / Pro
+  { value: 'bureau',                label: 'Bureau',            icon: '🏗️' },
+  { value: 'local',                 label: 'Local comm.',       icon: '🏪' },
+  { value: 'restaurant',            label: 'Restaurant',        icon: '🍽️' },
+  { value: 'entrepot',              label: 'Entrepôt',          icon: '🏭' },
+  { value: 'hotel',                 label: 'Hôtel',             icon: '🏨' },
+  { value: 'fonds_commerce',        label: 'Fonds commerce',    icon: '💼' },
+  { value: 'murs_commerciaux',      label: 'Murs commerciaux',  icon: '🏬' },
+  // Foncier
+  { value: 'terrain',               label: 'Terrain',           icon: '🌱' },
+  { value: 'terrain_agricole',      label: 'Terrain agricole',  icon: '🌾' },
+  { value: 'terrain_constructible', label: 'Terrain construct.', icon: '🏗️' },
+  // Autre
+  { value: 'parking',               label: 'Parking',           icon: '🅿️' },
+]
+
+const LICENCES_RESTO = [
+  { value: '', label: 'Sans licence' },
+  { value: 'II', label: 'Licence II (bières, vins, cidres)' },
+  { value: 'III', label: 'Licence III (bières, vins + alcools fermentés)' },
+  { value: 'IV', label: 'Licence IV (tous alcools)' },
 ]
 
 const OPTIONS = [
@@ -52,11 +75,24 @@ const DPE_COLORS: Record<DpeClasse, string> = {
   A:'#2E7D32', B:'#558B2F', C:'#9E9D24',
   D:'#F9A825', E:'#EF6C00', F:'#D84315', G:'#B71C1C'
 }
+// Couleurs officielles GES (bleu clair → bleu très foncé, comme sur la page annonce)
+const GES_COLORS: Record<DpeClasse, string> = {
+  A:'#9DD4E8', B:'#76B8D8', C:'#4D9DC4',
+  D:'#2E7BAE', E:'#1B5C94', F:'#0F3D72', G:'#071E45'
+}
 
-export default function PublierForm({ profile, userEmail, siteSettings }: Props) {
+const CAT_GROUPS = [
+  { label: 'Résidentiel',      values: ['appartement','maison','studio','villa','chalet','loft','colocation'] },
+  { label: 'Commercial / Pro', values: ['bureau','local','restaurant','entrepot','hotel','fonds_commerce','murs_commerciaux'] },
+  { label: 'Foncier',          values: ['terrain','terrain_agricole','terrain_constructible'] },
+  { label: 'Autre',            values: ['parking'] },
+]
+
+export default function PublierForm({ profile, userEmail, siteSettings, planPhotosMax }: Props) {
   const router = useRouter()
   const supabase = createClient()
-  const limite = LIMITES_PLAN[profile.plan]
+  // Utilise la limite live passée par le serveur ; 10 en dernier recours
+  const photoLimit = planPhotosMax ?? 10
 
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -89,6 +125,49 @@ export default function PublierForm({ profile, userEmail, siteSettings }: Props)
     meuble: false,
     fibre: false,
     options: [] as string[],
+    // Champs restaurant
+    licence_restaurant: '' as string,
+    couverts: '' as string,
+    fonds_commerce: false,
+    cuisine_pro: false,
+    terrasse_ext: false,
+    // Champs hôtel
+    nb_chambres_hotel: '' as string,
+    nb_etoiles: '' as string,
+    // Champs colocation
+    nb_colocataires: '' as string,
+    // Universal category fields
+    type_chauffage: '',
+    exposition: '',
+    charges_copro: '',
+    // Colocation extras
+    loyer_par_chambre: '',
+    charges_incluses: false,
+    // Bureau / Local
+    open_space: false,
+    nb_postes_travail: '',
+    bail_commercial: false,
+    droit_au_bail: '',
+    // Entrepôt
+    hauteur_sous_plafond: '',
+    quai_chargement: false,
+    porte_sectionnelle: false,
+    surface_bureau_incluse: '',
+    // Fonds de commerce
+    chiffre_affaires: '',
+    loyer_annuel: '',
+    duree_bail_restant: '',
+    effectif: '',
+    // Murs commerciaux
+    bail_en_cours: false,
+    rendement_locatif: '',
+    // Terrains
+    viabilise: false,
+    nature_terrain: '',
+    zone_plu: '',
+    // Parking
+    type_parking: '',
+    acces_24h: false,
     adresse: '',
     complement: '',
     ville: '',
@@ -129,7 +208,8 @@ export default function PublierForm({ profile, userEmail, siteSettings }: Props)
       }
       return true
     })
-    const max = siteSettings.photosMaxUpload
+    // Limite effective = minimum entre le global admin et la limite du plan
+    const max = Math.min(siteSettings.photosMaxUpload, photoLimit)
     const selected = valid.slice(0, max - photos.length)
     setPhotos(p => [...p, ...selected])
     selected.forEach(f => {
@@ -208,6 +288,83 @@ export default function PublierForm({ profile, userEmail, siteSettings }: Props)
           pro: profile.type === 'pro',
           neuf: form.neuf,
           ref_agence: form.ref_agence || null,
+          // Champs restaurant
+          ...(form.categorie === 'restaurant' ? {
+            licence_restaurant: form.licence_restaurant || null,
+            couverts: form.couverts ? parseInt(form.couverts) : null,
+            fonds_commerce: form.fonds_commerce,
+            cuisine_pro: form.cuisine_pro,
+            terrasse_ext: form.terrasse_ext,
+          } : {}),
+          // Champs hôtel
+          ...(form.categorie === 'hotel' ? {
+            nb_chambres_hotel: form.nb_chambres_hotel ? parseInt(form.nb_chambres_hotel) : null,
+            nb_etoiles:        form.nb_etoiles ? parseInt(form.nb_etoiles) : null,
+          } : {}),
+          // Champs colocation
+          ...(form.categorie === 'colocation' ? {
+            nb_colocataires: form.nb_colocataires ? parseInt(form.nb_colocataires) : null,
+            loyer_par_chambre: form.loyer_par_chambre ? parseInt(form.loyer_par_chambre) : null,
+            charges_incluses: form.charges_incluses,
+          } : {}),
+          // Champs universels chauffage/exposition/charges_copro
+          ...(['appartement','maison','studio','villa','chalet','loft','colocation','bureau'].includes(form.categorie) ? {
+            type_chauffage: form.type_chauffage || null,
+          } : {}),
+          ...(['appartement','studio','loft'].includes(form.categorie) ? {
+            charges_copro: form.charges_copro ? parseInt(form.charges_copro) : null,
+          } : {}),
+          ...(['appartement','maison','studio','villa','chalet','loft','colocation'].includes(form.categorie) ? {
+            exposition: form.exposition || null,
+          } : {}),
+          // Champs bureau
+          ...(form.categorie === 'bureau' ? {
+            open_space: form.open_space,
+            nb_postes_travail: form.nb_postes_travail ? parseInt(form.nb_postes_travail) : null,
+            bail_commercial: form.bail_commercial,
+          } : {}),
+          // Champs local
+          ...(form.categorie === 'local' ? {
+            droit_au_bail: form.droit_au_bail ? parseInt(form.droit_au_bail) : null,
+            bail_commercial: form.bail_commercial,
+          } : {}),
+          // Champs entrepôt
+          ...(form.categorie === 'entrepot' ? {
+            hauteur_sous_plafond: form.hauteur_sous_plafond ? parseFloat(form.hauteur_sous_plafond) : null,
+            quai_chargement: form.quai_chargement,
+            porte_sectionnelle: form.porte_sectionnelle,
+            surface_bureau_incluse: form.surface_bureau_incluse ? parseInt(form.surface_bureau_incluse) : null,
+          } : {}),
+          // Champs fonds de commerce
+          ...(form.categorie === 'fonds_commerce' ? {
+            chiffre_affaires: form.chiffre_affaires ? parseInt(form.chiffre_affaires) : null,
+            loyer_annuel: form.loyer_annuel ? parseInt(form.loyer_annuel) : null,
+            duree_bail_restant: form.duree_bail_restant ? parseInt(form.duree_bail_restant) : null,
+            effectif: form.effectif ? parseInt(form.effectif) : null,
+            bail_commercial: form.bail_commercial,
+          } : {}),
+          // Champs murs commerciaux
+          ...(form.categorie === 'murs_commerciaux' ? {
+            bail_en_cours: form.bail_en_cours,
+            rendement_locatif: form.rendement_locatif ? parseFloat(form.rendement_locatif) : null,
+            loyer_annuel: form.loyer_annuel ? parseInt(form.loyer_annuel) : null,
+            bail_commercial: form.bail_commercial,
+          } : {}),
+          // Champs terrains
+          ...(['terrain','terrain_agricole','terrain_constructible'].includes(form.categorie) ? {
+            viabilise: form.viabilise,
+          } : {}),
+          ...(form.categorie === 'terrain_agricole' ? {
+            nature_terrain: form.nature_terrain || null,
+          } : {}),
+          ...(form.categorie === 'terrain_constructible' ? {
+            zone_plu: form.zone_plu || null,
+          } : {}),
+          // Champs parking
+          ...(form.categorie === 'parking' ? {
+            type_parking: form.type_parking || null,
+            acces_24h: form.acces_24h,
+          } : {}),
         })
         .select()
         .single()
@@ -328,21 +485,28 @@ export default function PublierForm({ profile, userEmail, siteSettings }: Props)
                 ))}
               </div>
 
-              {/* Catégorie */}
-              <div className="grid grid-cols-3 gap-2 mb-6">
-                {CATEGORIES.map(c => (
-                  <button
-                    key={c.value}
-                    onClick={() => update('categorie', c.value)}
-                    className={`py-3 rounded-xl text-sm border transition-all flex flex-col items-center gap-1 ${
-                      form.categorie === c.value
-                        ? 'bg-navy text-white border-navy'
-                        : 'bg-white text-navy/60 border-navy/15 hover:border-navy/30'
-                    }`}
-                  >
-                    <span className="text-xl">{c.icon}</span>
-                    <span className="text-xs font-medium">{c.label}</span>
-                  </button>
+              {/* Catégorie — groupée */}
+              <div className="space-y-2 mb-6">
+                {CAT_GROUPS.map(group => (
+                  <div key={group.label}>
+                    <p className="text-[9px] font-semibold text-navy/30 uppercase tracking-wider mb-1">{group.label}</p>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {CATEGORIES.filter(c => group.values.includes(c.value)).map(c => (
+                        <button
+                          key={c.value}
+                          onClick={() => update('categorie', c.value)}
+                          className={`py-1.5 px-1 rounded-lg text-xs border transition-all flex items-center gap-1.5 ${
+                            form.categorie === c.value
+                              ? 'bg-navy text-white border-navy'
+                              : 'bg-white text-navy/60 border-navy/15 hover:border-navy/30'
+                          }`}
+                        >
+                          <span className="text-sm flex-shrink-0">{c.icon}</span>
+                          <span className="font-medium leading-tight">{c.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
 
@@ -524,7 +688,7 @@ export default function PublierForm({ profile, userEmail, siteSettings }: Props)
                     <button
                       key={d}
                       onClick={() => update('ges', form.ges === d ? '' : d)}
-                      style={{ background: form.ges === d ? DPE_COLORS[d] : '#f5f5f5' }}
+                      style={{ background: form.ges === d ? GES_COLORS[d] : '#f5f5f5' }}
                       className={`w-9 h-8 rounded-md text-sm font-bold transition-all ${
                         form.ges === d ? 'text-white scale-110' : 'text-navy/50'
                       }`}
@@ -636,6 +800,346 @@ export default function PublierForm({ profile, userEmail, siteSettings }: Props)
                   <span className="text-sm text-navy/70">Fibre optique disponible</span>
                 </label>
               </div>
+
+              {/* Champs spécifiques restaurant */}
+              {form.categorie === 'restaurant' && (
+                <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-amber-700 flex items-center gap-1.5">🍽️ Informations spécifiques restaurant</p>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Licence</label>
+                      <select
+                        value={form.licence_restaurant}
+                        onChange={e => update('licence_restaurant', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                      >
+                        {LICENCES_RESTO.map(l => (
+                          <option key={l.value} value={l.value}>{l.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Capacité (couverts)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Ex : 40"
+                        value={form.couverts}
+                        onChange={e => update('couverts', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-4">
+                    {[
+                      { field: 'fonds_commerce', label: 'Vente du fonds de commerce' },
+                      { field: 'cuisine_pro',    label: 'Cuisine professionnelle équipée' },
+                      { field: 'terrasse_ext',   label: 'Terrasse extérieure (droits inclus)' },
+                    ].map(({ field, label }) => (
+                      <label key={field} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={form[field as keyof typeof form] as boolean}
+                          onChange={e => update(field, e.target.checked)}
+                          className="accent-primary"
+                        />
+                        <span className="text-sm text-navy/70">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Champs spécifiques hôtel */}
+              {form.categorie === 'hotel' && (
+                <div className="mt-4 border border-blue-200 bg-blue-50 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">🏨 Informations hôtel</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Nombre de chambres</label>
+                      <input type="number" min="0" placeholder="20" value={form.nb_chambres_hotel}
+                        onChange={e => update('nb_chambres_hotel', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Classement étoiles (1–5)</label>
+                      <input type="number" min="1" max="5" placeholder="3" value={form.nb_etoiles}
+                        onChange={e => update('nb_etoiles', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Champs spécifiques colocation */}
+              {form.categorie === 'colocation' && (
+                <div className="mt-4 border border-purple-200 bg-purple-50 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-purple-700 flex items-center gap-1.5">👥 Informations colocation</p>
+                  <div>
+                    <label className="block text-xs text-navy/50 mb-1">Nombre de colocataires max</label>
+                    <input type="number" min="2" placeholder="4" value={form.nb_colocataires}
+                      onChange={e => update('nb_colocataires', e.target.value)}
+                      className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Loyer par chambre (€/mois)</label>
+                      <input type="number" min="0" placeholder="450" value={form.loyer_par_chambre}
+                        onChange={e => update('loyer_par_chambre', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.charges_incluses} onChange={e => update('charges_incluses', e.target.checked)} className="accent-primary" />
+                    <span className="text-sm text-navy/70">Charges incluses</span>
+                  </label>
+                </div>
+              )}
+
+              {/* Champs universels : chauffage / charges copro / exposition */}
+              {['appartement','maison','studio','villa','chalet','loft','colocation','bureau'].includes(form.categorie) && (
+                <div className="mt-4 border border-navy/08 bg-navy/02 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-navy/50 uppercase tracking-wider">Informations complémentaires</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Type de chauffage</label>
+                      <select value={form.type_chauffage} onChange={e => update('type_chauffage', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                        <option value="">— Non précisé —</option>
+                        <option value="electrique">Électrique</option>
+                        <option value="gaz">Gaz</option>
+                        <option value="pac">PAC (pompe à chaleur)</option>
+                        <option value="fioul">Fioul</option>
+                        <option value="bois">Bois / Pellets</option>
+                        <option value="collectif">Collectif / Réseau de chaleur</option>
+                      </select>
+                    </div>
+                    {['appartement','studio','loft'].includes(form.categorie) && (
+                      <div>
+                        <label className="block text-xs text-navy/50 mb-1">Charges de copropriété (€/mois)</label>
+                        <input type="number" min="0" placeholder="150" value={form.charges_copro}
+                          onChange={e => update('charges_copro', e.target.value)}
+                          className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                      </div>
+                    )}
+                    {['appartement','maison','studio','villa','chalet','loft','colocation'].includes(form.categorie) && (
+                      <div>
+                        <label className="block text-xs text-navy/50 mb-1">Exposition</label>
+                        <select value={form.exposition} onChange={e => update('exposition', e.target.value)}
+                          className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                          <option value="">— Non précisé —</option>
+                          <option value="N">Nord</option>
+                          <option value="NE">Nord-Est</option>
+                          <option value="E">Est</option>
+                          <option value="SE">Sud-Est</option>
+                          <option value="S">Sud</option>
+                          <option value="SW">Sud-Ouest</option>
+                          <option value="O">Ouest</option>
+                          <option value="NO">Nord-Ouest</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Champs spécifiques bureau */}
+              {form.categorie === 'bureau' && (
+                <div className="mt-4 border border-blue-200 bg-blue-50 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">🏢 Informations bureau</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Nb postes de travail</label>
+                      <input type="number" min="0" placeholder="10" value={form.nb_postes_travail}
+                        onChange={e => update('nb_postes_travail', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.open_space} onChange={e => update('open_space', e.target.checked)} className="accent-primary" />
+                      <span className="text-sm text-navy/70">Open space</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.bail_commercial} onChange={e => update('bail_commercial', e.target.checked)} className="accent-primary" />
+                      <span className="text-sm text-navy/70">Bail commercial</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Champs spécifiques local commercial */}
+              {form.categorie === 'local' && (
+                <div className="mt-4 border border-blue-200 bg-blue-50 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">🏪 Informations local commercial</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Droit au bail (€)</label>
+                      <input type="number" min="0" placeholder="15000" value={form.droit_au_bail}
+                        onChange={e => update('droit_au_bail', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.bail_commercial} onChange={e => update('bail_commercial', e.target.checked)} className="accent-primary" />
+                    <span className="text-sm text-navy/70">Bail commercial</span>
+                  </label>
+                </div>
+              )}
+
+              {/* Champs spécifiques entrepôt */}
+              {form.categorie === 'entrepot' && (
+                <div className="mt-4 border border-orange-200 bg-orange-50 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-orange-700 flex items-center gap-1.5">🏭 Informations entrepôt</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Hauteur sous plafond (m)</label>
+                      <input type="number" min="0" step="0.1" placeholder="6.0" value={form.hauteur_sous_plafond}
+                        onChange={e => update('hauteur_sous_plafond', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Surface bureaux incluse (m²)</label>
+                      <input type="number" min="0" placeholder="50" value={form.surface_bureau_incluse}
+                        onChange={e => update('surface_bureau_incluse', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.quai_chargement} onChange={e => update('quai_chargement', e.target.checked)} className="accent-primary" />
+                      <span className="text-sm text-navy/70">Quai de chargement</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.porte_sectionnelle} onChange={e => update('porte_sectionnelle', e.target.checked)} className="accent-primary" />
+                      <span className="text-sm text-navy/70">Porte sectionnelle</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Champs spécifiques fonds de commerce */}
+              {form.categorie === 'fonds_commerce' && (
+                <div className="mt-4 border border-yellow-200 bg-yellow-50 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-yellow-700 flex items-center gap-1.5">💼 Informations fonds de commerce</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Chiffre d'affaires (€/an)</label>
+                      <input type="number" min="0" placeholder="200000" value={form.chiffre_affaires}
+                        onChange={e => update('chiffre_affaires', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Loyer annuel (€/an)</label>
+                      <input type="number" min="0" placeholder="24000" value={form.loyer_annuel}
+                        onChange={e => update('loyer_annuel', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Durée bail restant (années)</label>
+                      <input type="number" min="0" placeholder="7" value={form.duree_bail_restant}
+                        onChange={e => update('duree_bail_restant', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Effectif (salariés)</label>
+                      <input type="number" min="0" placeholder="5" value={form.effectif}
+                        onChange={e => update('effectif', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.bail_commercial} onChange={e => update('bail_commercial', e.target.checked)} className="accent-primary" />
+                    <span className="text-sm text-navy/70">Bail commercial</span>
+                  </label>
+                </div>
+              )}
+
+              {/* Champs spécifiques murs commerciaux */}
+              {form.categorie === 'murs_commerciaux' && (
+                <div className="mt-4 border border-indigo-200 bg-indigo-50 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-indigo-700 flex items-center gap-1.5">🏬 Informations murs commerciaux</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Loyer annuel (€/an)</label>
+                      <input type="number" min="0" placeholder="24000" value={form.loyer_annuel}
+                        onChange={e => update('loyer_annuel', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Rendement locatif (%)</label>
+                      <input type="number" min="0" step="0.1" placeholder="5.5" value={form.rendement_locatif}
+                        onChange={e => update('rendement_locatif', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.bail_en_cours} onChange={e => update('bail_en_cours', e.target.checked)} className="accent-primary" />
+                      <span className="text-sm text-navy/70">Bail en cours</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.bail_commercial} onChange={e => update('bail_commercial', e.target.checked)} className="accent-primary" />
+                      <span className="text-sm text-navy/70">Bail commercial</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Champs spécifiques terrains */}
+              {['terrain','terrain_agricole','terrain_constructible'].includes(form.categorie) && (
+                <div className="mt-4 border border-green-200 bg-green-50 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-green-700 flex items-center gap-1.5">🌱 Informations terrain</p>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.viabilise} onChange={e => update('viabilise', e.target.checked)} className="accent-primary" />
+                    <span className="text-sm text-navy/70">Terrain viabilisé</span>
+                  </label>
+                  {form.categorie === 'terrain_agricole' && (
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Nature du terrain</label>
+                      <select value={form.nature_terrain} onChange={e => update('nature_terrain', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                        <option value="">— Non précisé —</option>
+                        <option value="terres">Terres arables</option>
+                        <option value="prairies">Prairies</option>
+                        <option value="bois">Bois / Forêt</option>
+                        <option value="vignes">Vignes</option>
+                      </select>
+                    </div>
+                  )}
+                  {form.categorie === 'terrain_constructible' && (
+                    <div>
+                      <label className="block text-xs text-navy/50 mb-1">Zone PLU</label>
+                      <input type="text" placeholder="Ex: UA, UB, AU, N" value={form.zone_plu}
+                        onChange={e => update('zone_plu', e.target.value)}
+                        className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Champs spécifiques parking */}
+              {form.categorie === 'parking' && (
+                <div className="mt-4 border border-slate-200 bg-slate-50 rounded-xl p-4 space-y-4">
+                  <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">🅿️ Informations parking</p>
+                  <div>
+                    <label className="block text-xs text-navy/50 mb-1">Type de parking</label>
+                    <select value={form.type_parking} onChange={e => update('type_parking', e.target.value)}
+                      className="w-full border border-navy/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                      <option value="">— Non précisé —</option>
+                      <option value="box_ferme">Box fermé</option>
+                      <option value="place_ouverte">Place ouverte</option>
+                      <option value="souterrain">Parking souterrain</option>
+                    </select>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.acces_24h} onChange={e => update('acces_24h', e.target.checked)} className="accent-primary" />
+                    <span className="text-sm text-navy/70">Accès 24h/24</span>
+                  </label>
+                </div>
+              )}
             </div>
 
             <button
@@ -726,11 +1230,11 @@ export default function PublierForm({ profile, userEmail, siteSettings }: Props)
             <div className="bg-white rounded-2xl p-6 border border-navy/10">
               <h2 className="font-medium text-sm text-navy/50 uppercase tracking-wider mb-2">Photos</h2>
               <p className="text-xs text-navy/40 mb-4">
-                {photos.length}/{siteSettings.photosMaxUpload} photos · La première sera la photo principale
+                {photos.length}/{Math.min(siteSettings.photosMaxUpload, photoLimit)} photos · La première sera la photo principale
               </p>
 
               {/* Upload zone */}
-              {photos.length < siteSettings.photosMaxUpload && (
+              {photos.length < Math.min(siteSettings.photosMaxUpload, photoLimit) && (
                 <label className="block border-2 border-dashed border-navy/15 rounded-xl p-8 text-center cursor-pointer hover:border-primary transition-colors mb-4">
                   <div className="text-3xl mb-2">📷</div>
                   <p className="text-sm text-navy/50">
@@ -770,11 +1274,11 @@ export default function PublierForm({ profile, userEmail, siteSettings }: Props)
               )}
             </div>
 
-            {/* Récap limite */}
+            {/* Récap limite plan gratuit */}
             {profile.plan === 'gratuit' && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-                <strong>Plan gratuit</strong> — {limite.annonces} annonces max, {siteSettings.photosMaxUpload} photos/annonce, visible {limite.duree_jours} jours.{' '}
-                <a href="/compte/plan" className="underline font-medium">Passer Pro →</a>
+                <strong>Plan gratuit</strong> — {photoLimit} photos max par annonce.{' '}
+                <a href="/compte/plan" className="underline font-medium">Passer à un plan payant →</a>
               </div>
             )}
 

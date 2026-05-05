@@ -6,12 +6,24 @@ import { useRouter } from 'next/navigation'
 import type { BienType, BienCategorie } from '@/lib/types'
 
 const CATEGORIES: { value: BienCategorie; label: string }[] = [
-  { value: 'appartement', label: 'Appartement' },
-  { value: 'maison',      label: 'Maison'       },
-  { value: 'bureau',      label: 'Bureau/Local' },
-  { value: 'terrain',     label: 'Terrain'      },
-  { value: 'parking',     label: 'Parking'      },
-  { value: 'local',       label: 'Local comm.'  },
+  { value: 'appartement',           label: 'Appartement'          },
+  { value: 'maison',                label: 'Maison'               },
+  { value: 'studio',                label: 'Studio / T1'          },
+  { value: 'villa',                 label: 'Villa'                },
+  { value: 'chalet',                label: 'Chalet'               },
+  { value: 'loft',                  label: 'Loft / Atelier'       },
+  { value: 'colocation',            label: 'Colocation'           },
+  { value: 'bureau',                label: 'Bureau/Local'         },
+  { value: 'local',                 label: 'Local comm.'          },
+  { value: 'restaurant',            label: 'Restaurant'           },
+  { value: 'entrepot',              label: 'Entrepôt'             },
+  { value: 'hotel',                 label: 'Hôtel'                },
+  { value: 'fonds_commerce',        label: 'Fonds de commerce'    },
+  { value: 'murs_commerciaux',      label: 'Murs commerciaux'     },
+  { value: 'terrain',               label: 'Terrain'              },
+  { value: 'terrain_agricole',      label: 'Terrain agricole'     },
+  { value: 'terrain_constructible', label: 'Terrain constructible'},
+  { value: 'parking',               label: 'Parking'              },
 ]
 
 interface Recherche {

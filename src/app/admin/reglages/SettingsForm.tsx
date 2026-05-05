@@ -15,12 +15,28 @@ const TABS = [
 ]
 
 const CATEGORIES = [
-  { key: 'appartement', label: 'Appartement', icon: '🏛️' },
-  { key: 'maison',      label: 'Maison',      icon: '🌿' },
-  { key: 'terrain',     label: 'Terrain',     icon: '🌱' },
-  { key: 'bureau',      label: 'Bureau',      icon: '🏢' },
-  { key: 'parking',     label: 'Parking',     icon: '🅿️' },
-  { key: 'local',       label: 'Local comm.', icon: '🏪' },
+  // Résidentiel
+  { key: 'appartement',          label: 'Appartement',          icon: '🏛️' },
+  { key: 'maison',               label: 'Maison',               icon: '🌿' },
+  { key: 'studio',               label: 'Studio / T1',          icon: '🛋️' },
+  { key: 'villa',                label: 'Villa',                icon: '🏰' },
+  { key: 'chalet',               label: 'Chalet',               icon: '🏔️' },
+  { key: 'loft',                 label: 'Loft / Atelier',       icon: '🎨' },
+  { key: 'colocation',           label: 'Colocation',           icon: '👥' },
+  // Commercial / Pro
+  { key: 'bureau',               label: 'Bureau',               icon: '🏢' },
+  { key: 'local',                label: 'Local comm.',          icon: '🏪' },
+  { key: 'restaurant',           label: 'Restaurant',           icon: '🍽️' },
+  { key: 'entrepot',             label: 'Entrepôt',             icon: '🏭' },
+  { key: 'hotel',                label: 'Hôtel',                icon: '🏨' },
+  { key: 'fonds_commerce',       label: 'Fonds de commerce',    icon: '💼' },
+  { key: 'murs_commerciaux',     label: 'Murs commerciaux',     icon: '🧱' },
+  // Foncier
+  { key: 'terrain',              label: 'Terrain',              icon: '🌱' },
+  { key: 'terrain_agricole',     label: 'Terrain agricole',     icon: '🌾' },
+  { key: 'terrain_constructible',label: 'Terrain constructible',icon: '🏗️' },
+  // Autre
+  { key: 'parking',              label: 'Parking',              icon: '🅿️' },
 ]
 
 const POI_CATEGORIES_WEIGHTS = [

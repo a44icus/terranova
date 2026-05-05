@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { startImpersonation, changeUserType } from './actions'
 import PlanGrantButton from './PlanGrantButton'
+import { getPlanConfig } from '@/lib/plan'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -8,10 +9,19 @@ export const dynamic = 'force-dynamic'
 export default async function AdminUtilisateursPage() {
   const admin = createAdminClient()
 
-  const [{ data: profiles }, { data: authUsers }] = await Promise.all([
+  const [{ data: profiles }, { data: authUsers }, planConfig] = await Promise.all([
     admin.from('profiles').select('*, reseaux(nom)').order('created_at', { ascending: false }).limit(500),
     admin.auth.admin.listUsers({ perPage: 500 }),
+    getPlanConfig(),
   ])
+
+  const planLabels = {
+    gratuit:        planConfig.gratuit.label        ?? 'Gratuit',
+    pro_mensuel:    planConfig.pro_mensuel.label     ?? 'Pro',
+    pro_annuel:     planConfig.pro_annuel.label      ?? 'Pro',
+    agence_mensuel: planConfig.agence_mensuel.label  ?? 'Agence',
+    agence_annuel:  planConfig.agence_annuel.label   ?? 'Agence',
+  }
 
   const emailById = Object.fromEntries(
     (authUsers?.users ?? []).map(u => [u.id, u.email ?? ''])
@@ -41,6 +51,7 @@ export default async function AdminUtilisateursPage() {
         users={pros}
         emailById={emailById}
         isPro
+        planLabels={planLabels}
       />
 
       {/* ── Particuliers ─────────────────────────────────────── */}
@@ -51,18 +62,20 @@ export default async function AdminUtilisateursPage() {
         users={particuliers}
         emailById={emailById}
         isPro={false}
+        planLabels={planLabels}
       />
     </div>
   )
 }
 
-function UserSection({ title, count, emptyLabel, users, emailById, isPro }: {
+function UserSection({ title, count, emptyLabel, users, emailById, isPro, planLabels }: {
   title: string
   count: number
   emptyLabel: string
   users: any[]
   emailById: Record<string, string>
   isPro: boolean
+  planLabels: Record<string, string>
 }) {
   return (
     <section className="mb-10">
@@ -122,7 +135,9 @@ function UserSection({ title, count, emptyLabel, users, emailById, isPro }: {
                         userId={p.id}
                         currentPlan={p.plan ?? 'gratuit'}
                         expireAt={p.plan_expire_at ?? null}
+                        planLabels={planLabels}
                       />
+
                     </div>
                   )}
 

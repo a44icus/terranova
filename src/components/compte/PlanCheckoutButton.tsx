@@ -8,9 +8,10 @@ interface Props {
   isCurrent: boolean
   hasPriceId: boolean
   color: string
+  compact?: boolean
 }
 
-export default function PlanCheckoutButton({ plan, isCurrent, hasPriceId, color }: Props) {
+export default function PlanCheckoutButton({ plan, isCurrent, hasPriceId, color, compact }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -36,6 +37,25 @@ export default function PlanCheckoutButton({ plan, isCurrent, hasPriceId, color 
       setError(err.message)
       setLoading(false)
     }
+  }
+
+  if (compact) {
+    return (
+      <div>
+        <button
+          onClick={handleClick}
+          disabled={loading || isCurrent}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 whitespace-nowrap"
+          style={isCurrent
+            ? { background: color + '15', color }
+            : { background: color, color: '#fff' }
+          }
+        >
+          {loading ? '…' : isCurrent ? 'Actuel' : 'Choisir →'}
+        </button>
+        {error && <p className="mt-1 text-[10px] text-red-600">{error}</p>}
+      </div>
+    )
   }
 
   return (

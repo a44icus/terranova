@@ -12,8 +12,9 @@ const DPE_COLORS: Record<string, string> = {
 }
 
 const CAT_ICON: Record<string, string> = {
-  appartement: '🏢', maison: '🏠', bureau: '🏗️',
-  terrain: '🌱', parking: '🅿️', local: '🏪',
+  appartement: '🏢', maison: '🏠', studio: '🛋️', villa: '🏰', chalet: '🏔️', loft: '🎨', colocation: '👥',
+  bureau: '🏗️', local: '🏪', restaurant: '🍽️', entrepot: '🏭', hotel: '🏨', fonds_commerce: '💼', murs_commerciaux: '🧱',
+  terrain: '🌱', terrain_agricole: '🌾', terrain_constructible: '🏗️', parking: '🅿️',
 }
 
 interface Props {

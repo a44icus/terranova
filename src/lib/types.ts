@@ -14,9 +14,17 @@ export interface Reseau {
 }
 export type BienStatut = 'brouillon' | 'en_attente' | 'publie' | 'archive' | 'refuse'
 export type BienType = 'vente' | 'location'
-export type BienCategorie = 'appartement' | 'maison' | 'bureau' | 'terrain' | 'parking' | 'local'
+export type BienCategorie =
+  // Résidentiel
+  | 'appartement' | 'maison' | 'studio' | 'villa' | 'chalet' | 'loft' | 'colocation'
+  // Commercial / Pro
+  | 'bureau' | 'local' | 'restaurant' | 'entrepot' | 'hotel' | 'fonds_commerce' | 'murs_commerciaux'
+  // Foncier
+  | 'terrain' | 'terrain_agricole' | 'terrain_constructible'
+  // Autre
+  | 'parking'
 export type DpeClasse = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G'
-export type PlanType = 'gratuit' | 'pro_mensuel' | 'pro_annuel'
+export type PlanType = 'gratuit' | 'pro_mensuel' | 'pro_annuel' | 'agence_mensuel' | 'agence_annuel'
 
 export interface Profile {
   id: string
@@ -95,6 +103,38 @@ export interface Bien {
   created_at: string
   updated_at: string
   publie_at?: string
+  // Universal category fields
+  type_chauffage?: string
+  exposition?: string
+  charges_copro?: number
+  // Colocation
+  loyer_par_chambre?: number
+  charges_incluses?: boolean
+  // Bureau / Local
+  open_space?: boolean
+  nb_postes_travail?: number
+  bail_commercial?: boolean
+  droit_au_bail?: number
+  // Entrepôt
+  hauteur_sous_plafond?: number
+  quai_chargement?: boolean
+  porte_sectionnelle?: boolean
+  surface_bureau_incluse?: number
+  // Fonds de commerce
+  chiffre_affaires?: number
+  loyer_annuel?: number
+  duree_bail_restant?: number
+  effectif?: number
+  // Murs commerciaux
+  bail_en_cours?: boolean
+  rendement_locatif?: number
+  // Terrains
+  viabilise?: boolean
+  nature_terrain?: string
+  zone_plu?: string
+  // Parking
+  type_parking?: string
+  acces_24h?: boolean
 }
 
 export interface Photo {
@@ -168,6 +208,49 @@ export interface BienPublic {
   vendeur_avatar?: string
   vendeur_logo?: string
   score_quartier?: number | null
+  // Champs spécifiques restaurant
+  licence_restaurant?: string | null
+  couverts?: number | null
+  fonds_commerce?: boolean
+  cuisine_pro?: boolean
+  terrasse_ext?: boolean
+  // Champs spécifiques hôtel
+  nb_chambres_hotel?: number | null
+  nb_etoiles?: number | null
+  // Champs spécifiques colocation
+  nb_colocataires?: number | null
+  // Universal category fields
+  type_chauffage?: string | null
+  exposition?: string | null
+  charges_copro?: number | null
+  // Colocation
+  loyer_par_chambre?: number | null
+  charges_incluses?: boolean
+  // Bureau / Local
+  open_space?: boolean
+  nb_postes_travail?: number | null
+  bail_commercial?: boolean
+  droit_au_bail?: number | null
+  // Entrepôt
+  hauteur_sous_plafond?: number | null
+  quai_chargement?: boolean
+  porte_sectionnelle?: boolean
+  surface_bureau_incluse?: number | null
+  // Fonds de commerce
+  chiffre_affaires?: number | null
+  loyer_annuel?: number | null
+  duree_bail_restant?: number | null
+  effectif?: number | null
+  // Murs commerciaux
+  bail_en_cours?: boolean
+  rendement_locatif?: number | null
+  // Terrains
+  viabilise?: boolean
+  nature_terrain?: string | null
+  zone_plu?: string | null
+  // Parking
+  type_parking?: string | null
+  acces_24h?: boolean
 }
 
 // Filtres de recherche
@@ -188,13 +271,15 @@ export interface FiltresRecherche {
   lng_max?: number
 }
 
-// Limites freemium
+// Limites freemium (fallback statique — les valeurs réelles viennent de getPlanConfig())
 export const LIMITES_PLAN: Record<PlanType, {
   annonces: number
   photos: number
   duree_jours: number
 }> = {
-  gratuit:     { annonces: 3,   photos: 5,  duree_jours: 30  },
-  pro_mensuel: { annonces: 50,  photos: 20, duree_jours: 90  },
-  pro_annuel:  { annonces: 999, photos: 20, duree_jours: 180 },
+  gratuit:        { annonces: 1,   photos: 10, duree_jours: 90  },
+  pro_mensuel:    { annonces: 10,  photos: 20, duree_jours: 30  },
+  pro_annuel:     { annonces: 10,  photos: 20, duree_jours: 365 },
+  agence_mensuel: { annonces: 999, photos: 30, duree_jours: 30  },
+  agence_annuel:  { annonces: 999, photos: 30, duree_jours: 365 },
 }

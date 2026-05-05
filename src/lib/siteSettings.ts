@@ -139,7 +139,11 @@ export const DEFAULT_SETTINGS: SiteSettings = {
 
   moderation:             'manuelle',
   expiration_defaut_jours: 30,
-  categories_actives:     ['appartement', 'maison', 'terrain', 'bureau', 'parking', 'local'],
+  categories_actives:     [
+    'appartement', 'maison', 'studio', 'villa', 'chalet', 'loft', 'colocation',
+    'bureau', 'local', 'restaurant', 'entrepot', 'hotel', 'fonds_commerce', 'murs_commerciaux',
+    'terrain', 'terrain_agricole', 'terrain_constructible', 'parking',
+  ],
   types_actifs:           ['vente', 'location'],
   surface_min_prix_m2:    10,
   photos_max_upload:      20,
