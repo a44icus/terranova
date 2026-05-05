@@ -16,42 +16,47 @@ async function checkAdmin() {
   if (!isAdmin) throw new Error('Accès refusé')
 }
 
-export async function uploadHeroPhoto(formData: FormData) {
-  await checkAdmin()
-  const supabase = createAdminClient()
+export async function uploadHeroPhoto(_prevState: string | null, formData: FormData): Promise<string | null> {
+  try {
+    await checkAdmin()
+    const supabase = createAdminClient()
 
-  const file = formData.get('file') as File
-  if (!file || file.size === 0) throw new Error('Fichier manquant')
-  if (file.size > 8 * 1024 * 1024) throw new Error('Fichier trop lourd (max 8 Mo)')
+    const file = formData.get('file') as File
+    if (!file || file.size === 0) return 'Fichier manquant'
+    if (file.size > 8 * 1024 * 1024) return 'Fichier trop lourd (max 8 Mo)'
 
-  const ext         = file.name.split('.').pop() ?? 'jpg'
-  const path        = `hero/${Date.now()}.${ext}`
-  const arrayBuffer = await file.arrayBuffer()
-  const buffer      = new Uint8Array(arrayBuffer)
+    const ext         = file.name.split('.').pop() ?? 'jpg'
+    const path        = `hero/${Date.now()}.${ext}`
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer      = new Uint8Array(arrayBuffer)
 
-  const { error: uploadError } = await supabase.storage
-    .from('hero-photos')
-    .upload(path, buffer, { contentType: file.type, upsert: false })
-  if (uploadError) throw new Error(`Upload échoué : ${uploadError.message}`)
+    const { error: uploadError } = await supabase.storage
+      .from('hero-photos')
+      .upload(path, buffer, { contentType: file.type, upsert: false })
+    if (uploadError) return `Upload Storage échoué : ${uploadError.message}`
 
-  const { data: { publicUrl } } = supabase.storage
-    .from('hero-photos')
-    .getPublicUrl(path)
+    const { data: { publicUrl } } = supabase.storage
+      .from('hero-photos')
+      .getPublicUrl(path)
 
-  // Ordre = max existant + 1
-  const { data: existing } = await supabase
-    .from('hero_photos')
-    .select('ordre')
-    .order('ordre', { ascending: false })
-    .limit(1)
-    .single()
-  const ordre = (existing?.ordre ?? 0) + 1
+    // Ordre = max existant + 1
+    const { data: existing } = await supabase
+      .from('hero_photos')
+      .select('ordre')
+      .order('ordre', { ascending: false })
+      .limit(1)
+      .single()
+    const ordre = (existing?.ordre ?? 0) + 1
 
-  const { error } = await supabase.from('hero_photos').insert({ url: publicUrl, ordre, actif: true })
-  if (error) throw new Error(`Insertion échouée : ${error.message}`)
+    const { error } = await supabase.from('hero_photos').insert({ url: publicUrl, ordre, actif: true })
+    if (error) return `Insertion DB échouée : ${error.message}`
 
-  revalidatePath('/admin/hero')
-  revalidatePath('/')
+    revalidatePath('/admin/hero')
+    revalidatePath('/')
+    return null
+  } catch (e: any) {
+    return e?.message ?? 'Erreur inconnue'
+  }
 }
 
 export async function deleteHeroPhoto(id: string, url: string) {

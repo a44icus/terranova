@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { uploadHeroPhoto, deleteHeroPhoto, toggleHeroPhotoActif, moveHeroPhoto } from './actions'
+import { deleteHeroPhoto, toggleHeroPhotoActif, moveHeroPhoto } from './actions'
+import UploadForm from './UploadForm'
 import Image from 'next/image'
 
 export const dynamic = 'force-dynamic'
@@ -48,21 +49,7 @@ CREATE POLICY "Admin all"         ON hero_photos FOR ALL    USING (true);
       {/* Upload */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-8">
         <h2 className="font-semibold text-sm text-navy mb-4">Ajouter une photo</h2>
-        <form action={uploadHeroPhoto} className="flex flex-col sm:flex-row items-start gap-3">
-          <input
-            type="file"
-            name="file"
-            accept="image/jpeg,image/png,image/webp"
-            required
-            className="text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-semibold file:text-xs hover:file:bg-indigo-100 transition-all"
-          />
-          <button
-            type="submit"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2 rounded-xl transition-colors whitespace-nowrap"
-          >
-            Uploader
-          </button>
-        </form>
+        <UploadForm />
         <p className="text-xs text-slate-400 mt-2">JPG, PNG ou WebP · max 8 Mo · recommandé : 1920×1080 px</p>
       </div>
 
