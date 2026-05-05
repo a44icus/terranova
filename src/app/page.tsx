@@ -1,9 +1,10 @@
-import Image from 'next/image'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import HeroBubbles from '@/components/hero/HeroBubbles'
+import HeroSlideshow from '@/components/home/HeroSlideshow'
 import SiteFooter from '@/components/SiteFooter'
 import LatestBiens from '@/components/home/LatestBiens'
 import FeaturesShowcase from '@/components/home/FeaturesShowcase'
@@ -58,6 +59,8 @@ export default async function LandingPage() {
   // Si géoloc dispo : on récupère 30 biens récents pour pouvoir trier par distance
   const fetchLimit = hasGeo ? 30 : 6
 
+  const supabaseAdmin = createAdminClient()
+
   const [
     { data: { user } },
     { data: latestBiens },
@@ -65,6 +68,7 @@ export default async function LandingPage() {
     { count: totalVilles },
     { count: totalAnnonceurs },
     planConfig,
+    { data: heroPhotosData },
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from('biens_publics').select('*')
@@ -75,7 +79,10 @@ export default async function LandingPage() {
     supabase.from('biens').select('ville', { count: 'exact', head: true }).eq('statut', 'publie'),
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     getPlanConfig(),
+    supabaseAdmin.from('hero_photos').select('url').eq('actif', true).order('ordre', { ascending: true }),
   ])
+
+  const heroPhotos = (heroPhotosData ?? []).map(p => p.url)
 
   // ── Plans homepage : 3 tiers (Gratuit / Pro / Agence) ─────────────────────
   // On utilise pro_mensuel et agence_mensuel comme référence pour les features/limites.
@@ -224,16 +231,8 @@ export default async function LandingPage() {
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="min-h-[78vh] lg:min-h-[82vh] flex overflow-hidden relative bg-[#0F172A]">
 
-        {/* Photo plein écran */}
-        <Image
-          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=90&auto=format&fit=crop"
-          alt=""
-          fill
-          className="object-cover object-center"
-          sizes="100vw"
-          quality={90}
-          priority
-        />
+        {/* Slideshow plein écran */}
+        <HeroSlideshow photos={heroPhotos} />
 
         {/* Gradient mobile : overlay sombre uniforme */}
         <div className="absolute inset-0 pointer-events-none lg:hidden" style={{

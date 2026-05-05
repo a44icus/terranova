@@ -7,6 +7,7 @@ const ADMIN_NAV = [
   { href: '/admin/annonces/toutes',  label: 'Toutes les annonces', icon: '🏠' },
   { href: '/admin/utilisateurs',     label: 'Utilisateurs',        icon: '👥' },
   { href: '/admin/reseaux',          label: 'Réseaux & Enseignes', icon: '🏢' },
+  { href: '/admin/hero',             label: 'Photos hero',         icon: '🖼' },
   { href: '/admin/map-ads',          label: 'Pubs sur la carte',   icon: '📍' },
   { href: '/admin/blog',             label: 'Blog',                icon: '📝' },
   { href: '/admin/reglages',         label: 'Réglages du site',    icon: '🔧' },
