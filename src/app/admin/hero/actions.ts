@@ -24,12 +24,14 @@ export async function uploadHeroPhoto(formData: FormData) {
   if (!file || file.size === 0) throw new Error('Fichier manquant')
   if (file.size > 8 * 1024 * 1024) throw new Error('Fichier trop lourd (max 8 Mo)')
 
-  const ext  = file.name.split('.').pop() ?? 'jpg'
-  const path = `hero/${Date.now()}.${ext}`
+  const ext         = file.name.split('.').pop() ?? 'jpg'
+  const path        = `hero/${Date.now()}.${ext}`
+  const arrayBuffer = await file.arrayBuffer()
+  const buffer      = new Uint8Array(arrayBuffer)
 
   const { error: uploadError } = await supabase.storage
     .from('hero-photos')
-    .upload(path, file, { contentType: file.type, upsert: false })
+    .upload(path, buffer, { contentType: file.type, upsert: false })
   if (uploadError) throw new Error(`Upload échoué : ${uploadError.message}`)
 
   const { data: { publicUrl } } = supabase.storage
