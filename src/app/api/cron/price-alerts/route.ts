@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { timingSafeEqual } from 'crypto'
 
 function escHtml(s: unknown): string {
   if (typeof s !== 'string') return ''
@@ -8,8 +9,16 @@ function escHtml(s: unknown): string {
 
 export async function POST(req: NextRequest) {
   // Protection par secret header (à configurer dans Vercel Cron ou appel manuel)
-  const secret = req.headers.get('x-cron-secret')
-  if (secret !== process.env.CRON_SECRET) {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) {
+    console.error('[Cron price-alerts] CRON_SECRET non configuré — accès refusé')
+    return NextResponse.json({ error: 'Not configured' }, { status: 500 })
+  }
+  const provided = req.headers.get('x-cron-secret') ?? ''
+  const safe =
+    provided.length === cronSecret.length &&
+    timingSafeEqual(Buffer.from(provided), Buffer.from(cronSecret))
+  if (!safe) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

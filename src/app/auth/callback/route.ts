@@ -4,7 +4,9 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const redirect = searchParams.get('redirect') ?? '/'
+  const rawRedirect = searchParams.get('redirect') ?? '/'
+  // Valider que la redirection est relative et non-protocole-relative (évite l'open redirect)
+  const redirect = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/'
 
   if (code) {
     const supabase = await createClient()

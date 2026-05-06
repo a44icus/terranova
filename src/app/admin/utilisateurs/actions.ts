@@ -1,21 +1,13 @@
 'use server'
 
+import { requireAdmin } from '@/lib/auth'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 
 const COOKIE = 'tn_impersonate'
 
 async function assertAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/')
-  const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim()).filter(Boolean)
-  const isAdmin =
-    user.user_metadata?.role === 'admin' ||
-    user.app_metadata?.role === 'admin' ||
-    adminEmails.includes(user.email ?? '')
-  if (!isAdmin) redirect('/')
+  await requireAdmin()
 }
 
 export async function startImpersonation(userId: string) {
@@ -25,6 +17,7 @@ export async function startImpersonation(userId: string) {
     httpOnly: true,
     path: '/',
     sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
     maxAge: 60 * 60, // 1 hour
   })
   redirect('/compte')

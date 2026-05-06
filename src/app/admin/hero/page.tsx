@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { deleteHeroPhoto, toggleHeroPhotoActif, moveHeroPhoto } from './actions'
 import UploadForm from './UploadForm'
+import DeleteHeroPhotoButton from './DeleteHeroPhotoButton'
 import Image from 'next/image'
 
 export const dynamic = 'force-dynamic'
@@ -136,20 +137,7 @@ CREATE POLICY "Admin all"         ON hero_photos FOR ALL    USING (true);
                 </form>
 
                 {/* Supprimer */}
-                <form action={deleteHeroPhoto.bind(null, photo.id, photo.url)}>
-                  <button
-                    type="submit"
-                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors"
-                    title="Supprimer"
-                    onClick={(e) => {
-                      if (!confirm('Supprimer définitivement cette photo ?')) e.preventDefault()
-                    }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-                    </svg>
-                  </button>
-                </form>
+                <DeleteHeroPhotoButton id={photo.id} url={photo.url} />
 
               </div>
             </div>

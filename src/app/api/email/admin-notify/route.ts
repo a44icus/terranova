@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 function escHtml(str: unknown): string {
   if (typeof str !== 'string') return ''
@@ -8,6 +10,11 @@ function escHtml(str: unknown): string {
 }
 
 export async function POST(req: NextRequest) {
+  // ── Authentification requise ───────────────────────────────
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const RESEND_API_KEY = process.env.RESEND_API_KEY
   const ADMIN_EMAILS   = process.env.ADMIN_EMAILS ?? ''
   const BASE_URL       = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
@@ -22,6 +29,19 @@ export async function POST(req: NextRequest) {
   }
 
   const { bienId, titre, ville, type, prix, vendeurNom, vendeurEmail } = body
+
+  // ── Vérifier que le bienId appartient bien à l'utilisateur authentifié ──
+  if (bienId) {
+    const admin = createAdminClient()
+    const { data: bien } = await admin
+      .from('biens')
+      .select('auteur_id')
+      .eq('id', String(bienId))
+      .single()
+    if (!bien || bien.auteur_id !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+  }
 
   const safeTitre       = escHtml(titre)
   const safeVille       = escHtml(ville)

@@ -22,9 +22,9 @@ export async function isEmailRateLimited(ip: string, route: string): Promise<boo
       .gte('created_at', since)
 
     if (error) {
-      // Table probablement absente — ne pas bloquer
-      console.warn('[RateLimit] email_rate_limits inaccessible:', error.message)
-      return false
+      // En cas d'erreur DB, on bloque par sécurité (fail-closed) plutôt que de laisser passer
+      console.warn('[RateLimit] email_rate_limits inaccessible — blocage par sécurité:', error.message)
+      return true
     }
 
     if ((count ?? 0) >= MAX_PER_HOUR) return true
@@ -34,19 +34,24 @@ export async function isEmailRateLimited(ip: string, route: string): Promise<boo
 
     return false
   } catch (err) {
-    console.warn('[RateLimit] erreur inattendue:', err)
-    return false
+    console.warn('[RateLimit] erreur inattendue — blocage par sécurité:', err)
+    return true
   }
 }
 
 /**
  * Extrait l'IP réelle depuis les headers de la requête Next.js.
+ * Utilise x-real-ip (injecté par Vercel/Nginx) en priorité, puis le DERNIER
+ * élément de x-forwarded-for (ajouté par l'infrastructure, non-spoofable par le client).
  */
 export function getClientIp(req: Request): string {
   const headers = req instanceof Request ? req.headers : (req as any).headers
-  return (
-    headers.get('x-real-ip') ??
-    headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    'unknown'
-  )
+  const xRealIp = headers.get('x-real-ip')
+  if (xRealIp) return xRealIp.trim()
+  const xff = headers.get('x-forwarded-for')
+  if (xff) {
+    const parts = xff.split(',')
+    return parts[parts.length - 1].trim()
+  }
+  return 'unknown'
 }

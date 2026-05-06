@@ -188,6 +188,29 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   support_telephone:       '',
 }
 
+// ── Validation des identifiants de tracking ───────────────────────────────────
+const GA4_PATTERN   = /^G-[A-Z0-9]{4,12}$/
+const GTM_PATTERN   = /^GTM-[A-Z0-9]{4,8}$/
+const PIXEL_PATTERN = /^\d{10,20}$/
+// Matomo URL : on accepte uniquement http(s)://hostname/optionalpath — pas de guillemets, backticks, etc.
+const MATOMO_URL_PATTERN = /^https?:\/\/[a-zA-Z0-9._-]+(:\d+)?(\/[a-zA-Z0-9._\-/]*)?$/
+const MATOMO_SITE_PATTERN = /^\d{1,10}$/
+
+/**
+ * Retourne les settings avec les champs tracking validés :
+ * si un champ ne correspond pas au pattern attendu, il est remplacé par une chaîne vide.
+ */
+function sanitizeTrackingFields(s: SiteSettings): SiteSettings {
+  return {
+    ...s,
+    ga4_id:        GA4_PATTERN.test(s.ga4_id)               ? s.ga4_id        : '',
+    gtm_id:        GTM_PATTERN.test(s.gtm_id)               ? s.gtm_id        : '',
+    pixel_meta_id: PIXEL_PATTERN.test(s.pixel_meta_id)      ? s.pixel_meta_id : '',
+    matomo_url:    MATOMO_URL_PATTERN.test(s.matomo_url)    ? s.matomo_url    : '',
+    matomo_site_id: MATOMO_SITE_PATTERN.test(s.matomo_site_id) ? s.matomo_site_id : '',
+  }
+}
+
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
     const supabase = createAdminClient()
@@ -197,7 +220,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       .eq('id', 1)
       .single()
     if (error || !data) return DEFAULT_SETTINGS
-    return { ...DEFAULT_SETTINGS, ...(data.settings as Partial<SiteSettings>) }
+    return sanitizeTrackingFields({ ...DEFAULT_SETTINGS, ...(data.settings as Partial<SiteSettings>) })
   } catch {
     return DEFAULT_SETTINGS
   }

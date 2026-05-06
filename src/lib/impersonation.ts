@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import { isAdminUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
 const COOKIE = 'tn_impersonate'
@@ -6,13 +7,7 @@ const COOKIE = 'tn_impersonate'
 async function isCallerAdmin(): Promise<boolean> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
-  const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim()).filter(Boolean)
-  return (
-    user.user_metadata?.role === 'admin' ||
-    user.app_metadata?.role === 'admin' ||
-    adminEmails.includes(user.email ?? '')
-  )
+  return isAdminUser(user)
 }
 
 /** Returns the impersonated user ID if the caller is admin and a cookie is set. */

@@ -42,19 +42,26 @@ async function getMiddlewareSettings(): Promise<MiddlewareSettings> {
 function isAdminUser(user: { email?: string; user_metadata?: Record<string, unknown>; app_metadata?: Record<string, unknown> } | null): boolean {
   if (!user) return false
   const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim()).filter(Boolean)
+  // NOTE : user_metadata est volontairement exclu — il est modifiable par l'utilisateur lui-même.
   return (
-    user.user_metadata?.role === 'admin' ||
-    user.app_metadata?.role  === 'admin' ||
+    user.app_metadata?.role === 'admin' ||
     adminEmails.includes(user.email ?? '')
   )
 }
 
 function getClientIp(request: NextRequest): string {
-  return (
-    request.headers.get('x-real-ip') ??
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    ''
-  )
+  // Sur Vercel, x-real-ip est injecté par l'infrastructure (non-spoofable depuis le client).
+  // Sinon, on prend le dernier IP de x-forwarded-for (le plus proche de notre edge),
+  // ce qui limite le spoofing à condition que le proxy de confiance soit le dernier maillon.
+  const xRealIp = request.headers.get('x-real-ip')
+  if (xRealIp) return xRealIp.trim()
+  const xff = request.headers.get('x-forwarded-for')
+  if (xff) {
+    // Prendre le DERNIER IP de la chaîne (ajouté par notre propre infrastructure)
+    const parts = xff.split(',')
+    return parts[parts.length - 1].trim()
+  }
+  return ''
 }
 
 export async function updateSession(request: NextRequest) {

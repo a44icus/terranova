@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
@@ -14,6 +15,11 @@ function isEmail(v: unknown): v is string {
 }
 
 export async function POST(req: NextRequest) {
+  // ── Authentification requise ───────────────────────────────
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   // ── Rate limiting ──────────────────────────────────────────
   const ip = getClientIp(req)
   if (await isEmailRateLimited(ip, 'contact-agent')) {

@@ -28,12 +28,8 @@ export async function updateProfil(data: {
 
   // Si impersonation active, vérifier que l'appelant est admin
   if (impersonatedId && impersonatedId !== user.id) {
-    const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim()).filter(Boolean)
-    const isAdmin =
-      user.user_metadata?.role === 'admin' ||
-      user.app_metadata?.role === 'admin' ||
-      adminEmails.includes(user.email ?? '')
-    if (!isAdmin) throw new Error('Accès refusé')
+    const { isAdminUser } = await import('@/lib/auth')
+    if (!isAdminUser(user)) throw new Error('Accès refusé')
   }
 
   const admin = createAdminClient()

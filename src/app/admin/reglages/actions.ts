@@ -1,21 +1,11 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import type { SiteSettings } from '@/lib/siteSettings'
 
-async function checkAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Non authentifié')
-  const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim()).filter(Boolean)
-  const isAdmin =
-    user.user_metadata?.role === 'admin' ||
-    user.app_metadata?.role === 'admin' ||
-    adminEmails.includes(user.email ?? '')
-  if (!isAdmin) throw new Error('Accès refusé')
-}
+async function checkAdmin() { await requireAdmin() }
 
 export async function saveSettings(section: string, data: Partial<SiteSettings>) {
   await checkAdmin()

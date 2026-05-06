@@ -72,6 +72,114 @@
 
   <div class="timeline">
 
+    <!-- ══ SESSION 6 MAI 2026 ══ -->
+    <div class="session">
+      <div class="session-dot" style="background:var(--red)"></div>
+      <div class="session-date">6 mai 2026 — session 7</div>
+      <div class="session-title">Audit de sécurité — 12 vulnérabilités corrigées</div>
+      <div class="session-desc">Correction exhaustive de l'audit sécurité : 2 critiques (open redirect OAuth, XSS analytics), 3 élevés (IP spoofing, routes email sans auth, upload non validé), 4 moyens (cookie, timing attack, duplication admin, fuites d'erreurs), 3 faibles (rate limit fail-open, user_metadata, CRON_SECRET absent). Nouveau fichier <code>lib/auth.ts</code> centralisant <code>requireAdmin()</code> et <code>isAdminUser()</code>. 14 fichiers modifiés, 1 créé.</div>
+
+      <div class="changes">
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🔴</span>
+          <div class="change-text">
+            <strong>Open redirect après OAuth corrigé — <code>auth/callback/route.ts</code></strong>
+            <span>Le paramètre <code>redirect</code> n'était jamais validé. Un attaquant pouvait forger <code>/auth/callback?redirect=https://evil.com</code> pour rediriger après connexion. Correction : validation stricte — la valeur doit commencer par <code>/</code> et non <code>//</code>, sinon forcée à <code>/</code>.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🔴</span>
+          <div class="change-text">
+            <strong>XSS dans les scripts analytics corrigé — <code>lib/siteSettings.ts</code></strong>
+            <span>Les champs <code>ga4_id</code>, <code>gtm_id</code>, <code>pixel_meta_id</code>, <code>matomo_url</code> et <code>matomo_site_id</code> étaient injectés directement dans des balises <code>&lt;Script&gt;</code> sans validation. Un admin compromis pouvait stocker du JavaScript arbitraire exécuté sur chaque page visiteur. Correction : fonction <code>sanitizeTrackingFields()</code> avec patterns regex stricts (<code>G-XXXX</code>, <code>GTM-XXXX</code>, etc.) — tout champ invalide est vidé avant injection.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🟠</span>
+          <div class="change-text">
+            <strong>IP spoofing sur whitelist admin et rate limiting — <code>lib/supabase/middleware.ts</code> · <code>lib/emailRateLimit.ts</code></strong>
+            <span>L'IP client était lue depuis le premier élément de <code>X-Forwarded-For</code>, entièrement contrôlable par l'attaquant. Envoi de <code>X-Forwarded-For: 127.0.0.1</code> permettait de contourner la whitelist IP admin et le rate limiting email. Correction : utilisation de <code>x-real-ip</code> en priorité, puis du <strong>dernier</strong> élément de la chaîne (ajouté par l'infrastructure, non spoofable).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🟠</span>
+          <div class="change-text">
+            <strong>Routes email sans authentification — <code>api/email/contact-agent</code> · <code>publicite-contact</code> · <code>admin-notify</code></strong>
+            <span>Ces 3 routes acceptaient des POST anonymes, permettant spam vers agents et phishing. Auth requise sur les 3 routes. <code>admin-notify</code> vérifie en plus que le <code>bienId</code> appartient bien à l'utilisateur authentifié avant d'envoyer.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🟠</span>
+          <div class="change-text">
+            <strong>Upload de fichiers sans validation — <code>app/admin/hero/actions.ts</code></strong>
+            <span>L'extension et le Content-Type étaient entièrement contrôlés par le client. Un admin malveillant pouvait uploader un <code>.html</code> ou <code>.svg</code> pour du XSS stocké. Correction en 3 couches : whitelist d'extensions (<code>jpg/png/webp</code>), whitelist de types MIME, et vérification des <strong>magic bytes</strong> (signature binaire réelle du fichier).</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🟡</span>
+          <div class="change-text">
+            <strong>Cookie d'impersonation sans flag <code>Secure</code> — <code>admin/utilisateurs/actions.ts</code></strong>
+            <span>Le cookie <code>tn_impersonate</code> manquait de <code>secure: true</code> et pouvait être intercepté sur des connexions HTTP. Ajout de <code>secure: process.env.NODE_ENV === 'production'</code>.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🟡</span>
+          <div class="change-text">
+            <strong>CRON_SECRET — timing attack et secret absent — <code>api/cron/new-biens</code> · <code>api/cron/price-alerts</code></strong>
+            <span>La comparaison naïve (<code>!==</code>) était vulnérable aux attaques par timing. Si <code>CRON_SECRET</code> était absent, le comportement était indéfini. Correction : comparaison via <code>timingSafeEqual</code> (crypto), et rejet explicite 500 si le secret n'est pas configuré.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🟡</span>
+          <div class="change-text">
+            <strong>Logique <code>isAdmin</code> centralisée — nouveau <code>lib/auth.ts</code></strong>
+            <span>La vérification admin était dupliquée en 9 endroits avec des variations subtiles (redirect vs throw, <code>user_metadata</code> vs <code>app_metadata</code>). Création de <code>lib/auth.ts</code> avec <code>requireAdmin()</code> et <code>isAdminUser()</code>. Les 9 fichiers (<code>hero/actions</code>, <code>utilisateurs/actions</code>, <code>reglages/actions</code>, <code>parametres/actions</code>, <code>annonces/actions</code>, <code>reseaux/actions</code>, <code>admin/layout</code>, <code>impersonation.ts</code>, <code>backfill-scores</code>) utilisent désormais ce point d'entrée unique.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🟡</span>
+          <div class="change-text">
+            <strong>Fuites d'infos dans les erreurs Stripe et DB — <code>api/stripe/checkout</code> · <code>api/stripe/portal</code> · <code>api/admin/backfill-scores</code></strong>
+            <span><code>err.message</code> et <code>error.message</code> retournés bruts au client pouvaient exposer des noms de tables Supabase, contraintes SQL ou détails Stripe. Remplacés par un message générique côté client ; les détails restent dans les logs serveur.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🟢</span>
+          <div class="change-text">
+            <strong>Rate limiting email fail-closed — <code>lib/emailRateLimit.ts</code></strong>
+            <span>En cas d'erreur DB (table absente, timeout), la fonction retournait <code>false</code> (laisse passer), annulant la protection anti-spam. Passage en fail-closed : toute erreur DB bloque la requête.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🟢</span>
+          <div class="change-text">
+            <strong><code>user_metadata.role</code> retiré de toutes les vérifications admin</strong>
+            <span>Sur Supabase, <code>user_metadata</code> est modifiable par l'utilisateur lui-même via <code>supabase.auth.updateUser()</code> — n'importe qui pouvait se donner le rôle admin. Toutes les vérifications (<code>user.user_metadata?.role === 'admin'</code>) supprimées dans les 9 fichiers concernés. Seuls <code>app_metadata.role</code> (non modifiable) et <code>ADMIN_EMAILS</code> restent.</span>
+          </div>
+        </div>
+
+        <div class="change">
+          <span class="change-tag tag-fix">Sécu 🟢</span>
+          <div class="change-text">
+            <strong><code>CRON_SECRET</code> absent — rejet explicite — <code>api/cron/new-biens</code> · <code>api/cron/price-alerts</code></strong>
+            <span>Si <code>CRON_SECRET</code> n'était pas défini, la comparaison pouvait passer selon la valeur envoyée. Ajout d'un guard explicite : si la variable est absente en production, retour 500 immédiat avec log d'erreur.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- ══ SESSION 5 MAI 2026 ══ -->
     <div class="session">
       <div class="session-dot" style="background:var(--green)"></div>

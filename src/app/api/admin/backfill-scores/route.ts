@@ -5,7 +5,7 @@
  */
 
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { computeAndStoreScore } from '@/lib/computeBienScore'
 
@@ -13,17 +13,8 @@ export const runtime = 'nodejs'
 export const maxDuration = 300 // 5 min (Vercel Pro) — sinon 60s sur hobby
 
 export async function POST() {
-  // Vérification admin
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
-  const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim()).filter(Boolean)
-  const isAdmin =
-    user.user_metadata?.role === 'admin' ||
-    user.app_metadata?.role === 'admin' ||
-    adminEmails.includes(user.email ?? '')
-  if (!isAdmin) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+  // Vérification admin centralisée (redirige si non connecté ou non-admin)
+  await requireAdmin()
 
   const adminClient = createAdminClient()
 
@@ -36,7 +27,10 @@ export async function POST() {
     .not('lat', 'is', null)
     .not('lng', 'is', null)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[backfill-scores]', error)
+    return NextResponse.json({ error: 'Erreur lors de la récupération des biens.' }, { status: 500 })
+  }
   if (!biens?.length) return NextResponse.json({ ok: true, processed: 0, message: 'Tous les biens ont déjà un score.' })
 
   let processed = 0

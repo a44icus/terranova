@@ -1,19 +1,11 @@
 'use server'
 
+import { requireAdmin } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 async function checkAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Non authentifié')
-  const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim()).filter(Boolean)
-  const isAdmin =
-    user.user_metadata?.role === 'admin' ||
-    user.app_metadata?.role === 'admin' ||
-    adminEmails.includes(user.email ?? '')
-  if (!isAdmin) throw new Error('Accès refusé')
+  await requireAdmin()
 }
 
 export async function uploadHeroPhoto(_prevState: string | null, formData: FormData): Promise<string | null> {
@@ -25,10 +17,22 @@ export async function uploadHeroPhoto(_prevState: string | null, formData: FormD
     if (!file || file.size === 0) return 'Fichier manquant'
     if (file.size > 8 * 1024 * 1024) return 'Fichier trop lourd (max 8 Mo)'
 
-    const ext         = file.name.split('.').pop() ?? 'jpg'
-    const path        = `hero/${Date.now()}.${ext}`
+    // ── Validation extension, MIME et magic bytes ─────────────
+    const ALLOWED_EXTS  = ['jpg', 'jpeg', 'png', 'webp']
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+    if (!ALLOWED_EXTS.includes(ext))  return 'Extension non autorisée (jpg, png, webp uniquement)'
+    if (!ALLOWED_TYPES.includes(file.type)) return 'Type MIME non autorisé'
+
     const arrayBuffer = await file.arrayBuffer()
-    const buffer      = new Uint8Array(arrayBuffer)
+    const header = Buffer.from(arrayBuffer).subarray(0, 12)
+    const isJpeg = header[0] === 0xFF && header[1] === 0xD8
+    const isPng  = header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4E && header[3] === 0x47
+    const isWebp = header.toString('ascii', 0, 4) === 'RIFF' && header.toString('ascii', 8, 12) === 'WEBP'
+    if (!isJpeg && !isPng && !isWebp) return 'Contenu du fichier invalide (signature non reconnue)'
+
+    const path   = `hero/${Date.now()}.${ext}`
+    const buffer = new Uint8Array(arrayBuffer)
 
     const { error: uploadError } = await supabase.storage
       .from('hero-photos')
