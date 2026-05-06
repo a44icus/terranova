@@ -53,7 +53,10 @@ export async function uploadHeroPhoto(_prevState: string | null, formData: FormD
     const ordre = (existing?.ordre ?? 0) + 1
 
     const { error } = await supabase.from('hero_photos').insert({ url: publicUrl, ordre, actif: true })
-    if (error) return `Insertion DB échouée : ${error.message}`
+    if (error) {
+      console.error('[uploadHeroPhoto] insertion DB', error)
+      return 'Erreur lors de l\'enregistrement en base'
+    }
 
     revalidatePath('/admin/hero')
     revalidatePath('/')

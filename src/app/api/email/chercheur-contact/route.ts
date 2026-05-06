@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
 
 function escHtml(s: unknown): string {
@@ -12,6 +13,11 @@ function isEmail(v: unknown): v is string {
 }
 
 export async function POST(req: NextRequest) {
+  // ── Authentification requise ───────────────────────────────
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const ip = getClientIp(req)
   if (await isEmailRateLimited(ip, 'chercheur-contact')) {
     return NextResponse.json({ error: 'Trop de messages envoyés. Réessayez dans une heure.' }, { status: 429 })

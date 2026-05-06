@@ -32,10 +32,11 @@ export async function sendReply(contactId: string, contenu: string): Promise<{ o
   })
 
   if (error) {
+    console.error('[sendReply]', error)
     if (error.message.includes('does not exist')) {
       return { error: 'Table contact_replies manquante. Exécutez le SQL de migration.' }
     }
-    return { error: error.message }
+    return { error: 'Erreur lors de l\'envoi du message' }
   }
 
   // Marquer comme lu si c'est le vendeur qui répond

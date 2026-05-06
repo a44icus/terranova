@@ -28,7 +28,10 @@ export async function POST(req: Request) {
       .update({ lu: true })
       .eq('id', contactId)
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error('[mark-read]', error)
+      return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 })
+    }
 
     return NextResponse.json({ ok: true })
   } catch (e) {

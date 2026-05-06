@@ -17,7 +17,10 @@ export async function approuverAnnonce(bienId: string): Promise<{ ok?: boolean; 
     .update({ statut: 'publie', publie_at: new Date().toISOString() })
     .eq('id', bienId)
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[approuverAnnonce]', error)
+    return { error: 'Erreur lors de l'approbation' }
+  }
 
   revalidatePath('/admin/annonces')
   revalidatePath('/admin/annonces/toutes')
@@ -82,7 +85,10 @@ export async function refuserAnnonce(bienId: string, raison?: string): Promise<{
     .update(updateData)
     .eq('id', bienId)
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[refuserAnnonce]', error)
+    return { error: 'Erreur lors du refus' }
+  }
 
   revalidatePath('/admin/annonces')
   revalidatePath('/admin/annonces/toutes')
@@ -114,7 +120,10 @@ export async function toggleCoupDeCoeur(bienId: string, value: boolean): Promise
   const user = await checkAdmin()
   if (!user) return { error: 'Non autorisé' }
   const { error } = await createAdminClient().from('biens').update({ coup_de_coeur: value }).eq('id', bienId)
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[toggleCoupDeCoeur]', error)
+    return { error: 'Erreur lors de la mise à jour' }
+  }
   revalidatePath('/admin/annonces/toutes')
   revalidatePath('/carte')
   return { ok: true }
@@ -124,7 +133,10 @@ export async function toggleFeatured(bienId: string, value: boolean): Promise<{ 
   const user = await checkAdmin()
   if (!user) return { error: 'Non autorisé' }
   const { error } = await createAdminClient().from('biens').update({ featured: value }).eq('id', bienId)
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[toggleFeatured]', error)
+    return { error: 'Erreur lors de la mise à jour' }
+  }
   revalidatePath('/admin/annonces/toutes')
   revalidatePath('/carte')
   return { ok: true }

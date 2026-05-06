@@ -33,10 +33,11 @@ export async function createAlerte(data: AlerteData): Promise<{ ok?: boolean; er
   })
 
   if (error) {
+    console.error('[createAlerte]', error)
     if (error.message.includes('does not exist')) {
       return { error: 'Table alertes manquante. Exécutez le SQL de migration.' }
     }
-    return { error: error.message }
+    return { error: 'Erreur lors de la création de l\'alerte' }
   }
 
   revalidatePath('/compte/alertes')
@@ -49,7 +50,10 @@ export async function deleteAlerte(id: string): Promise<{ ok?: boolean; error?: 
   if (!user) return { error: 'Non authentifié' }
 
   const { error } = await supabase.from('alertes').delete().eq('id', id).eq('user_id', user.id)
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[deleteAlerte]', error)
+    return { error: 'Erreur lors de la suppression' }
+  }
 
   revalidatePath('/compte/alertes')
   return { ok: true }

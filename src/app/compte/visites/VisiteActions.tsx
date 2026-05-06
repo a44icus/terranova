@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { updateVisiteStatut } from './actions'
 
 interface Props {
   visiteId:       string
@@ -13,15 +13,11 @@ interface Props {
 
 export default function VisiteActions({ visiteId, statut, demandeurEmail, demandeurNom }: Props) {
   const [loading, setLoading] = useState<string | null>(null)
-  const router  = useRouter()
-  const supabase = createClient()
+  const router = useRouter()
 
-  async function updateStatut(newStatut: string) {
+  async function handleUpdate(newStatut: 'en_attente' | 'confirme' | 'annule') {
     setLoading(newStatut)
-    await supabase
-      .from('visites')
-      .update({ statut: newStatut })
-      .eq('id', visiteId)
+    await updateVisiteStatut(visiteId, newStatut)
     setLoading(null)
     router.refresh()
   }
@@ -31,13 +27,13 @@ export default function VisiteActions({ visiteId, statut, demandeurEmail, demand
       <div className="flex flex-col gap-2 flex-shrink-0">
         <a
           href={`mailto:${demandeurEmail}?subject=Visite confirmée via Terranova`}
-          onClick={() => updateStatut('confirme')}
+          onClick={() => handleUpdate('confirme')}
           className="text-xs font-semibold px-3 py-2 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors text-center whitespace-nowrap"
         >
           {loading === 'confirme' ? '...' : '✅ Confirmer'}
         </a>
         <button
-          onClick={() => updateStatut('annule')}
+          onClick={() => handleUpdate('annule')}
           disabled={loading !== null}
           className="text-xs font-semibold px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors whitespace-nowrap"
         >
@@ -57,7 +53,7 @@ export default function VisiteActions({ visiteId, statut, demandeurEmail, demand
           ✉️ Contacter
         </a>
         <button
-          onClick={() => updateStatut('annule')}
+          onClick={() => handleUpdate('annule')}
           disabled={loading !== null}
           className="text-xs px-3 py-2 rounded-lg bg-navy/06 text-navy/50 hover:bg-navy/10 transition-colors whitespace-nowrap"
         >
@@ -67,10 +63,9 @@ export default function VisiteActions({ visiteId, statut, demandeurEmail, demand
     )
   }
 
-  // Statut annulé
   return (
     <button
-      onClick={() => updateStatut('en_attente')}
+      onClick={() => handleUpdate('en_attente')}
       disabled={loading !== null}
       className="text-xs px-3 py-2 rounded-lg bg-navy/06 text-navy/50 hover:bg-navy/10 transition-colors whitespace-nowrap flex-shrink-0"
     >

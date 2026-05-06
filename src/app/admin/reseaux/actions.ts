@@ -34,7 +34,10 @@ export async function createReseau(data: {
     logo_url:    data.logo_url?.trim() || null,
   })
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[createReseau]', error)
+    return { error: 'Erreur lors de la création du réseau' }
+  }
   revalidatePath('/admin/reseaux')
   revalidatePath('/agences')
   return { ok: true }
@@ -62,7 +65,10 @@ export async function updateReseau(id: string, data: {
     updated_at:  new Date().toISOString(),
   }).eq('id', id)
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[updateReseau]', error)
+    return { error: 'Erreur lors de la mise à jour du réseau' }
+  }
   revalidatePath('/admin/reseaux')
   revalidatePath('/agences')
   return { ok: true }
@@ -76,7 +82,10 @@ export async function deleteReseau(id: string): Promise<{ ok?: boolean; error?: 
   await createAdminClient().from('profiles').update({ reseau_id: null }).eq('reseau_id', id)
 
   const { error } = await createAdminClient().from('reseaux').delete().eq('id', id)
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[deleteReseau]', error)
+    return { error: 'Erreur lors de la suppression du réseau' }
+  }
 
   revalidatePath('/admin/reseaux')
   revalidatePath('/agences')

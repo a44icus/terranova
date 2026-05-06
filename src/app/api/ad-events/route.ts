@@ -73,9 +73,12 @@ export async function POST(req: NextRequest) {
     const ua = req.headers.get('user-agent')
     if (isBot(ua)) return NextResponse.json({ ok: true })
 
+    // Lire x-real-ip en priorité (injecté par l'infra, non spoofable),
+    // puis le DERNIER élément de x-forwarded-for (ajouté par notre edge).
+    const xff = req.headers.get('x-forwarded-for')
     const rawIp =
-      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      req.headers.get('x-real-ip') ??
+      req.headers.get('x-real-ip')?.trim() ??
+      (xff ? xff.split(',').at(-1)?.trim() : undefined) ??
       'unknown'
     const ip = anonymizeIp(rawIp)
 

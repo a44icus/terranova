@@ -26,7 +26,10 @@ export async function markContactAsRead(contactId: string) {
     .update({ lu: true })
     .eq('id', contactId)
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[markContactAsRead]', error)
+    return { error: 'Erreur lors de la mise à jour' }
+  }
 
   revalidatePath('/compte/messages')
   revalidatePath('/compte')
@@ -53,7 +56,10 @@ export async function markChercheurContactAsRead(contactId: string) {
     .update({ lu: true })
     .eq('id', contactId)
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[markChercheurContactAsRead]', error)
+    return { error: 'Erreur lors de la mise à jour' }
+  }
 
   revalidatePath('/compte/messages')
   return { ok: true }
