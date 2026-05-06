@@ -19,7 +19,7 @@ export async function approuverAnnonce(bienId: string): Promise<{ ok?: boolean; 
 
   if (error) {
     console.error('[approuverAnnonce]', error)
-    return { error: 'Erreur lors de l'approbation' }
+    return { error: 'Erreur lors de l\'approbation' }
   }
 
   revalidatePath('/admin/annonces')
