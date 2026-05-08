@@ -111,6 +111,17 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // ── Pages internes (changelog, roadmap, overview, presse) ─
+  const INTERNAL_PAGES = ['/changelog.html', '/roadmap.html', '/overview.html', '/press.html']
+  if (INTERNAL_PAGES.includes(pathname)) {
+    if (!isAdminUser(user)) {
+      const url = request.nextUrl.clone()
+      url.pathname = user ? '/' : '/auth/login'
+      if (!user) url.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(url)
+    }
+  }
+
   // ── Routes admin ──────────────────────────────────────────
   if (pathname.startsWith('/admin')) {
     if (!user) {

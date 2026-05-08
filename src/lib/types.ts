@@ -12,7 +12,7 @@ export interface Reseau {
   created_at: string
   updated_at: string
 }
-export type BienStatut = 'brouillon' | 'en_attente' | 'publie' | 'archive' | 'refuse'
+export type BienStatut = 'brouillon' | 'en_attente' | 'publie' | 'vendue' | 'archive' | 'refuse'
 export type BienType = 'vente' | 'location'
 export type BienCategorie =
   // Résidentiel

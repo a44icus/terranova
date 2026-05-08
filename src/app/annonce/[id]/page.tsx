@@ -91,7 +91,7 @@ export default async function AnnoncePage({ params }: Props) {
   const supabase = await createClient()
 
   const [{ data: bien }, { data: photos }, { data: { user } }] = await Promise.all([
-    supabase.from('biens').select('*').eq('id', id).eq('statut', 'publie').single(),
+    supabase.from('biens').select('*').eq('id', id).in('statut', ['publie', 'vendue']).single(),
     supabase.from('photos').select('*').eq('bien_id', id).order('ordre'),
     supabase.auth.getUser(),
   ])
@@ -189,6 +189,17 @@ export default async function AnnoncePage({ params }: Props) {
         {tour360Urls.length > 0 && (
           <div className="mt-3">
             <VirtualTour360 urls={tour360Urls} titre={bien.titre} />
+          </div>
+        )}
+
+        {/* Banner vendu */}
+        {bien.statut === 'vendue' && (
+          <div className="mt-4 bg-emerald-50 border border-emerald-200 rounded-2xl px-5 py-4 flex items-center gap-3">
+            <span className="text-2xl">✅</span>
+            <div>
+              <p className="font-semibold text-emerald-800 text-sm">Ce bien a été vendu</p>
+              <p className="text-xs text-emerald-600 mt-0.5">Cette annonce est conservée à titre de référence. Le contact avec le vendeur n'est plus disponible.</p>
+            </div>
           </div>
         )}
 
@@ -568,15 +579,21 @@ export default async function AnnoncePage({ params }: Props) {
               {/* Contact card */}
               <div className="bg-white rounded-2xl p-6 border border-navy/08">
                 <h2 className="font-medium text-navy mb-4">Contacter l'annonceur</h2>
-                <ContactForm
-                  bienId={bien.id}
-                  vendeurId={bien.user_id}
-                  bienTitre={bien.titre}
-                  vendeurEmail={vendeurEmail}
-                  vendeurNom={vendeurNom}
-                  delaiReponse={siteSettings.contact_delai_reponse}
-                  antispamMinutes={siteSettings.contact_antispam_minutes}
-                />
+                {bien.statut === 'vendue' ? (
+                  <div className="text-sm text-navy/50 bg-navy/04 rounded-xl px-4 py-3 text-center">
+                    Ce bien a été vendu — le contact n'est plus disponible.
+                  </div>
+                ) : (
+                  <ContactForm
+                    bienId={bien.id}
+                    vendeurId={bien.user_id}
+                    bienTitre={bien.titre}
+                    vendeurEmail={vendeurEmail}
+                    vendeurNom={vendeurNom}
+                    delaiReponse={siteSettings.contact_delai_reponse}
+                    antispamMinutes={siteSettings.contact_antispam_minutes}
+                  />
+                )}
 
                 {/* Vendor */}
                 {vendeur && (

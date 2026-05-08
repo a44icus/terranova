@@ -14,6 +14,7 @@ const STATUT_STYLE: Record<string, { label: string; bg: string; color: string }>
   brouillon:  { label: 'Brouillon',  bg: '#f5f5f5', color: '#888' },
   en_attente: { label: 'En attente', bg: '#fef9c3', color: '#854d0e' },
   publie:     { label: 'Publié',     bg: '#dcfce7', color: '#166534' },
+  vendue:     { label: 'Vendu',      bg: '#d1fae5', color: '#065f46' },
   archive:    { label: 'Archivé',    bg: '#f5f5f5', color: '#888' },
   refuse:     { label: 'Refusé',     bg: '#fee2e2', color: '#991b1b' },
 }
@@ -21,6 +22,7 @@ const STATUT_STYLE: Record<string, { label: string; bg: string; color: string }>
 const FILTRES = [
   { key: '',           label: 'Toutes' },
   { key: 'publie',     label: 'Publiées' },
+  { key: 'vendue',     label: 'Vendues' },
   { key: 'en_attente', label: 'En attente' },
   { key: 'brouillon',  label: 'Brouillons' },
   { key: 'archive',    label: 'Archivées' },
