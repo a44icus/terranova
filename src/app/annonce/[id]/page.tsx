@@ -178,9 +178,9 @@ export default async function AnnoncePage({ params }: Props) {
         <nav className="text-xs text-navy/40 mb-6 flex items-center gap-1.5 flex-wrap">
           <Link href="/" className="hover:text-primary transition-colors">Accueil</Link>
           <span>›</span>
-          <span>{bien.ville}</span>
+          <Link href={`/annonces?ville=${encodeURIComponent(bien.ville)}`} className="hover:text-primary transition-colors">{bien.ville}</Link>
           <span>›</span>
-          <span className="text-navy/70">{CAT_LABEL[bien.categorie] ?? bien.categorie}</span>
+          <Link href={`/annonces?categorie=${bien.categorie}`} className="hover:text-primary transition-colors">{CAT_LABEL[bien.categorie] ?? bien.categorie}</Link>
           <span>›</span>
           <span className="text-navy/70 truncate max-w-[200px]">{bien.titre}</span>
         </nav>
