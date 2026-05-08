@@ -89,9 +89,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function AnnoncePage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
+  const adminForBien = createAdminClient()
 
   const [{ data: bien }, { data: photos }, { data: { user } }] = await Promise.all([
-    supabase.from('biens').select('*').eq('id', id).in('statut', ['publie', 'vendue']).single(),
+    adminForBien.from('biens').select('*').eq('id', id).in('statut', ['publie', 'vendue']).single(),
     supabase.from('photos').select('*').eq('bien_id', id).order('ordre'),
     supabase.auth.getUser(),
   ])

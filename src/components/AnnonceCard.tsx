@@ -14,6 +14,7 @@ export interface AnnonceCardBien {
   code_postal:    string
   prix:           number
   type:           string
+  statut?:        string | null
   surface?:       number | null
   pieces?:        number | null
   dpe?:           string | null
@@ -72,7 +73,7 @@ export default function AnnonceCard({
         {/* Badges top-right — empilés en colonne si les deux sont présents */}
         <div className="absolute top-2 right-2 flex flex-col items-end gap-1 z-10">
           {/* Nouveau animé */}
-          {isNouveau(bien.publie_at) && (
+          {bien.statut !== 'vendue' && isNouveau(bien.publie_at) && (
             <span
               className="relative overflow-hidden inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full text-white uppercase tracking-wide"
               style={{ background: 'linear-gradient(90deg,#4F46E5,#818CF8)' }}
@@ -82,12 +83,21 @@ export default function AnnonceCard({
             </span>
           )}
           {/* Coup de cœur — toujours visible si vrai */}
-          {bien.coup_de_coeur && (
+          {bien.coup_de_coeur && bien.statut !== 'vendue' && (
             <span className="text-xs bg-amber-400 text-amber-900 px-1.5 py-0.5 rounded font-semibold shadow-sm">
               ❤ Coup de cœur
             </span>
           )}
         </div>
+
+        {/* Overlay Vendu */}
+        {bien.statut === 'vendue' && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
+            <span className="text-white font-bold text-base tracking-widest uppercase px-4 py-1.5 rounded-full border-2 border-white/80 bg-emerald-700/80 shadow-lg">
+              Vendu
+            </span>
+          </div>
+        )}
 
         {/* Logo vendeur */}
         {showLogo && bien.vendeur_logo && (
