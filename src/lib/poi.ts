@@ -178,6 +178,96 @@ export function scoreLabel(
   return                                { text: 'Faible',     color: '#DC2626' }
 }
 
+// ── POI précis groupés par catégorie ─────────────────────────────────────────
+export interface PoiPrecis {
+  key:   string
+  label: string
+  emoji: string
+}
+
+export interface PoiGroupe {
+  categorie: { key: string; label: string; emoji: string; color: string }
+  pois: PoiPrecis[]
+}
+
+export const POI_GROUPES: PoiGroupe[] = [
+  {
+    categorie: { key: 'transport', label: 'Transports', emoji: '🚇', color: '#9b59b6' },
+    pois: [
+      { key: 'gare',       label: 'Gare',           emoji: '🚉' },
+      { key: 'metro',      label: 'Métro',           emoji: '🚇' },
+      { key: 'tramway',    label: 'Tramway',         emoji: '🚊' },
+      { key: 'bus',        label: 'Arrêt de bus',    emoji: '🚌' },
+      { key: 'velo',       label: 'Location vélo',   emoji: '🚲' },
+    ],
+  },
+  {
+    categorie: { key: 'education', label: 'Éducation', emoji: '🏫', color: '#27ae60' },
+    pois: [
+      { key: 'creche',      label: 'Crèche',             emoji: '🧸' },
+      { key: 'ecole',       label: 'École primaire',      emoji: '🏫' },
+      { key: 'college',     label: 'Collège / Lycée',     emoji: '🎓' },
+      { key: 'universite',  label: 'Université',          emoji: '🎓' },
+      { key: 'bibliotheque',label: 'Bibliothèque',        emoji: '📚' },
+    ],
+  },
+  {
+    categorie: { key: 'sante', label: 'Santé', emoji: '🏥', color: '#3498db' },
+    pois: [
+      { key: 'pharmacie',  label: 'Pharmacie',          emoji: '💊' },
+      { key: 'medecin',    label: 'Médecin généraliste', emoji: '🩺' },
+      { key: 'hopital',    label: 'Hôpital / Clinique',  emoji: '🏥' },
+      { key: 'dentiste',   label: 'Dentiste',            emoji: '🦷' },
+      { key: 'veterinaire',label: 'Vétérinaire',         emoji: '🐾' },
+    ],
+  },
+  {
+    categorie: { key: 'commerce', label: 'Commerce', emoji: '🛒', color: '#f39c12' },
+    pois: [
+      { key: 'supermarche',         label: 'Supermarché',          emoji: '🛒' },
+      { key: 'boulangerie',         label: 'Boulangerie',          emoji: '🥖' },
+      { key: 'marche',              label: 'Marché',               emoji: '🏪' },
+      { key: 'centre_commercial',   label: 'Centre commercial',    emoji: '🏬' },
+      { key: 'pharmacie_parapharma',label: 'Parapharmacie',        emoji: '🧴' },
+    ],
+  },
+  {
+    categorie: { key: 'loisirs', label: 'Loisirs & Sport', emoji: '🌳', color: '#1abc9c' },
+    pois: [
+      { key: 'parc',        label: 'Parc / Jardin',   emoji: '🌳' },
+      { key: 'salle_sport', label: 'Salle de sport',  emoji: '💪' },
+      { key: 'piscine',     label: 'Piscine',          emoji: '🏊' },
+      { key: 'cinema',      label: 'Cinéma',           emoji: '🎬' },
+      { key: 'theatre',     label: 'Théâtre / Musée',  emoji: '🎭' },
+      { key: 'terrain_sport',label: 'Terrain de sport',emoji: '⚽' },
+    ],
+  },
+  {
+    categorie: { key: 'restauration', label: 'Restauration', emoji: '🍽️', color: '#e74c3c' },
+    pois: [
+      { key: 'restaurant', label: 'Restaurant',        emoji: '🍴' },
+      { key: 'cafe',       label: 'Café / Brasserie',  emoji: '☕' },
+      { key: 'bar',        label: 'Bar / Pub',          emoji: '🍺' },
+    ],
+  },
+  {
+    categorie: { key: 'services', label: 'Services', emoji: '🏦', color: '#7f8c8d' },
+    pois: [
+      { key: 'banque',  label: 'Banque / DAB',      emoji: '🏦' },
+      { key: 'poste',   label: 'Bureau de poste',   emoji: '📮' },
+      { key: 'mairie',  label: 'Mairie',             emoji: '🏛️' },
+      { key: 'police',  label: 'Commissariat',       emoji: '👮' },
+    ],
+  },
+  {
+    categorie: { key: 'beaute', label: 'Beauté & Bien-être', emoji: '💆', color: '#e91e8c' },
+    pois: [
+      { key: 'coiffeur', label: 'Coiffeur',          emoji: '💇' },
+      { key: 'spa',      label: 'Spa / Institut',    emoji: '💆' },
+    ],
+  },
+]
+
 export const OVERPASS_QUERY = (bbox: string) => `
   [out:json][timeout:10][maxsize:524288];
   (

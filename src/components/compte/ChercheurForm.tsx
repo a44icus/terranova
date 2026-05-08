@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { BienType, BienCategorie } from '@/lib/types'
-import { POI_CATEGORIES } from '@/lib/poi'
+import { POI_GROUPES } from '@/lib/poi'
 
 const CATEGORIES: { value: BienCategorie; label: string }[] = [
   { value: 'appartement',           label: 'Appartement'          },
@@ -246,24 +246,40 @@ export default function ChercheurForm({ userId, initial }: Props) {
 
         {/* POI — Environnement souhaité */}
         <div>
-          <label className={labelCls}>Environnement souhaité <span className="text-navy/30 font-normal">(optionnel)</span></label>
-          <div className="flex flex-wrap gap-2 mb-3">
-            {POI_CATEGORIES.map(cat => (
-              <button key={cat.key} type="button" onClick={() => togglePoi(cat.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-all ${
-                  form.poi_priorites.includes(cat.key)
-                    ? 'text-white border-transparent'
-                    : 'bg-white text-navy/60 border-navy/15 hover:border-navy/30'
-                }`}
-                style={form.poi_priorites.includes(cat.key) ? { background: cat.color } : {}}>
-                <span>{cat.emoji}</span>
-                {cat.label}
-              </button>
+          <label className={labelCls}>
+            Proximité souhaitée <span className="text-navy/30 font-normal">(optionnel — sélectionnez les lieux importants pour vous)</span>
+          </label>
+          <div className="space-y-3">
+            {POI_GROUPES.map(groupe => (
+              <div key={groupe.categorie.key}>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1"
+                  style={{ color: groupe.categorie.color }}>
+                  {groupe.categorie.emoji} {groupe.categorie.label}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {groupe.pois.map(poi => {
+                    const selected = form.poi_priorites.includes(poi.key)
+                    return (
+                      <button key={poi.key} type="button" onClick={() => togglePoi(poi.key)}
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs border transition-all ${
+                          selected ? 'text-white border-transparent' : 'bg-white text-navy/60 border-navy/15 hover:border-navy/30'
+                        }`}
+                        style={selected ? { background: groupe.categorie.color } : {}}>
+                        {poi.emoji} {poi.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             ))}
           </div>
+
           {form.poi_priorites.length > 0 && (
-            <div>
-              <label className={labelCls}>Score de quartier minimum <span className="text-navy/30 font-normal">(0 = aucun filtre · 10 = quartier excellent)</span></label>
+            <div className="mt-3 pt-3 border-t border-navy/08">
+              <label className={labelCls}>
+                Score de quartier minimum
+                <span className="text-navy/30 font-normal ml-1">(0 = aucun filtre · 10 = quartier excellent)</span>
+              </label>
               <div className="flex items-center gap-3">
                 <input
                   type="range" min="0" max="10" step="1"

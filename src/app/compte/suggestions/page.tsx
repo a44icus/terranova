@@ -6,7 +6,7 @@ import AnnonceCard from '@/components/AnnonceCard'
 import { getViewUserId } from '@/lib/impersonation'
 import PageHeader from '@/components/compte/ui/PageHeader'
 import EmptyState from '@/components/compte/ui/EmptyState'
-import { POI_CATEGORIES } from '@/lib/poi'
+import { POI_GROUPES } from '@/lib/poi'
 
 const CAT_LABEL: Record<string, string> = {
   appartement: 'Appartement', maison: 'Maison', studio: 'Studio / T1', villa: 'Villa',
@@ -109,13 +109,17 @@ export default async function SuggestionsPage() {
           {recherche.poi_priorites?.length > 0 && (
             <div className="flex flex-wrap gap-1.5 pt-1 border-t border-primary/10">
               {recherche.poi_priorites.map((key: string) => {
-                const cat = POI_CATEGORIES.find(c => c.key === key)
-                if (!cat) return null
+                // Retrouver le POI précis et sa couleur de groupe
+                let poiLabel = key, poiEmoji = '📍', poiColor = '#7f8c8d'
+                for (const groupe of POI_GROUPES) {
+                  const found = groupe.pois.find(p => p.key === key)
+                  if (found) { poiLabel = found.label; poiEmoji = found.emoji; poiColor = groupe.categorie.color; break }
+                }
                 return (
                   <span key={key}
                     className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full text-white"
-                    style={{ background: cat.color }}>
-                    {cat.emoji} {cat.label}
+                    style={{ background: poiColor }}>
+                    {poiEmoji} {poiLabel}
                   </span>
                 )
               })}
