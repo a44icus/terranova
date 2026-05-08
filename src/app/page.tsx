@@ -69,6 +69,8 @@ export default async function LandingPage() {
     { count: totalAnnonceurs },
     planConfig,
     { data: heroPhotosData },
+    { data: regionsData },
+    { count: totalPros },
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from('biens_publics').select('*')
@@ -80,7 +82,11 @@ export default async function LandingPage() {
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     getPlanConfig(),
     supabaseAdmin.from('hero_photos').select('url').eq('actif', true).order('ordre', { ascending: true }),
+    supabase.from('biens').select('region').eq('statut', 'publie').not('region', 'is', null),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('type', 'pro'),
   ])
+
+  const totalRegions = new Set((regionsData ?? []).map((b: any) => b.region)).size
 
   const heroPhotos = (heroPhotosData ?? []).map(p => p.url)
 
@@ -248,7 +254,7 @@ export default async function LandingPage() {
         }} />
 
         {/* ── Colonne texte ── */}
-        <div className="relative flex flex-col justify-center px-6 lg:px-16 xl:px-20 w-full lg:w-[52%] lg:flex-shrink-0 z-10 pt-24 pb-12 lg:pt-0 lg:pb-0">
+        <div className="relative flex flex-col justify-center px-6 lg:px-16 xl:px-20 w-full lg:w-[52%] lg:flex-shrink-0 z-10 pt-24 pb-12 lg:pt-24 lg:pb-4">
           <div className="relative z-10 max-w-lg lg:max-w-none mx-auto lg:mx-0">
 
             <div className="flex items-center gap-3 text-[#818CF8] text-[11px] font-semibold tracking-[0.18em] uppercase mb-4">
@@ -290,20 +296,25 @@ export default async function LandingPage() {
             {/* Stats */}
             <div className="flex gap-8 lg:gap-10 pt-5 border-t border-white/10">
               {[
+                { val: '0 %', label: 'commission' },
                 { val: (totalBiens ?? 0).toLocaleString('fr-FR'), label: 'biens' },
-                { val: (totalVilles ?? 0).toLocaleString('fr-FR'), label: 'villes' },
+                { val: (totalAnnonceurs ?? 0).toLocaleString('fr-FR'), label: 'annonceurs' },
+                { val: totalRegions.toLocaleString('fr-FR'), label: 'régions' },
               ].map(s => (
-                <div key={s.label}>
+                <div key={s.label} className="text-center">
                   <div className="font-serif text-2xl lg:text-3xl text-white" style={{ fontFamily: "'DM Serif Display', serif" }}>{s.val}</div>
                   <div className="text-xs text-white/30 mt-1">{s.label}</div>
                 </div>
               ))}
             </div>
+            <p className="text-sm text-white/60 mt-3 tracking-wide">
+              100 % gratuit&nbsp;&nbsp;|&nbsp;&nbsp;24h modération
+            </p>
           </div>
         </div>
 
         {/* ── Colonne droite — bulles (desktop only) ── */}
-        <div className="relative flex-1 z-10 hidden lg:block">
+        <div className="relative flex-1 z-10 hidden lg:block pt-24 pb-4">
           <HeroBubbles fallback={biens.slice(1, 5)} />
         </div>
 

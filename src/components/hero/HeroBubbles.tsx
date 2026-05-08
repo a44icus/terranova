@@ -109,7 +109,7 @@ export default function HeroBubbles({ fallback }: Props) {
   }, [])
 
   return (
-    <div className="hidden lg:flex flex-col gap-3 absolute inset-0 items-center justify-center z-20 pointer-events-none">
+    <div className="hidden lg:flex flex-col gap-3 absolute inset-0 items-center justify-center z-20 pointer-events-none pt-28 pb-2">
       <div className="flex flex-col gap-3 pointer-events-auto">
 
       <style>{`
@@ -185,8 +185,8 @@ export default function HeroBubbles({ fallback }: Props) {
 
       {/* Lien voir plus */}
       <Link href="/annonces"
-        className="text-center text-[11px] text-white/30 hover:text-[#818CF8] transition-colors mt-1 px-1">
-        Voir toutes les annonces &rarr;
+        className="self-center text-xs font-medium text-white bg-[#4F46E5] hover:bg-[#4338CA] rounded-lg py-1.5 px-4 transition-colors mt-1 shadow-md shadow-[#4F46E5]/30">
+        Voir toutes les annonces →
       </Link>
       </div>
     </div>
