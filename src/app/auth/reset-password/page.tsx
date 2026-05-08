@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="font-serif text-3xl text-navy">
-            Terra<span className="text-primary italic">nova</span>
+            Jazz<span className="text-primary italic">Immo</span>
           </h1>
           <p className="text-sm text-navy/50 mt-2">Nouveau mot de passe</p>
         </div>

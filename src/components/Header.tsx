@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
@@ -45,7 +45,7 @@ export default function Header({ user, unreadCount = 0 }: Props) {
       {/* Logo */}
       <Link href="/" className="font-serif text-[22px] tracking-wide flex-shrink-0"
         style={{ fontFamily: "'DM Serif Display', serif" }}>
-        Terra<span className="text-[#818CF8] italic">nova</span>
+        Jazz<span className="text-[#818CF8] italic">Immo</span>
       </Link>
 
       {/* Nav centrale pill — desktop */}

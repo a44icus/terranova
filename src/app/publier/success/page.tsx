@@ -21,7 +21,7 @@ export default async function PublierSuccessPage() {
           className="text-xl font-semibold tracking-wide"
           style={{ fontFamily: "'DM Serif Display', serif" }}
         >
-          Terra<span className="text-[#818CF8] italic">nova</span>
+          Jazz<span className="text-[#818CF8] italic">Immo</span>
         </Link>
         <Link
           href="/compte"

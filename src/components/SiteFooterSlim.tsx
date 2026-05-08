@@ -7,7 +7,7 @@ export default function SiteFooterSlim() {
 
         <Link href="/" className="font-serif text-sm text-white tracking-wide"
           style={{ fontFamily: "'DM Serif Display', serif" }}>
-          Terra<span className="text-[#818CF8] italic">nova</span>
+          Jazz<span className="text-[#818CF8] italic">Immo</span>
         </Link>
 
         <nav className="flex items-center gap-4 text-[11px] text-white/35">

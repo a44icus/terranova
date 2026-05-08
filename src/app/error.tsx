@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect } from 'react'
 import Link from 'next/link'
@@ -17,7 +17,7 @@ export default function GlobalError({ error, reset }: Props) {
     <div className="min-h-screen bg-surface flex flex-col">
       <header className="bg-navy text-white px-6 h-14 flex items-center">
         <Link href="/" className="font-serif text-[22px] tracking-wide">
-          Terra<span className="text-primary italic">nova</span>
+          Jazz<span className="text-primary italic">Immo</span>
         </Link>
       </header>
 

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import CompteNav from '@/components/compte/CompteNav'
@@ -57,7 +57,7 @@ export default async function CompteLayout({ children }: { children: React.React
       {/* Header */}
       <header className="bg-navy text-white px-6 h-14 flex items-center justify-between flex-shrink-0">
         <a href="/" className="font-serif text-[22px] tracking-wide">
-          Terra<span className="text-primary italic">nova</span>
+          Jazz<span className="text-primary italic">Immo</span>
         </a>
         {impersonatedId ? (
           <a href="/admin/utilisateurs" className="text-white/50 hover:text-white text-sm transition-colors">

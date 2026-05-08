@@ -1,4 +1,4 @@
-import { getSiteSettings } from '@/lib/siteSettings'
+﻿import { getSiteSettings } from '@/lib/siteSettings'
 
 export default async function MaintenancePage() {
   const s = await getSiteSettings()
@@ -9,7 +9,7 @@ export default async function MaintenancePage() {
 
         {/* Logo */}
         <h1 className="font-serif text-4xl text-navy mb-2">
-          Terra<span className="text-primary italic">nova</span>
+          Jazz<span className="text-primary italic">Immo</span>
         </h1>
 
         {/* Icône */}

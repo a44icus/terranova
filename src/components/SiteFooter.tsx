@@ -11,7 +11,7 @@ export default function SiteFooter() {
           <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
             <Link href="/" className="font-serif text-xl text-white tracking-wide w-fit"
               style={{ fontFamily: "'DM Serif Display', serif" }}>
-              Terra<span className="text-[#818CF8] italic">nova</span>
+              Jazz<span className="text-[#818CF8] italic">Immo</span>
             </Link>
             <p className="text-xs text-white/40 leading-relaxed max-w-[180px]">
               La plateforme immobilière pensée pour le marché français.

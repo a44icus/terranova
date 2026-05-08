@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         style="max-width:560px;background:#FFFFFF;border-radius:16px;overflow:hidden;border:1px solid #E2E0DB;">
         <tr><td style="background:#0F172A;padding:24px 32px;">
           <span style="font-family:Georgia,serif;font-size:24px;color:#FFFFFF;">
-            Terra<span style="color:#4F46E5;font-style:italic;">nova</span>
+            Jazz<span style="color:#4F46E5;font-style:italic;">Immo</span>
           </span>
         </td></tr>
         <tr><td style="padding:32px;">

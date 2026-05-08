@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
         <tr>
           <td style="background:#1A1A18;padding:24px 32px;">
             <span style="font-family:Georgia,serif;font-size:24px;color:#FFFFFF;letter-spacing:0.04em;">
-              Terra<span style="color:#C8602A;font-style:italic;">nova</span>
+              Jazz<span style="color:#C8602A;font-style:italic;">Immo</span>
             </span>
           </td>
         </tr>

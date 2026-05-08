@@ -153,7 +153,7 @@ export default async function LandingPage() {
         {/* Logo */}
         <Link href="/" className="font-serif text-[22px] lg:text-[28px] tracking-wide text-white flex-shrink-0"
           style={{ fontFamily: "'DM Serif Display', serif" }}>
-          Terra<span className="text-[#818CF8] italic">nova</span>
+          Jazz<span className="text-[#818CF8] italic">Immo</span>
         </Link>
 
         {/* Navbar glass — centrée, desktop uniquement */}

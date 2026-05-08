@@ -113,7 +113,7 @@ export default function HomeHamburger({ isLoggedIn }: { isLoggedIn: boolean }) {
 
             {/* Logo */}
             <div className="mb-8 font-serif text-xl text-white" style={{ fontFamily: "'DM Serif Display', serif" }}>
-              Terra<span className="text-[#818CF8] italic">nova</span>
+              Jazz<span className="text-[#818CF8] italic">Immo</span>
             </div>
 
             {/* Liens */}

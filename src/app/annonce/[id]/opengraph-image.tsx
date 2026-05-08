@@ -75,7 +75,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 0 }}>
               <span style={{ fontSize: 34, fontWeight: 700, color: 'white', letterSpacing: '0.04em' }}>Terra</span>
-              <span style={{ fontSize: 34, fontWeight: 700, color: '#818CF8', fontStyle: 'italic', letterSpacing: '0.04em' }}>nova</span>
+              <span style={{ fontSize: 34, fontWeight: 700, color: '#818CF8', fontStyle: 'italic', letterSpacing: '0.04em' }}>Immo</span>
             </div>
             <div style={{
               background: bien?.type === 'location' ? '#0891B2' : '#4F46E5',
