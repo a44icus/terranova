@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { BienType, BienCategorie } from '@/lib/types'
+import { POI_CATEGORIES } from '@/lib/poi'
 
 const CATEGORIES: { value: BienCategorie; label: string }[] = [
   { value: 'appartement',           label: 'Appartement'          },
@@ -41,6 +42,8 @@ interface Recherche {
   pieces_min: string
   description: string
   budget_visible: boolean
+  poi_priorites: string[]
+  score_quartier_min: string
 }
 
 interface Props {
@@ -62,6 +65,8 @@ const DEFAULT: Recherche = {
   pieces_min: '',
   description: '',
   budget_visible: true,
+  poi_priorites: [],
+  score_quartier_min: '0',
 }
 
 export default function ChercheurForm({ userId, initial }: Props) {
@@ -70,15 +75,17 @@ export default function ChercheurForm({ userId, initial }: Props) {
   const [form, setForm] = useState<Recherche>(
     initial ? {
       ...initial,
-      type:        initial.type ?? '',
-      code_postal: initial.code_postal ?? '',
-      rayon_km:    String(initial.rayon_km ?? ''),
-      prix_min:    String(initial.prix_min ?? ''),
-      prix_max:    String(initial.prix_max ?? ''),
-      surface_min: String(initial.surface_min ?? ''),
-      surface_max: String(initial.surface_max ?? ''),
-      pieces_min:  String(initial.pieces_min ?? ''),
-      description: initial.description ?? '',
+      type:               initial.type ?? '',
+      code_postal:        initial.code_postal ?? '',
+      rayon_km:           String(initial.rayon_km ?? ''),
+      prix_min:           String(initial.prix_min ?? ''),
+      prix_max:           String(initial.prix_max ?? ''),
+      surface_min:        String(initial.surface_min ?? ''),
+      surface_max:        String(initial.surface_max ?? ''),
+      pieces_min:         String(initial.pieces_min ?? ''),
+      description:        initial.description ?? '',
+      poi_priorites:      (initial as any).poi_priorites ?? [],
+      score_quartier_min: String((initial as any).score_quartier_min ?? '0'),
     } : DEFAULT
   )
   const [saving, setSaving] = useState(false)
@@ -97,24 +104,35 @@ export default function ChercheurForm({ userId, initial }: Props) {
     }))
   }
 
+  function togglePoi(key: string) {
+    setForm(f => ({
+      ...f,
+      poi_priorites: f.poi_priorites.includes(key)
+        ? f.poi_priorites.filter(p => p !== key)
+        : [...f.poi_priorites, key],
+    }))
+  }
+
   async function handleSave() {
     setSaving(true)
     setMsg(null)
     const payload = {
-      user_id:        userId,
-      actif:          form.actif,
-      type:           form.type || null,
-      categories:     form.categories,
-      ville:          form.ville || null,
-      code_postal:    form.code_postal || null,
-      rayon_km:       form.rayon_km ? parseInt(form.rayon_km) : null,
-      prix_min:       form.prix_min ? parseInt(form.prix_min) : null,
-      prix_max:       form.prix_max ? parseInt(form.prix_max) : null,
-      surface_min:    form.surface_min ? parseInt(form.surface_min) : null,
-      surface_max:    form.surface_max ? parseInt(form.surface_max) : null,
-      pieces_min:     form.pieces_min ? parseInt(form.pieces_min) : null,
-      description:    form.description || null,
-      budget_visible: form.budget_visible,
+      user_id:            userId,
+      actif:              form.actif,
+      type:               form.type || null,
+      categories:         form.categories,
+      ville:              form.ville || null,
+      code_postal:        form.code_postal || null,
+      rayon_km:           form.rayon_km ? parseInt(form.rayon_km) : null,
+      prix_min:           form.prix_min ? parseInt(form.prix_min) : null,
+      prix_max:           form.prix_max ? parseInt(form.prix_max) : null,
+      surface_min:        form.surface_min ? parseInt(form.surface_min) : null,
+      surface_max:        form.surface_max ? parseInt(form.surface_max) : null,
+      pieces_min:         form.pieces_min ? parseInt(form.pieces_min) : null,
+      description:        form.description || null,
+      budget_visible:     form.budget_visible,
+      poi_priorites:      form.poi_priorites,
+      score_quartier_min: form.score_quartier_min ? parseInt(form.score_quartier_min) : 0,
     }
 
     const { error } = initial?.id
@@ -224,6 +242,39 @@ export default function ChercheurForm({ userId, initial }: Props) {
             <label className={labelCls}>Pièces min</label>
             <input type="number" value={form.pieces_min} onChange={e => update('pieces_min', e.target.value)} placeholder="2" className={inputCls} />
           </div>
+        </div>
+
+        {/* POI — Environnement souhaité */}
+        <div>
+          <label className={labelCls}>Environnement souhaité <span className="text-navy/30 font-normal">(optionnel)</span></label>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {POI_CATEGORIES.map(cat => (
+              <button key={cat.key} type="button" onClick={() => togglePoi(cat.key)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border transition-all ${
+                  form.poi_priorites.includes(cat.key)
+                    ? 'text-white border-transparent'
+                    : 'bg-white text-navy/60 border-navy/15 hover:border-navy/30'
+                }`}
+                style={form.poi_priorites.includes(cat.key) ? { background: cat.color } : {}}>
+                <span>{cat.emoji}</span>
+                {cat.label}
+              </button>
+            ))}
+          </div>
+          {form.poi_priorites.length > 0 && (
+            <div>
+              <label className={labelCls}>Score de quartier minimum <span className="text-navy/30 font-normal">(0 = aucun filtre · 10 = quartier excellent)</span></label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range" min="0" max="10" step="1"
+                  value={form.score_quartier_min}
+                  onChange={e => update('score_quartier_min', e.target.value)}
+                  className="flex-1 accent-primary"
+                />
+                <span className="text-sm font-semibold text-navy w-6 text-center">{form.score_quartier_min}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Description libre */}
