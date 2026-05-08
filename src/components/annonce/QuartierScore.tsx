@@ -1,7 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { POI_CATEGORIES, scoreLabel, DEFAULT_SCORE_SEUILS, type ScoreSeuils } from '@/lib/poi'
+import {
+  POI_CATEGORIES, scoreLabel, DEFAULT_SCORE_SEUILS, type ScoreSeuils,
+  getPoiCategory, findPoiByKey,
+} from '@/lib/poi'
 
 interface Props {
   lat: number
@@ -9,6 +12,7 @@ interface Props {
   storedScore?: number | null
   poiWeights?: Record<string, number>
   seuils?: ScoreSeuils
+  userPoiPriorities?: string[]
 }
 
 type POIResult = { name: string; distance: number; emoji: string }
@@ -17,7 +21,7 @@ function fmtDist(m: number) {
   return m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`
 }
 
-export default function QuartierScore({ lat, lng, storedScore, poiWeights, seuils = DEFAULT_SCORE_SEUILS }: Props) {
+export default function QuartierScore({ lat, lng, storedScore, poiWeights, seuils = DEFAULT_SCORE_SEUILS, userPoiPriorities = [] }: Props) {
   const hasStoredScore = typeof storedScore === 'number'
   const [score, setScore]         = useState<number | null>(hasStoredScore ? storedScore : null)
   const [best, setBest]           = useState<Record<string, POIResult>>({})
@@ -118,6 +122,45 @@ export default function QuartierScore({ lat, lng, storedScore, poiWeights, seuil
 
       {!hasPOI && loading === false && (
         <p className="text-[11px] text-navy/30">Données POI en cours de chargement…</p>
+      )}
+
+      {/* ── Critères du chercheur ── */}
+      {userPoiPriorities.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-navy/08">
+          <p className="text-[10px] font-semibold text-navy/40 uppercase tracking-wider mb-2">
+            🎯 Vos critères de proximité
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {userPoiPriorities.map(key => {
+              const poi      = findPoiByKey(key)
+              const catKey   = getPoiCategory(key)
+              const catResult = catKey ? best[catKey] : null
+              const found    = !!catResult
+              return (
+                <div key={key}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] border ${
+                    found
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                      : 'bg-navy/03 border-navy/10 text-navy/35'
+                  }`}>
+                  <span>{poi?.emoji ?? '📍'}</span>
+                  <span className="font-medium">{poi?.label ?? key}</span>
+                  {found && catResult && (
+                    <span className={`ml-0.5 font-normal ${catResult.distance < 500 ? 'text-emerald-500' : 'text-emerald-400'}`}>
+                      · {fmtDist(catResult.distance)}
+                    </span>
+                  )}
+                  {!found && (
+                    <span className="ml-0.5 text-navy/25 font-normal">· non trouvé</span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          <p className="text-[9px] text-navy/25 mt-1.5">
+            Indicatif — basé sur la catégorie de proximité la plus proche
+          </p>
+        </div>
       )}
 
       <p className="text-[9px] text-navy/25 mt-2">

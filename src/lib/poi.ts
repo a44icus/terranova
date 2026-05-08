@@ -292,3 +292,22 @@ export const SEARCH_RADII = [
   { km: 3, deg: 0.027 },
   { km: 5, deg: 0.045 },
 ]
+
+// ── Helpers POI précis ────────────────────────────────────────────────────────
+
+/** Retourne la catégorie large (clé de POI_CATEGORIES) d'un POI précis (clé de POI_GROUPES) */
+export function getPoiCategory(specificKey: string): string | null {
+  for (const groupe of POI_GROUPES) {
+    if (groupe.pois.some(p => p.key === specificKey)) return groupe.categorie.key
+  }
+  return null
+}
+
+/** Retourne les infos d'un POI précis par sa clé */
+export function findPoiByKey(key: string): PoiPrecis | null {
+  for (const groupe of POI_GROUPES) {
+    const found = groupe.pois.find(p => p.key === key)
+    if (found) return found
+  }
+  return null
+}

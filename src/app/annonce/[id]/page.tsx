@@ -112,6 +112,17 @@ export default async function AnnoncePage({ params }: Props) {
     })
   }
 
+  // POI priorités du chercheur connecté (indicatif)
+  let userPoiPriorities: string[] = []
+  if (user) {
+    const { data: recherche } = await adminForBien
+      .from('recherches')
+      .select('poi_priorites')
+      .eq('user_id', user.id)
+      .single()
+    userPoiPriorities = (recherche as any)?.poi_priorites ?? []
+  }
+
   // Fetch settings + vendeur + biens similaires + email vendeur en parallèle
   const adminClient = createAdminClient()
   const [{ data: vendeur }, { data: similaires }, { data: vendeurAuthData }, siteSettings] = await Promise.all([
@@ -437,6 +448,7 @@ export default async function AnnoncePage({ params }: Props) {
                 storedScore={bien.score_quartier ?? null}
                 poiWeights={getPoiWeights(siteSettings)}
                 seuils={getScoreSeuils(siteSettings)}
+                userPoiPriorities={userPoiPriorities}
               />
             )}
 
