@@ -43,6 +43,7 @@ interface Recherche {
   description: string
   budget_visible: boolean
   poi_priorites: string[]
+  rayon_poi_km: string
   score_quartier_min: string
 }
 
@@ -66,6 +67,7 @@ const DEFAULT: Recherche = {
   description: '',
   budget_visible: true,
   poi_priorites: [],
+  rayon_poi_km: '1',
   score_quartier_min: '0',
 }
 
@@ -85,6 +87,7 @@ export default function ChercheurForm({ userId, initial }: Props) {
       pieces_min:         String(initial.pieces_min ?? ''),
       description:        initial.description ?? '',
       poi_priorites:      (initial as any).poi_priorites ?? [],
+      rayon_poi_km:       String((initial as any).rayon_poi_km ?? '1'),
       score_quartier_min: String((initial as any).score_quartier_min ?? '0'),
     } : DEFAULT
   )
@@ -132,6 +135,7 @@ export default function ChercheurForm({ userId, initial }: Props) {
       description:        form.description || null,
       budget_visible:     form.budget_visible,
       poi_priorites:      form.poi_priorites,
+      rayon_poi_km:       form.rayon_poi_km ? parseInt(form.rayon_poi_km) : 1,
       score_quartier_min: form.score_quartier_min ? parseInt(form.score_quartier_min) : 0,
     }
 
@@ -275,20 +279,51 @@ export default function ChercheurForm({ userId, initial }: Props) {
           </div>
 
           {form.poi_priorites.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-navy/08">
-              <label className={labelCls}>
-                Score de quartier minimum
-                <span className="text-navy/30 font-normal ml-1">(0 = aucun filtre · 10 = quartier excellent)</span>
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="range" min="0" max="10" step="1"
-                  value={form.score_quartier_min}
-                  onChange={e => update('score_quartier_min', e.target.value)}
-                  className="flex-1 accent-primary"
-                />
-                <span className="text-sm font-semibold text-navy w-6 text-center">{form.score_quartier_min}</span>
+            <div className="mt-3 pt-3 border-t border-navy/08 space-y-4">
+
+              {/* Distance souhaitée */}
+              <div>
+                <label className={labelCls}>Distance souhaitée</label>
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    { val: '0.5', label: '500 m' },
+                    { val: '1',   label: '1 km'  },
+                    { val: '2',   label: '2 km'  },
+                    { val: '5',   label: '5 km'  },
+                  ].map(opt => (
+                    <button key={opt.val} type="button"
+                      onClick={() => update('rayon_poi_km', opt.val)}
+                      className={`px-3 py-1.5 rounded-lg text-xs border transition-all ${
+                        form.rayon_poi_km === opt.val
+                          ? 'bg-navy text-white border-navy'
+                          : 'bg-white text-navy/60 border-navy/15 hover:border-navy/30'
+                      }`}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-navy/35 mt-1.5">
+                  Indicatif — le filtrage se base sur le score global du quartier.
+                </p>
               </div>
+
+              {/* Score minimum */}
+              <div>
+                <label className={labelCls}>
+                  Score de quartier minimum
+                  <span className="text-navy/30 font-normal ml-1">(0 = aucun filtre · 10 = excellent)</span>
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range" min="0" max="10" step="1"
+                    value={form.score_quartier_min}
+                    onChange={e => update('score_quartier_min', e.target.value)}
+                    className="flex-1 accent-primary"
+                  />
+                  <span className="text-sm font-semibold text-navy w-6 text-center">{form.score_quartier_min}</span>
+                </div>
+              </div>
+
             </div>
           )}
         </div>

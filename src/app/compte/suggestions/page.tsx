@@ -123,6 +123,11 @@ export default async function SuggestionsPage() {
                   </span>
                 )
               })}
+              {recherche.rayon_poi_km && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-navy/10 text-navy/70">
+                  📍 dans {recherche.rayon_poi_km < 1 ? `${recherche.rayon_poi_km * 1000} m` : `${recherche.rayon_poi_km} km`}
+                </span>
+              )}
               {recherche.score_quartier_min > 0 && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-navy/10 text-navy/70">
                   ⭐ Score ≥ {recherche.score_quartier_min}/10
