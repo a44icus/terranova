@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -36,7 +36,7 @@ export default function ArticleForm({ article }: { article?: Article }) {
   const [chapeau,   setChapeau]   = useState(article?.chapeau    ?? '')
   const [contenu,   setContenu]   = useState(article?.contenu    ?? '')
   const [categorie, setCategorie] = useState(article?.categorie  ?? 'guide')
-  const [auteur,    setAuteur]    = useState(article?.auteur_nom ?? 'Terranova')
+  const [auteur,    setAuteur]    = useState(article?.auteur_nom ?? 'JazzImmo')
   const [photoUrl,  setPhotoUrl]  = useState(article?.photo_url  ?? '')
   const [publie,    setPublie]    = useState(article?.publie     ?? false)
   const [loading,   setLoading]   = useState(false)
@@ -63,7 +63,7 @@ export default function ArticleForm({ article }: { article?: Article }) {
       chapeau:    chapeau.trim() || null,
       contenu:    contenu.trim(),
       categorie,
-      auteur_nom: auteur.trim() || 'Terranova',
+      auteur_nom: auteur.trim() || 'JazzImmo',
       photo_url:  photoUrl.trim() || null,
       publie:     publishNow ? true : publie,
       publie_at:  (publishNow || publie) ? (article?.publie_at ?? new Date().toISOString()) : null,
@@ -107,7 +107,7 @@ export default function ArticleForm({ article }: { article?: Article }) {
       <div>
         <label className="block text-sm font-medium text-[#0F172A] mb-1.5">
           Slug (URL) *
-          <span className="ml-2 font-normal text-[#0F172A]/40 text-xs">terranova.fr/blog/<strong>{slug || 'mon-article'}</strong></span>
+          <span className="ml-2 font-normal text-[#0F172A]/40 text-xs">JazzImmo.fr/blog/<strong>{slug || 'mon-article'}</strong></span>
         </label>
         <input
           value={slug} onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
@@ -162,7 +162,7 @@ export default function ArticleForm({ article }: { article?: Article }) {
             value={auteur} onChange={e => setAuteur(e.target.value)}
             maxLength={100}
             className="w-full text-sm border border-[#0F172A]/15 rounded-xl px-4 py-3 focus:outline-none focus:border-[#4F46E5]"
-            placeholder="Terranova"
+            placeholder="JazzImmo"
           />
         </div>
       </div>

@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Conditions Générales de Vente — Terranova',
-  description: 'Conditions Générales de Vente des abonnements payants Terranova : prix, paiement Stripe, rétractation, résiliation.',
+  title: 'Conditions Générales de Vente — JazzImmo',
+  description: 'Conditions Générales de Vente des abonnements payants JazzImmo : prix, paiement Stripe, rétractation, résiliation.',
 }
 
 const H2 = "text-2xl text-[#0F172A] mb-3"
@@ -34,7 +34,7 @@ export default function CGVPage() {
           <h2 className={H2} style={H2_STYLE}>1. Objet</h2>
           <p>
             Les présentes Conditions Générales de Vente (« CGV ») régissent les relations contractuelles
-            entre Terranova (le « Vendeur ») et tout utilisateur souscrivant à un abonnement payant
+            entre JazzImmo (le « Vendeur ») et tout utilisateur souscrivant à un abonnement payant
             (« Abonné »), particulier (consommateur) ou professionnel.
           </p>
           <p className="mt-3">
@@ -50,7 +50,7 @@ export default function CGVPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>2. Plans et tarifs</h2>
           <p>
-            Terranova propose les plans suivants, dont le détail est accessible sur la page d&apos;accueil
+            JazzImmo propose les plans suivants, dont le détail est accessible sur la page d&apos;accueil
             ou dans l&apos;espace abonné :
           </p>
           <div className="space-y-3 mt-3">
@@ -97,7 +97,7 @@ export default function CGVPage() {
             <li>Confirmation par email de la souscription et envoi de la première facture</li>
           </ol>
           <p className="mt-3 text-sm">
-            La validation finale du paiement vaut formation du contrat entre l&apos;Abonné et Terranova.
+            La validation finale du paiement vaut formation du contrat entre l&apos;Abonné et JazzImmo.
           </p>
         </section>
 
@@ -109,7 +109,7 @@ export default function CGVPage() {
             <strong>Stripe Payments Europe Ltd</strong>, certifié PCI-DSS niveau 1.
           </p>
           <p className="mt-3 text-sm">
-            <strong>Aucune donnée bancaire n&apos;est collectée ou stockée par Terranova.</strong>{' '}
+            <strong>Aucune donnée bancaire n&apos;est collectée ou stockée par JazzImmo.</strong>{' '}
             La saisie et le traitement des coordonnées bancaires sont opérés directement par Stripe
             sur ses infrastructures sécurisées.
           </p>
@@ -129,7 +129,7 @@ export default function CGVPage() {
             l&apos;espace abonné, rubrique « Facturation ».
           </p>
           <p className="mt-3 text-sm">
-            Les factures sont conservées par Terranova pendant <strong>10 ans</strong> conformément
+            Les factures sont conservées par JazzImmo pendant <strong>10 ans</strong> conformément
             à l&apos;article L.123-22 du Code de commerce.
           </p>
         </section>
@@ -142,7 +142,7 @@ export default function CGVPage() {
             conditions ci-dessous.
           </p>
           <p className="mt-3 text-sm">
-            Conformément à l&apos;article L.215-1 du Code de la consommation (loi Chatel), Terranova
+            Conformément à l&apos;article L.215-1 du Code de la consommation (loi Chatel), JazzImmo
             informe l&apos;Abonné consommateur, par email, au plus tôt 3 mois et au plus tard 1 mois
             avant la fin de la période, de sa faculté de ne pas reconduire le contrat.
           </p>
@@ -167,7 +167,7 @@ export default function CGVPage() {
           </p>
           <p className="mt-3 text-sm">
             Pour exercer le droit de rétractation, l&apos;Abonné doit notifier sa décision par email
-            à <a href="mailto:contact@terranova.fr" className="text-[#4F46E5] hover:underline">contact@terranova.fr</a>{' '}
+            à <a href="mailto:contact@JazzImmo.fr" className="text-[#4F46E5] hover:underline">contact@JazzImmo.fr</a>{' '}
             ou par courrier au siège social, en utilisant le{' '}
             <a href="https://www.economie.gouv.fr/files/files/directions_services/dgccrf/documentation/fiches_pratiques/fiches/formulaire-retractation.pdf" target="_blank" rel="noopener noreferrer" className="text-[#4F46E5] hover:underline">
               formulaire-type de rétractation
@@ -187,7 +187,7 @@ export default function CGVPage() {
             sauf disposition légale contraire.
           </p>
           <p className="mt-3">
-            <strong>Par Terranova :</strong> Terranova peut résilier l&apos;abonnement de plein droit,
+            <strong>Par JazzImmo :</strong> JazzImmo peut résilier l&apos;abonnement de plein droit,
             sans préavis ni indemnité, en cas de manquement grave de l&apos;Abonné aux CGU ou aux
             CGV (notamment : utilisation frauduleuse, contenu illicite, défaut de paiement persistant
             au-delà de 30 jours).
@@ -197,7 +197,7 @@ export default function CGVPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>9. Modification des prix</h2>
           <p>
-            Terranova se réserve le droit de modifier ses tarifs à tout moment. Toute modification
+            JazzImmo se réserve le droit de modifier ses tarifs à tout moment. Toute modification
             applicable aux abonnements en cours sera notifiée par email <strong>au moins 60 jours
             avant son entrée en vigueur</strong>. L&apos;Abonné qui refuse les nouveaux tarifs peut
             résilier son abonnement sans frais à tout moment avant la date d&apos;application.
@@ -207,28 +207,28 @@ export default function CGVPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>10. Garantie légale de conformité</h2>
           <p>
-            Le Service est fourni « tel quel ». Terranova s&apos;engage à fournir un Service conforme
+            Le Service est fourni « tel quel ». JazzImmo s&apos;engage à fournir un Service conforme
             à la description du plan choisi et garantit l&apos;Abonné contre tout défaut de
             conformité dans les conditions des articles L.217-3 et suivants du Code de la consommation.
           </p>
           <p className="mt-3 text-sm">
             En cas de dysfonctionnement, l&apos;Abonné est invité à contacter le support à{' '}
-            <a href="mailto:support@terranova.fr" className="text-[#4F46E5] hover:underline">
-              support@terranova.fr
-            </a>. Terranova s&apos;engage à intervenir dans les meilleurs délais.
+            <a href="mailto:support@JazzImmo.fr" className="text-[#4F46E5] hover:underline">
+              support@JazzImmo.fr
+            </a>. JazzImmo s&apos;engage à intervenir dans les meilleurs délais.
           </p>
         </section>
 
         <section>
           <h2 className={H2} style={H2_STYLE}>11. Limitation de responsabilité</h2>
           <p>
-            La responsabilité de Terranova est limitée au montant des sommes effectivement payées
+            La responsabilité de JazzImmo est limitée au montant des sommes effectivement payées
             par l&apos;Abonné au titre des 12 derniers mois précédant le fait générateur. Cette
             limitation ne s&apos;applique pas en cas de faute lourde, dol, ou atteinte aux droits
             personnels et libertés fondamentales.
           </p>
           <p className="mt-3 text-sm">
-            Terranova ne saurait être tenue responsable de tout dommage indirect (perte de chance,
+            JazzImmo ne saurait être tenue responsable de tout dommage indirect (perte de chance,
             d&apos;exploitation, de données, manque à gagner) résultant de l&apos;utilisation ou
             de l&apos;impossibilité d&apos;utilisation du Service.
           </p>
@@ -240,7 +240,7 @@ export default function CGVPage() {
             Le service client est joignable :
           </p>
           <ul className="list-disc list-inside text-sm space-y-1 text-[#4B5563] mt-2">
-            <li>Par email : <a href="mailto:support@terranova.fr" className="text-[#4F46E5] hover:underline">support@terranova.fr</a> (réponse sous 48 h ouvrées)</li>
+            <li>Par email : <a href="mailto:support@JazzImmo.fr" className="text-[#4F46E5] hover:underline">support@JazzImmo.fr</a> (réponse sous 48 h ouvrées)</li>
             <li>Par téléphone (Plan Agence uniquement) : [Numéro à compléter]</li>
             <li>Du lundi au vendredi, de 9h à 18h (hors jours fériés)</li>
           </ul>
@@ -249,7 +249,7 @@ export default function CGVPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>13. Médiation et règlement des litiges</h2>
           <p>
-            En cas de litige, l&apos;Abonné est invité à contacter Terranova en priorité afin de
+            En cas de litige, l&apos;Abonné est invité à contacter JazzImmo en priorité afin de
             rechercher une solution amiable. À défaut, l&apos;Abonné consommateur peut recourir
             gratuitement au médiateur de la consommation désigné dans nos{' '}
             <a href="/legal/mentions-legales" className="text-[#4F46E5] hover:underline">

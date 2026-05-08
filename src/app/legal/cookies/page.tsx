@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Politique cookies — Terranova',
-  description: 'Politique de gestion des cookies et traceurs utilisés par Terranova : finalités, durées, gestion du consentement.',
+  title: 'Politique cookies — JazzImmo',
+  description: 'Politique de gestion des cookies et traceurs utilisés par JazzImmo : finalités, durées, gestion du consentement.',
 }
 
 const H2 = "text-2xl text-[#0F172A] mb-3"
@@ -45,7 +45,7 @@ export default function CookiesPage() {
         </section>
 
         <section>
-          <h2 className={H2} style={H2_STYLE}>2. Cookies utilisés par Terranova</h2>
+          <h2 className={H2} style={H2_STYLE}>2. Cookies utilisés par JazzImmo</h2>
 
           <h3 className="font-semibold text-[#0F172A] mt-6 mb-2">🟢 Cookies strictement nécessaires (sans consentement)</h3>
           <p className="text-sm mb-3">
@@ -179,8 +179,8 @@ export default function CookiesPage() {
               Politique de confidentialité
             </a>{' '}
             ou contactez-nous à{' '}
-            <a href="mailto:dpo@terranova.fr" className="text-[#4F46E5] hover:underline">
-              dpo@terranova.fr
+            <a href="mailto:dpo@JazzImmo.fr" className="text-[#4F46E5] hover:underline">
+              dpo@JazzImmo.fr
             </a>.
           </p>
         </section>

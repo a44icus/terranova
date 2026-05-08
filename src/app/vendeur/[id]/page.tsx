@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -6,6 +6,7 @@ import ContactAgentForm from '@/components/vendeur/ContactAgentForm'
 import ShareButton from '@/components/vendeur/ShareButton'
 import AgentMapPin from '@/components/vendeur/AgentMapPin'
 import AvisAgents from '@/components/vendeur/AvisAgents'
+import SignalerButton from '@/components/vendeur/SignalerButton'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 
@@ -13,11 +14,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params
   const supabase = await createClient()
   const { data: profile } = await supabase.from('profiles').select('prenom, nom, agence, ville').eq('id', id).single()
-  if (!profile) return { title: 'Agent — Terranova' }
+  if (!profile) return { title: 'Agent — JazzImmo' }
   const name = profile.agence || `${profile.prenom} ${profile.nom}`
   return {
-    title: `${name} — Terranova`,
-    description: `Découvrez le profil et les annonces de ${name}${profile.ville ? ` à ${profile.ville}` : ''} sur Terranova.`,
+    title: `${name} — JazzImmo`,
+    description: `Découvrez le profil et les annonces de ${name}${profile.ville ? ` à ${profile.ville}` : ''} sur JazzImmo.`,
   }
 }
 
@@ -151,6 +152,9 @@ export default async function VendeurPage({ params }: { params: Promise<{ id: st
                   ✉️ Contacter
                 </a>
                 <ShareButton name={displayName} />
+                {user?.id !== id && (
+                  <SignalerButton reportedUserId={id} isLoggedIn={!!user} />
+                )}
               </div>
             </div>
           </div>

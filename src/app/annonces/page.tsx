@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
@@ -31,8 +31,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   if (p.type === 'vente') parts.push('— Vente')
   if (p.type === 'location') parts.push('— Location')
   return {
-    title: parts.join(' ') + ' | Terranova',
-    description: 'Trouvez des biens immobiliers à vendre et à louer partout en France sur Terranova.',
+    title: parts.join(' ') + ' | JazzImmo',
+    description: 'Trouvez des biens immobiliers à vendre et à louer partout en France sur JazzImmo.',
   }
 }
 

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { getViewUserId } from '@/lib/impersonation'
@@ -237,7 +237,7 @@ export default async function MessagesPage({ searchParams }: Props) {
                         📞 {contact.vendeur_tel}
                       </a>
                     )}
-                    <a href={`mailto:${contact.vendeur_email}?subject=Re: votre bien sur Terranova`}
+                    <a href={`mailto:${contact.vendeur_email}?subject=Re: votre bien sur JazzImmo`}
                       className="ml-auto flex items-center gap-1 text-primary font-medium hover:underline">
                       Répondre par email →
                     </a>

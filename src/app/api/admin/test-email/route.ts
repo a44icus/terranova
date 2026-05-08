@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
@@ -23,9 +23,9 @@ export async function POST(req: NextRequest) {
     method: 'POST',
     headers: { Authorization: `Bearer ${api_key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: `${from_name ?? 'Terranova'} <${from_email}>`,
+      from: `${from_name ?? 'JazzImmo'} <${from_email}>`,
       to: [user.email!],
-      subject: 'Test de configuration email — Terranova',
+      subject: 'Test de configuration email — JazzImmo',
       html: '<p>La configuration email fonctionne correctement.</p>',
     }),
   })

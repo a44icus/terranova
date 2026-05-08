@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 
@@ -149,7 +149,7 @@ export default function PrixEvolutionChart({ ville, codePostal, categorie, curre
       </div>
 
       <p className="text-[10px] text-[#0F172A]/25 mt-2">
-        Sources : annonces Terranova + DVF (data.gouv.fr) · Moyenne mobile 30 jours
+        Sources : annonces JazzImmo + DVF (data.gouv.fr) · Moyenne mobile 30 jours
       </p>
     </div>
   )

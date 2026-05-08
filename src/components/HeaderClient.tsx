@@ -49,7 +49,7 @@ export default function HeaderClient({ isLoggedIn }: Props) {
       {/* Logo */}
       <Link href="/" className="font-serif text-[22px] tracking-wide flex-shrink-0"
         style={{ fontFamily: "'DM Serif Display', serif" }}>
-        Terra<span className="text-[#818CF8] italic">nova</span>
+        Jazz<span className="text-[#818CF8] italic">Immo</span>
       </Link>
 
       {/* Nav centrale — desktop, pill glass */}
@@ -174,7 +174,7 @@ export default function HeaderClient({ isLoggedIn }: Props) {
 
           {/* Logo */}
           <div className="mb-8 font-serif text-xl text-white" style={{ fontFamily: "'DM Serif Display', serif" }}>
-            Terra<span className="text-[#818CF8] italic">nova</span>
+            Jazz<span className="text-[#818CF8] italic">Immo</span>
           </div>
 
           {/* Liens */}

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
 
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
           </table>
         </td></tr>
         <tr><td style="background:#F8F7F5;padding:20px 32px;border-top:1px solid #E2E0DB;">
-          <p style="margin:0;font-size:11px;color:#94A3B8;text-align:center;">Terranova — Demande de publicité carte</p>
+          <p style="margin:0;font-size:11px;color:#94A3B8;text-align:center;">JazzImmo — Demande de publicité carte</p>
         </td></tr>
       </table>
     </td></tr>
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
     method: 'POST',
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: 'Terranova <notifications@terranova.fr>',
+      from: 'JazzImmo <notifications@JazzImmo.fr>',
       to: adminList,
       reply_to: email,
       subject: `📍 Demande de pub carte — ${String(nom).slice(0, 60)}`,

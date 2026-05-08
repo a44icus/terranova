@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "Conditions Générales d'Utilisation — Terranova",
-  description: "Conditions Générales d'Utilisation de la plateforme immobilière Terranova : inscription, publication d'annonces, modération, droits et obligations.",
+  title: "Conditions Générales d'Utilisation — JazzImmo",
+  description: "Conditions Générales d'Utilisation de la plateforme immobilière JazzImmo : inscription, publication d'annonces, modération, droits et obligations.",
 }
 
 const H2 = "text-2xl text-[#0F172A] mb-3"
@@ -33,8 +33,8 @@ export default function CGUPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>1. Définitions</h2>
           <ul className="space-y-2 text-sm">
-            <li><strong>« Plateforme » / « Service »</strong> : le site terranova.fr et l&apos;ensemble des fonctionnalités proposées.</li>
-            <li><strong>« Éditeur »</strong> : la société Terranova, telle que désignée dans les{' '}
+            <li><strong>« Plateforme » / « Service »</strong> : le site JazzImmo.fr et l&apos;ensemble des fonctionnalités proposées.</li>
+            <li><strong>« Éditeur »</strong> : la société JazzImmo, telle que désignée dans les{' '}
               <a href="/legal/mentions-legales" className="text-[#4F46E5] hover:underline">mentions légales</a>.</li>
             <li><strong>« Utilisateur »</strong> : toute personne physique ou morale accédant au Service, qu&apos;elle soit visiteur ou inscrite.</li>
             <li><strong>« Membre »</strong> : Utilisateur ayant créé un compte.</li>
@@ -48,16 +48,16 @@ export default function CGUPage() {
           <p>
             Les présentes Conditions Générales d&apos;Utilisation (ci-après les « CGU ») ont pour objet
             de définir les modalités et conditions d&apos;accès et d&apos;utilisation de la Plateforme
-            Terranova, ainsi que les droits et obligations des Utilisateurs.
+            JazzImmo, ainsi que les droits et obligations des Utilisateurs.
           </p>
           <p className="mt-3">
-            Terranova est une plateforme de mise en relation entre vendeurs/bailleurs et acheteurs/
-            locataires de biens immobiliers. <strong>Terranova n&apos;agit pas en qualité d&apos;agent
+            JazzImmo est une plateforme de mise en relation entre vendeurs/bailleurs et acheteurs/
+            locataires de biens immobiliers. <strong>JazzImmo n&apos;agit pas en qualité d&apos;agent
             immobilier</strong> au sens de la loi Hoguet, ne reçoit aucun mandat et ne perçoit aucune
             commission sur les transactions.
           </p>
           <p className="mt-3">
-            Terranova exerce son activité en qualité d&apos;<strong>hébergeur</strong> au sens de
+            JazzImmo exerce son activité en qualité d&apos;<strong>hébergeur</strong> au sens de
             l&apos;article 6-I-2 de la loi LCEN du 21 juin 2004.
           </p>
         </section>
@@ -85,7 +85,7 @@ export default function CGUPage() {
             <li>Maintenir la <strong>confidentialité</strong> de ses identifiants et mot de passe</li>
             <li>Ne créer qu&apos;<strong>un seul compte</strong> par personne physique</li>
             <li>Ne pas utiliser un compte tiers sans autorisation expresse</li>
-            <li>Notifier sans délai à Terranova toute utilisation non autorisée de son compte</li>
+            <li>Notifier sans délai à JazzImmo toute utilisation non autorisée de son compte</li>
           </ul>
           <p className="mt-3 text-sm">
             Tout manquement à ces engagements expose le Membre à la suspension immédiate ou la
@@ -109,8 +109,8 @@ export default function CGUPage() {
             <li>Le bien n&apos;est pas frappé d&apos;une <strong>interdiction légale de mise en location</strong> (notamment passoire thermique classée G à compter du 1<sup>er</sup> janvier 2025)</li>
           </ul>
           <p className="mt-3 text-sm">
-            Les annonces sont soumises à <strong>validation préalable</strong> par l&apos;équipe Terranova.
-            Cette validation ne constitue pas un engagement de Terranova quant à l&apos;exactitude ou
+            Les annonces sont soumises à <strong>validation préalable</strong> par l&apos;équipe JazzImmo.
+            Cette validation ne constitue pas un engagement de JazzImmo quant à l&apos;exactitude ou
             la conformité du contenu, dont la responsabilité incombe exclusivement au Membre publieur.
           </p>
         </section>
@@ -133,12 +133,12 @@ export default function CGUPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>7. Statut d&apos;hébergeur — Responsabilité</h2>
           <p>
-            Terranova exerce son activité en qualité d&apos;<strong>hébergeur de contenu</strong>
-            (article 6-I-2 LCEN). À ce titre, Terranova n&apos;est pas soumise à une obligation
+            JazzImmo exerce son activité en qualité d&apos;<strong>hébergeur de contenu</strong>
+            (article 6-I-2 LCEN). À ce titre, JazzImmo n&apos;est pas soumise à une obligation
             générale de surveillance des contenus publiés.
           </p>
           <p className="mt-3">
-            Terranova ne saurait être tenue responsable :
+            JazzImmo ne saurait être tenue responsable :
           </p>
           <ul className="list-disc list-inside text-sm space-y-1 text-[#4B5563] mt-2">
             <li>Des contenus, déclarations, photos ou informations publiés par les Membres</li>
@@ -148,7 +148,7 @@ export default function CGUPage() {
             <li>D&apos;une indisponibilité temporaire du Service due à une maintenance, mise à jour ou cas de force majeure</li>
           </ul>
           <p className="mt-3 text-sm">
-            Terranova s&apos;engage à mettre tous les moyens raisonnables en œuvre pour assurer la
+            JazzImmo s&apos;engage à mettre tous les moyens raisonnables en œuvre pour assurer la
             disponibilité du Service mais ne garantit pas un fonctionnement permanent et ininterrompu.
           </p>
         </section>
@@ -156,7 +156,7 @@ export default function CGUPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>8. Modération et suppression de contenu</h2>
           <p>
-            Terranova met en œuvre une modération <em>a priori</em> et <em>a posteriori</em> des
+            JazzImmo met en œuvre une modération <em>a priori</em> et <em>a posteriori</em> des
             Annonces. Toute Annonce ou tout Contenu Utilisateur peut être refusé, modifié ou
             supprimé sans préavis ni indemnité s&apos;il :
           </p>
@@ -174,8 +174,8 @@ export default function CGUPage() {
           <h2 className={H2} style={H2_STYLE}>9. Procédure de signalement de contenu illicite</h2>
           <p>
             Tout Utilisateur peut signaler un contenu manifestement illicite à l&apos;adresse{' '}
-            <a href="mailto:abuse@terranova.fr" className="text-[#4F46E5] hover:underline">
-              abuse@terranova.fr
+            <a href="mailto:abuse@JazzImmo.fr" className="text-[#4F46E5] hover:underline">
+              abuse@JazzImmo.fr
             </a>{' '}
             en respectant les conditions de l&apos;article 6-I-5 LCEN détaillées dans nos{' '}
             <a href="/legal/mentions-legales" className="text-[#4F46E5] hover:underline">
@@ -183,7 +183,7 @@ export default function CGUPage() {
             </a>.
           </p>
           <p className="mt-3 text-sm">
-            Terranova s&apos;engage à examiner toute notification recevable dans les meilleurs délais
+            JazzImmo s&apos;engage à examiner toute notification recevable dans les meilleurs délais
             et à retirer promptement tout contenu manifestement illicite. Tout signalement abusif ou
             de mauvaise foi engage la responsabilité civile et pénale de son auteur.
           </p>
@@ -194,8 +194,8 @@ export default function CGUPage() {
           <p>
             <strong>Par l&apos;Utilisateur :</strong> le Membre peut résilier son compte à tout
             moment depuis son espace personnel ou par demande écrite à{' '}
-            <a href="mailto:contact@terranova.fr" className="text-[#4F46E5] hover:underline">
-              contact@terranova.fr
+            <a href="mailto:contact@JazzImmo.fr" className="text-[#4F46E5] hover:underline">
+              contact@JazzImmo.fr
             </a>. La suppression entraîne la désactivation immédiate des Annonces et la suppression
             des données dans les conditions de notre{' '}
             <a href="/legal/confidentialite" className="text-[#4F46E5] hover:underline">
@@ -203,7 +203,7 @@ export default function CGUPage() {
             </a>.
           </p>
           <p className="mt-3">
-            <strong>Par Terranova :</strong> en cas de manquement grave ou répété aux CGU, Terranova
+            <strong>Par JazzImmo :</strong> en cas de manquement grave ou répété aux CGU, JazzImmo
             peut suspendre ou résilier le compte du Membre, sans préavis ni indemnité, sans préjudice
             des dommages-intérêts qui pourraient être réclamés.
           </p>
@@ -223,12 +223,12 @@ export default function CGUPage() {
           </p>
           <p className="mt-3">
             Les contenus publiés par les Membres restent la propriété de leurs auteurs. Cependant,
-            en publiant un contenu sur la Plateforme, le Membre concède à Terranova une{' '}
+            en publiant un contenu sur la Plateforme, le Membre concède à JazzImmo une{' '}
             <strong>licence non-exclusive, gratuite, mondiale et pour la durée de publication</strong>{' '}
             de reproduire, représenter, adapter et diffuser ledit contenu, dans la limite stricte
             de ce qui est nécessaire au fonctionnement et à la promotion du Service (notamment :
             affichage public sur le Site, partage social, indexation par les moteurs de recherche,
-            inclusion dans des sélections ou newsletters Terranova).
+            inclusion dans des sélections ou newsletters JazzImmo).
           </p>
           <p className="mt-3 text-sm">
             Cette licence prend fin automatiquement à la suppression du contenu, sous réserve des
@@ -253,7 +253,7 @@ export default function CGUPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>13. Force majeure</h2>
           <p>
-            La responsabilité de Terranova ne pourra être engagée en cas de force majeure ou de
+            La responsabilité de JazzImmo ne pourra être engagée en cas de force majeure ou de
             faits indépendants de sa volonté, notamment : panne d&apos;hébergeur, attaque
             informatique, défaillance d&apos;un service tiers (Supabase, Vercel, Stripe…), grève,
             émeute, guerre, catastrophe naturelle, pandémie, ou décision d&apos;une autorité
@@ -264,7 +264,7 @@ export default function CGUPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>14. Modification des CGU</h2>
           <p>
-            Terranova se réserve le droit de modifier les présentes CGU à tout moment afin
+            JazzImmo se réserve le droit de modifier les présentes CGU à tout moment afin
             d&apos;adapter le Service à l&apos;évolution juridique, technique ou commerciale. Les
             Utilisateurs seront informés de toute modification substantielle par email et/ou par
             une notification sur la Plateforme, au moins <strong>15 jours avant</strong> son
@@ -281,7 +281,7 @@ export default function CGUPage() {
             leur force et leur portée.
           </p>
           <p className="mt-3 text-sm">
-            Terranova se réserve le droit de céder tout ou partie de ses droits et obligations
+            JazzImmo se réserve le droit de céder tout ou partie de ses droits et obligations
             résultant des présentes CGU à un tiers, notamment dans le cadre d&apos;une cession,
             fusion, scission ou apport partiel d&apos;actif.
           </p>
@@ -290,10 +290,10 @@ export default function CGUPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>16. Médiation et règlement des litiges</h2>
           <p>
-            En cas de litige, l&apos;Utilisateur est invité à contacter Terranova en priorité à
+            En cas de litige, l&apos;Utilisateur est invité à contacter JazzImmo en priorité à
             l&apos;adresse{' '}
-            <a href="mailto:contact@terranova.fr" className="text-[#4F46E5] hover:underline">
-              contact@terranova.fr
+            <a href="mailto:contact@JazzImmo.fr" className="text-[#4F46E5] hover:underline">
+              contact@JazzImmo.fr
             </a>{' '}
             afin de rechercher une solution amiable.
           </p>

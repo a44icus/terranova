@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -34,16 +34,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq('publie', true)
     .single()
 
-  if (!data) return { title: 'Article introuvable – Terranova' }
+  if (!data) return { title: 'Article introuvable – JazzImmo' }
 
   return {
-    title: `${data.titre} | Terranova`,
-    description: data.chapeau ?? `Article publié par ${data.auteur_nom} sur Terranova.`,
+    title: `${data.titre} | JazzImmo`,
+    description: data.chapeau ?? `Article publié par ${data.auteur_nom} sur JazzImmo.`,
     openGraph: {
       title: data.titre,
       description: data.chapeau ?? '',
       url: `${BASE_URL}/blog/${slug}`,
-      siteName: 'Terranova',
+      siteName: 'JazzImmo',
       locale: 'fr_FR',
       type: 'article',
       publishedTime: data.publie_at ?? undefined,

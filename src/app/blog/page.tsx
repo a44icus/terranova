@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'Blog immobilier – Guides, conseils et actualités | Terranova',
+  title: 'Blog immobilier – Guides, conseils et actualités | JazzImmo',
   description: 'Retrouvez nos guides pratiques, conseils d\'achat, de vente et de location immobilière, ainsi que les actualités du marché.',
 }
 
@@ -46,7 +46,7 @@ export default async function BlogPage() {
         }} />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 text-center">
           <h1 className="font-serif text-4xl sm:text-5xl text-white mb-4 leading-tight">
-            Le blog <span className="text-[#818CF8] italic">Terranova</span>
+            Le blog <span className="text-[#818CF8] italic">JazzImmo</span>
           </h1>
           <p className="text-white/55 text-lg max-w-xl mx-auto">
             Guides pratiques, conseils d'experts et actualités du marché immobilier

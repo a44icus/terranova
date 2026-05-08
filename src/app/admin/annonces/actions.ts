@@ -1,4 +1,4 @@
-'use server'
+﻿'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth'
@@ -57,10 +57,10 @@ export async function approuverAnnonce(bienId: string): Promise<{ ok?: boolean; 
         const { Resend } = await import('resend')
         const resend = new Resend(process.env.RESEND_API_KEY)
         await resend.emails.send({
-          from: 'Terranova <noreply@terranova.fr>',
+          from: 'JazzImmo <noreply@JazzImmo.fr>',
           to: seller.email,
           subject: `✅ Votre annonce "${bien.titre}" est en ligne`,
-          html: `<p>Bonjour,</p><p>Votre annonce <strong>${bien.titre}</strong> à ${bien.ville} a été approuvée et est maintenant visible sur Terranova.</p><p><a href="${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'}/annonce/${bienId}">Voir mon annonce</a></p>`,
+          html: `<p>Bonjour,</p><p>Votre annonce <strong>${bien.titre}</strong> à ${bien.ville} a été approuvée et est maintenant visible sur JazzImmo.</p><p><a href="${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'}/annonce/${bienId}">Voir mon annonce</a></p>`,
         }).catch(() => {})
       }
     }
@@ -102,9 +102,9 @@ export async function refuserAnnonce(bienId: string, raison?: string): Promise<{
         const { Resend } = await import('resend')
         const resend = new Resend(process.env.RESEND_API_KEY)
         await resend.emails.send({
-          from: 'Terranova <noreply@terranova.fr>',
+          from: 'JazzImmo <noreply@JazzImmo.fr>',
           to: seller.email,
-          subject: `Votre annonce n'a pas été approuvée — Terranova`,
+          subject: `Votre annonce n'a pas été approuvée — JazzImmo`,
           html: `<p>Bonjour,</p><p>Votre annonce <strong>${bien.titre}</strong> à ${bien.ville} n'a malheureusement pas pu être approuvée.${raison ? `</p><p>Motif : ${raison}` : ''}</p><p>N'hésitez pas à nous contacter pour plus d'informations.</p>`,
         }).catch(() => {})
       }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import {
   POI_CATEGORIES,
   OVERPASS_QUERY,
@@ -34,7 +34,7 @@ async function fetchAtRadius(
         method: 'POST',
         body: `data=${encodeURIComponent(query)}`,
         signal: AbortSignal.timeout(9000),
-        headers: { 'User-Agent': 'Terranova/1.0 (immobilier)' },
+        headers: { 'User-Agent': 'JazzImmo/1.0 (immobilier)' },
       })
       if (!res.ok) continue
 

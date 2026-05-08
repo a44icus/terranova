@@ -1,4 +1,4 @@
-import { createAdminClient } from './supabase/admin'
+﻿import { createAdminClient } from './supabase/admin'
 
 export interface SiteSettings {
   // ── Site général ─────────────────────────────────────────
@@ -99,9 +99,9 @@ export interface SiteSettings {
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
-  nom_site:               'Terranova',
+  nom_site:               'JazzImmo',
   slogan:                 'La plateforme immobilière de référence',
-  email_contact:          'contact@terranova.fr',
+  email_contact:          'contact@JazzImmo.fr',
   maintenance:            false,
   maintenance_message:    'Le site est en maintenance, revenez bientôt.',
 
@@ -156,8 +156,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
 
   alertes_max_par_user:   5,
   alertes_frequence:      'instantane',
-  email_expediteur_nom:   'Terranova',
-  email_expediteur:       'noreply@terranova.fr',
+  email_expediteur_nom:   'JazzImmo',
+  email_expediteur:       'noreply@JazzImmo.fr',
 
   notif_admin_email:      '',
   notif_nouvelle_annonce: false,

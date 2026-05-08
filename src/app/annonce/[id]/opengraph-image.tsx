@@ -1,8 +1,8 @@
-import { ImageResponse } from 'next/og'
+﻿import { ImageResponse } from 'next/og'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatPrix } from '@/lib/geo'
 
-export const alt = 'Annonce Terranova'
+export const alt = 'Annonce JazzImmo'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 

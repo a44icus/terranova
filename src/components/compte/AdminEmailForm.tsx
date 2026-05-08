@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -98,11 +98,11 @@ export default function AdminEmailForm({ initial }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Nom expéditeur</label>
-            <input type="text" value={form.from_name} onChange={e => update('from_name', e.target.value)} className={inputCls} placeholder="Terranova" />
+            <input type="text" value={form.from_name} onChange={e => update('from_name', e.target.value)} className={inputCls} placeholder="JazzImmo" />
           </div>
           <div>
             <label className={labelCls}>Email expéditeur</label>
-            <input type="email" value={form.from_email} onChange={e => update('from_email', e.target.value)} className={inputCls} placeholder="no-reply@terranova.fr" />
+            <input type="email" value={form.from_email} onChange={e => update('from_email', e.target.value)} className={inputCls} placeholder="no-reply@JazzImmo.fr" />
           </div>
         </div>
 

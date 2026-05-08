@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
@@ -42,10 +42,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ville = villeRaw.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 
   return {
-    title: `Marché immobilier à ${ville} – Prix, tendances | Terranova`,
+    title: `Marché immobilier à ${ville} – Prix, tendances | JazzImmo`,
     description: `Prix au m², évolution du marché et biens disponibles à ${ville}. Consultez les statistiques immobilières et trouvez votre bien.`,
     openGraph: {
-      title: `Immobilier ${ville} – Prix du marché | Terranova`,
+      title: `Immobilier ${ville} – Prix du marché | JazzImmo`,
       description: `Découvrez les prix de l'immobilier à ${ville} : vente, location, évolution des prix.`,
       type: 'website',
     },

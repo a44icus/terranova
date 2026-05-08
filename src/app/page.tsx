@@ -1,4 +1,4 @@
-import { headers } from 'next/headers'
+﻿import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
@@ -14,7 +14,7 @@ import { getPlanConfig, ALL_FEATURES } from '@/lib/plan'
 import type { PlanConfig } from '@/lib/plan'
 
 export const metadata: Metadata = {
-  title: "Terranova \u2013 L'immobilier autrement",
+  title: "JazzImmo \u2013 L'immobilier autrement",
   description: 'Carte interactive, filtres avanc\u00e9s, contact direct. Trouvez ou vendez votre bien sans interm\u00e9diaire.',
 }
 

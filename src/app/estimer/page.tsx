@@ -1,11 +1,11 @@
-import EstimationForm from '@/components/EstimationForm'
+﻿import EstimationForm from '@/components/EstimationForm'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'Estimer mon bien — Terranova',
+  title: 'Estimer mon bien — JazzImmo',
   description: 'Obtenez une estimation gratuite de votre bien immobilier basée sur les ventes récentes dans votre secteur.',
 }
 
@@ -36,7 +36,7 @@ export default function EstimerPage() {
         </div>
 
         <p className="text-center text-xs text-[#0F172A]/30 mt-6">
-          Cette estimation est indicative et basée sur les annonces présentes sur Terranova.
+          Cette estimation est indicative et basée sur les annonces présentes sur JazzImmo.
           Pour une évaluation précise, consultez un professionnel de l&apos;immobilier.
         </p>
       </div>

@@ -1,4 +1,4 @@
-'use server'
+﻿'use server'
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -64,9 +64,9 @@ export async function sendReply(contactId: string, contenu: string): Promise<{ o
 
       if (toEmail) {
         await resend.emails.send({
-          from: 'Terranova <messages@terranova.fr>',
+          from: 'JazzImmo <messages@terranova.fr>',
           to: toEmail,
-          subject: `💬 Nouveau message sur Terranova`,
+          subject: `💬 Nouveau message sur JazzImmo`,
           html: `<p>Vous avez reçu un nouveau message concernant votre annonce.</p><a href="${baseUrl}/compte/messages/${contactId}" style="display:inline-block;background:#4F46E5;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;">Voir le message →</a>`,
         }).catch(() => {})
       }

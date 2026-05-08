@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin'
+﻿import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import AgencesClient from '@/components/agences/AgencesClient'
@@ -8,8 +8,8 @@ import SiteFooter from '@/components/SiteFooter'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Agents & Agences immobilières — Terranova',
-  description: 'Trouvez un agent immobilier, une agence ou un réseau sur Terranova.',
+  title: 'Agents & Agences immobilières — JazzImmo',
+  description: 'Trouvez un agent immobilier, une agence ou un réseau sur JazzImmo.',
 }
 
 export default async function AgencesPage() {
@@ -53,7 +53,7 @@ export default async function AgencesPage() {
             Agents & Agences
           </h1>
           <p className="text-white/45 text-sm mb-8 max-w-lg leading-relaxed">
-            Trouvez votre interlocuteur idéal parmi les professionnels de l'immobilier référencés sur Terranova.
+            Trouvez votre interlocuteur idéal parmi les professionnels de l'immobilier référencés sur JazzImmo.
           </p>
           <div className="flex flex-wrap gap-3">
             {totalAgents > 0 && (

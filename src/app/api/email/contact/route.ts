@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
@@ -92,14 +92,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, skipped: true })
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'
 
   const html = `<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nouveau message – Terranova</title>
+  <title>Nouveau message – JazzImmo</title>
 </head>
 <body style="margin:0;padding:0;background:#F8F7F5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F7F5;padding:40px 16px;">
@@ -188,7 +188,7 @@ export async function POST(req: NextRequest) {
           <tr>
             <td style="background:#F8F7F5;padding:20px 32px;border-top:1px solid #E2E0DB;">
               <p style="margin:0;font-size:11px;color:#94A3B8;text-align:center;">
-                Terranova — Plateforme immobilière &nbsp;·&nbsp;
+                JazzImmo — Plateforme immobilière &nbsp;·&nbsp;
                 <a href="${baseUrl}/annonce/${safeBienId}"
                   style="color:#94A3B8;text-decoration:underline;">Voir l'annonce</a>
               </p>
@@ -208,7 +208,7 @@ export async function POST(req: NextRequest) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'Terranova <notifications@terranova.fr>',
+      from: 'JazzImmo <notifications@JazzImmo.fr>',
       to: [vendeurEmail],
       subject: `Nouveau message pour "${String(bienTitre).slice(0, 100)}"`,
       html,

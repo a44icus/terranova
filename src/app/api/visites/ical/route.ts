@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -64,13 +64,13 @@ export async function GET(req: NextRequest) {
   ].filter(Boolean).join('\n')
 
   const now  = toIcalDate(new Date().toISOString())
-  const uid  = `visite-${id}@terranova.fr`
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
+  const uid  = `visite-${id}@JazzImmo.fr`
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'
 
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Terranova//Visites//FR',
+    'PRODID:-//JazzImmo//Visites//FR',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',

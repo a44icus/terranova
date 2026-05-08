@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Resend } from 'resend'
 import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
         const safCr     = creneau ? escHtml(String(creneau)) : ''
 
         await resend.emails.send({
-          from:    'Terranova <noreply@terranova-beta.vercel.app>',
+          from:    'JazzImmo <noreply@JazzImmo-beta.vercel.app>',
           to:      vendeurEmail,
           replyTo: (demandeurEmail as string).trim(),
           subject: `Demande de visite — ${bien.titre}`,
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
                 Répondre à ${safNom}
               </a>
               <p style="margin-top:20px;font-size:12px;color:#94A3B8">
-                Gérez vos demandes de visite dans <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'}/compte/visites" style="color:#4F46E5">votre espace vendeur</a>.
+                Gérez vos demandes de visite dans <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'}/compte/visites" style="color:#4F46E5">votre espace vendeur</a>.
               </p>
             </div>
           `,

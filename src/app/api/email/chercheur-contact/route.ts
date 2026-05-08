@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
@@ -82,9 +82,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, skipped: true })
   }
 
-  const fromEmail = emailConfig?.from_email ?? 'notifications@terranova.fr'
-  const fromName = emailConfig?.from_name ?? 'Terranova'
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
+  const fromEmail = emailConfig?.from_email ?? 'notifications@JazzImmo.fr'
+  const fromName = emailConfig?.from_name ?? 'JazzImmo'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'
 
   const safeVendeurNom  = escHtml(vendeurNom)
   const safeVendeurEmail = escHtml(vendeurEmail)
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
             </table>
             <table cellpadding="0" cellspacing="0"><tr>
               <td style="background:#C8602A;border-radius:10px;">
-                <a href="mailto:${safeVendeurEmail}?subject=Re: Votre bien sur Terranova"
+                <a href="mailto:${safeVendeurEmail}?subject=Re: Votre bien sur JazzImmo"
                   style="display:inline-block;padding:12px 28px;font-size:14px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;">
                   Répondre
                 </a>
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
         <tr>
           <td style="background:#F8F7F5;padding:16px 32px;border-top:1px solid #E2E0DB;">
             <p style="margin:0;font-size:11px;color:#94A3B8;text-align:center;">
-              Terranova · Vous recevez cet email car votre profil chercheur est actif.
+              JazzImmo · Vous recevez cet email car votre profil chercheur est actif.
               <a href="${baseUrl}/compte/chercheur" style="color:#94A3B8;text-decoration:underline;">Désactiver</a>
             </p>
           </td>
@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
       from: `${fromName} <${fromEmail}>`,
       to: [chercheurEmail],
       reply_to: vendeurEmail as string,
-      subject: `${vendeurNom} a un bien pour vous — Terranova`,
+      subject: `${vendeurNom} a un bien pour vous — JazzImmo`,
       html,
     }),
   })

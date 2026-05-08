@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Politique de confidentialité — Terranova',
-  description: 'Politique de confidentialité et protection des données personnelles (RGPD) de Terranova.',
+  title: 'Politique de confidentialité — JazzImmo',
+  description: 'Politique de confidentialité et protection des données personnelles (RGPD) de JazzImmo.',
 }
 
 const H2 = "text-2xl text-[#0F172A] mb-3"
@@ -31,15 +31,15 @@ export default function ConfidentialitePage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>1. Responsable du traitement</h2>
           <p>
-            Le responsable du traitement de vos données personnelles est <strong>Terranova</strong>,
+            Le responsable du traitement de vos données personnelles est <strong>JazzImmo</strong>,
             tel qu&apos;identifié dans les{' '}
             <a href="/legal/mentions-legales" className="text-[#4F46E5] hover:underline">mentions légales</a>.
           </p>
           <p className="mt-3 text-sm">
             Pour toute question relative à vos données personnelles ou pour exercer vos droits, vous
             pouvez nous contacter à :{' '}
-            <a href="mailto:dpo@terranova.fr" className="text-[#4F46E5] hover:underline">
-              dpo@terranova.fr
+            <a href="mailto:dpo@JazzImmo.fr" className="text-[#4F46E5] hover:underline">
+              dpo@JazzImmo.fr
             </a>
             {' '}(Délégué à la Protection des Données — DPO).
           </p>
@@ -76,7 +76,7 @@ export default function ConfidentialitePage() {
               <ul className="list-disc list-inside text-sm space-y-1 text-[#4B5563]">
                 <li>Identifiant client Stripe (jeton)</li>
                 <li>Historique de facturation</li>
-                <li className="text-[#DC2626]"><strong>Aucune donnée bancaire</strong> n&apos;est stockée par Terranova : la collecte et le traitement des moyens de paiement sont opérés par <a href="https://stripe.com/fr/privacy" target="_blank" rel="noopener noreferrer" className="text-[#4F46E5] hover:underline">Stripe</a>, prestataire certifié PCI-DSS niveau 1.</li>
+                <li className="text-[#DC2626]"><strong>Aucune donnée bancaire</strong> n&apos;est stockée par JazzImmo : la collecte et le traitement des moyens de paiement sont opérés par <a href="https://stripe.com/fr/privacy" target="_blank" rel="noopener noreferrer" className="text-[#4F46E5] hover:underline">Stripe</a>, prestataire certifié PCI-DSS niveau 1.</li>
               </ul>
             </div>
 
@@ -209,11 +209,11 @@ export default function ConfidentialitePage() {
             <li><strong className="text-[#374151]">Droit à la portabilité</strong> : recevoir vos données dans un format structuré, couramment utilisé et lisible par machine</li>
             <li><strong className="text-[#374151]">Droit de retirer votre consentement</strong> à tout moment, sans affecter la licéité du traitement effectué auparavant</li>
             <li><strong className="text-[#374151]">Droit de définir des directives post mortem</strong> sur le sort de vos données après votre décès</li>
-            <li><strong className="text-[#374151]">Droit de ne pas faire l&apos;objet d&apos;une décision automatisée</strong> ayant des effets juridiques significatifs (Terranova ne pratique aucun profilage de ce type)</li>
+            <li><strong className="text-[#374151]">Droit de ne pas faire l&apos;objet d&apos;une décision automatisée</strong> ayant des effets juridiques significatifs (JazzImmo ne pratique aucun profilage de ce type)</li>
           </ul>
           <p className="mt-3 text-sm">
             Pour exercer ces droits, contactez-nous à{' '}
-            <a href="mailto:dpo@terranova.fr" className="text-[#4F46E5] hover:underline">dpo@terranova.fr</a>{' '}
+            <a href="mailto:dpo@JazzImmo.fr" className="text-[#4F46E5] hover:underline">dpo@JazzImmo.fr</a>{' '}
             en justifiant de votre identité (copie d&apos;une pièce d&apos;identité). Nous nous
             engageons à répondre dans un délai maximum de <strong>1 mois</strong> à compter de la
             réception de votre demande, prolongeable de 2 mois en cas de complexité.
@@ -257,7 +257,7 @@ export default function ConfidentialitePage() {
             Le Service n&apos;est <strong>pas destiné aux personnes de moins de 18 ans</strong>.
             Nous ne collectons pas sciemment de données concernant des mineurs. Si vous estimez
             qu&apos;un mineur a transmis des données personnelles via la Plateforme, contactez-nous
-            à <a href="mailto:dpo@terranova.fr" className="text-[#4F46E5] hover:underline">dpo@terranova.fr</a> :
+            à <a href="mailto:dpo@JazzImmo.fr" className="text-[#4F46E5] hover:underline">dpo@JazzImmo.fr</a> :
             nous procéderons à la suppression dans les meilleurs délais.
           </p>
         </section>

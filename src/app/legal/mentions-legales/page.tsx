@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Mentions légales — Terranova',
-  description: 'Mentions légales de la plateforme immobilière Terranova : éditeur, hébergeur, propriété intellectuelle, signalement de contenu.',
+  title: 'Mentions légales — JazzImmo',
+  description: 'Mentions légales de la plateforme immobilière JazzImmo : éditeur, hébergeur, propriété intellectuelle, signalement de contenu.',
 }
 
 const H2 = "text-2xl text-[#0F172A] mb-3"
@@ -31,10 +31,10 @@ export default function MentionsLegalesPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>1. Éditeur du site</h2>
           <p>
-            Le site <strong>terranova.fr</strong> (ci-après « le Site » ou « la Plateforme ») est édité par :
+            Le site <strong>JazzImmo.fr</strong> (ci-après « le Site » ou « la Plateforme ») est édité par :
           </p>
           <ul className="mt-3 space-y-1 text-sm">
-            <li><span className="text-[#6B7280]">Dénomination sociale :</span> <strong>Terranova</strong></li>
+            <li><span className="text-[#6B7280]">Dénomination sociale :</span> <strong>JazzImmo</strong></li>
             <li><span className="text-[#6B7280]">Forme juridique :</span> [SASU / SAS / EURL / Auto-entrepreneur — à compléter]</li>
             <li><span className="text-[#6B7280]">Capital social :</span> [Montant en € — à compléter si société]</li>
             <li><span className="text-[#6B7280]">Siège social :</span> [Adresse complète — à compléter]</li>
@@ -43,7 +43,7 @@ export default function MentionsLegalesPage() {
             <li><span className="text-[#6B7280]">N° TVA intracommunautaire :</span> [À compléter si assujetti]</li>
             <li><span className="text-[#6B7280]">Téléphone :</span> [Numéro à compléter]</li>
             <li><span className="text-[#6B7280]">Email :</span>{' '}
-              <a href="mailto:contact@terranova.fr" className="text-[#4F46E5] hover:underline">contact@terranova.fr</a>
+              <a href="mailto:contact@JazzImmo.fr" className="text-[#4F46E5] hover:underline">contact@JazzImmo.fr</a>
             </li>
           </ul>
         </section>
@@ -54,7 +54,7 @@ export default function MentionsLegalesPage() {
             Le directeur de la publication est <strong>[Prénom NOM — à compléter]</strong>, en qualité de
             représentant légal de l&apos;éditeur. Toute correspondance peut lui être adressée à l&apos;adresse
             postale du siège social ou par email à{' '}
-            <a href="mailto:contact@terranova.fr" className="text-[#4F46E5] hover:underline">contact@terranova.fr</a>.
+            <a href="mailto:contact@JazzImmo.fr" className="text-[#4F46E5] hover:underline">contact@JazzImmo.fr</a>.
           </p>
         </section>
 
@@ -84,17 +84,17 @@ export default function MentionsLegalesPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>4. Activité et statut juridique</h2>
           <p>
-            Terranova est une plateforme en ligne de mise en relation entre vendeurs/bailleurs et
+            JazzImmo est une plateforme en ligne de mise en relation entre vendeurs/bailleurs et
             acheteurs/locataires de biens immobiliers situés en France.
           </p>
           <p className="mt-3">
-            <strong>Terranova n&apos;agit pas en qualité d&apos;agent immobilier</strong> au sens de la loi
-            n°70-9 du 2 janvier 1970 (loi Hoguet). Terranova ne reçoit ni mandat de vente, ni mandat de
+            <strong>JazzImmo n&apos;agit pas en qualité d&apos;agent immobilier</strong> au sens de la loi
+            n°70-9 du 2 janvier 1970 (loi Hoguet). JazzImmo ne reçoit ni mandat de vente, ni mandat de
             location, ne perçoit aucune commission sur les transactions et n&apos;intervient pas dans la
             négociation, la conclusion ou la rédaction des actes.
           </p>
           <p className="mt-3">
-            Terranova exerce une activité d&apos;<strong>hébergeur de contenu</strong> au sens de
+            JazzImmo exerce une activité d&apos;<strong>hébergeur de contenu</strong> au sens de
             l&apos;article 6-I-2 de la LCEN. À ce titre, elle n&apos;est pas soumise à une obligation
             générale de surveillance des contenus publiés par les utilisateurs, mais s&apos;engage à
             retirer promptement tout contenu manifestement illicite qui lui serait notifié.
@@ -104,11 +104,11 @@ export default function MentionsLegalesPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>5. Propriété intellectuelle</h2>
           <p>
-            L&apos;ensemble des éléments composant le Site — notamment la marque « Terranova », le nom
+            L&apos;ensemble des éléments composant le Site — notamment la marque « JazzImmo », le nom
             de domaine, les logos, l&apos;identité graphique, l&apos;arborescence, les textes, les
             illustrations, les photographies, les vidéos, les bases de données, le code source, les
             algorithmes (notamment le score de quartier, le simulateur de crédit, l&apos;estimateur de
-            prix), ainsi que toute création protégeable — sont la propriété exclusive de Terranova ou
+            prix), ainsi que toute création protégeable — sont la propriété exclusive de JazzImmo ou
             font l&apos;objet d&apos;une autorisation d&apos;utilisation. Ils sont protégés par le Code
             de la propriété intellectuelle (notamment articles L.111-1 et suivants).
           </p>
@@ -116,12 +116,12 @@ export default function MentionsLegalesPage() {
             Toute reproduction, représentation, modification, publication, adaptation, traduction,
             extraction substantielle, totale ou partielle, par quelque procédé que ce soit et sur
             quelque support que ce soit, est strictement interdite sans l&apos;autorisation écrite
-            préalable de Terranova. Toute exploitation non autorisée engage la responsabilité civile
+            préalable de JazzImmo. Toute exploitation non autorisée engage la responsabilité civile
             et pénale de son auteur (articles L.335-2 et L.343-1 du CPI).
           </p>
           <p className="mt-3 text-sm">
             Les contenus publiés par les utilisateurs (annonces, photos, descriptions) restent la propriété
-            de leurs auteurs ; ces derniers concèdent à Terranova une licence non-exclusive d&apos;utilisation
+            de leurs auteurs ; ces derniers concèdent à JazzImmo une licence non-exclusive d&apos;utilisation
             aux fins d&apos;exploitation du Service, dans les conditions précisées dans les CGU.
           </p>
         </section>
@@ -129,14 +129,14 @@ export default function MentionsLegalesPage() {
         <section>
           <h2 className={H2} style={H2_STYLE}>6. Liens hypertextes</h2>
           <p>
-            Le Site peut contenir des liens hypertextes vers des sites tiers. Terranova n&apos;exerce
+            Le Site peut contenir des liens hypertextes vers des sites tiers. JazzImmo n&apos;exerce
             aucun contrôle sur ces sites et décline toute responsabilité quant à leur contenu, leur
             disponibilité, leurs pratiques en matière de données personnelles ou tout dommage résultant
             de leur consultation.
           </p>
           <p className="mt-3">
             La création d&apos;un lien hypertexte vers le Site est libre, sous réserve qu&apos;elle ne
-            porte pas atteinte aux intérêts de Terranova et qu&apos;elle mentionne clairement la source.
+            porte pas atteinte aux intérêts de JazzImmo et qu&apos;elle mentionne clairement la source.
           </p>
         </section>
 
@@ -163,8 +163,8 @@ export default function MentionsLegalesPage() {
             diffamatoire, discrimination, contrefaçon, etc.) en envoyant une notification à :
           </p>
           <p className="mt-2">
-            <a href="mailto:abuse@terranova.fr" className="text-[#4F46E5] hover:underline">
-              abuse@terranova.fr
+            <a href="mailto:abuse@JazzImmo.fr" className="text-[#4F46E5] hover:underline">
+              abuse@JazzImmo.fr
             </a>
           </p>
           <p className="mt-3 text-sm">

@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin'
+﻿import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
@@ -74,14 +74,14 @@ export async function POST(req: NextRequest) {
     if (agentEmail) {
       const resend = new Resend(RESEND_API_KEY)
       await resend.emails.send({
-        from:    'Terranova <noreply@terranova-beta.vercel.app>',
+        from:    'JazzImmo <noreply@JazzImmo-beta.vercel.app>',
         to:      agentEmail,
         replyTo: (email as string).trim(),
-        subject: `Nouveau message de ${nom.trim()} via Terranova`,
+        subject: `Nouveau message de ${nom.trim()} via JazzImmo`,
         html: `
           <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#0F172A">
             <h2 style="font-size:20px;margin-bottom:4px">Nouveau message</h2>
-            <p style="color:#64748B;font-size:14px;margin-bottom:24px">Via votre profil Terranova — ${agentName}</p>
+            <p style="color:#64748B;font-size:14px;margin-bottom:24px">Via votre profil JazzImmo — ${agentName}</p>
             <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:20px">
               <p style="margin:0 0 8px"><strong>De :</strong> ${safeNom}</p>
               <p style="margin:0 0 8px"><strong>Email :</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
               <p style="margin:0 0 4px"><strong>Message :</strong></p>
               <p style="margin:0;color:#334155">${safeMessage}</p>
             </div>
-            <a href="mailto:${safeEmail}?subject=Re: votre message sur Terranova"
+            <a href="mailto:${safeEmail}?subject=Re: votre message sur JazzImmo"
               style="display:inline-block;background:#4F46E5;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">
               Répondre à ${safeNom}
             </a>

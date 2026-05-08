@@ -6,6 +6,7 @@ const ADMIN_NAV = [
   { href: '/admin/annonces',         label: 'Annonces en attente', icon: '⏳' },
   { href: '/admin/annonces/toutes',  label: 'Toutes les annonces', icon: '🏠' },
   { href: '/admin/utilisateurs',     label: 'Utilisateurs',        icon: '👥' },
+  { href: '/admin/signalements',     label: 'Signalements',        icon: '🚩' },
   { href: '/admin/reseaux',          label: 'Réseaux & Enseignes', icon: '🏢' },
   { href: '/admin/hero',             label: 'Photos hero',         icon: '🖼' },
   { href: '/admin/map-ads',          label: 'Pubs sur la carte',   icon: '📍' },
@@ -24,7 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         {/* Logo */}
         <div className="h-14 flex items-center px-6 border-b border-white/10">
           <Link href="/" className="font-serif text-[22px] tracking-wide text-white">
-            Terra<span className="italic" style={{ color: '#4F46E5' }}>nova</span>
+            Jazz<span className="italic" style={{ color: '#4F46E5' }}>Immo</span>
           </Link>
           <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 rounded text-white/60 border border-white/20 uppercase tracking-wider">
             Admin

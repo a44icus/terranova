@@ -1,4 +1,4 @@
-'use server'
+﻿'use server'
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -106,7 +106,7 @@ export async function notifierAlertes(bienId: string): Promise<void> {
 
   const { Resend } = await import('resend')
   const resend = new Resend(resendKey)
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'
 
   const prixLabel = bien.type === 'location'
     ? `${bien.prix.toLocaleString('fr-FR')} €/mois`
@@ -115,7 +115,7 @@ export async function notifierAlertes(bienId: string): Promise<void> {
   for (const alerte of matching) {
     try {
       await resend.emails.send({
-        from: 'Terranova Alertes <alertes@terranova.fr>',
+        from: 'JazzImmo Alertes <alertes@JazzImmo.fr>',
         to: alerte.email,
         subject: `🏠 Nouveau bien à ${bien.ville} — ${prixLabel}`,
         html: `
@@ -133,7 +133,7 @@ export async function notifierAlertes(bienId: string): Promise<void> {
               Voir l'annonce →
             </a>
             <p style="margin-top: 24px; font-size: 12px; color: #94A3B8;">
-              Vous recevez cet email car vous avez créé une alerte sur Terranova.
+              Vous recevez cet email car vous avez créé une alerte sur JazzImmo.
               <a href="${baseUrl}/compte/alertes" style="color: #4F46E5;">Gérer mes alertes</a>
             </p>
           </div>

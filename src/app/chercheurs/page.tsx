@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'Chercheurs actifs — Terranova',
+  title: 'Chercheurs actifs — JazzImmo',
   description: 'Acheteurs et locataires qui cherchent activement un bien immobilier.',
 }
 

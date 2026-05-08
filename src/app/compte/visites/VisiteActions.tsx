@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -26,7 +26,7 @@ export default function VisiteActions({ visiteId, statut, demandeurEmail, demand
     return (
       <div className="flex flex-col gap-2 flex-shrink-0">
         <a
-          href={`mailto:${demandeurEmail}?subject=Visite confirmée via Terranova`}
+          href={`mailto:${demandeurEmail}?subject=Visite confirmée via JazzImmo`}
           onClick={() => handleUpdate('confirme')}
           className="text-xs font-semibold px-3 py-2 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors text-center whitespace-nowrap"
         >

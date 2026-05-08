@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   const RESEND_API_KEY = process.env.RESEND_API_KEY
   const ADMIN_EMAILS   = process.env.ADMIN_EMAILS ?? ''
-  const BASE_URL       = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
+  const BASE_URL       = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'
 
   if (!RESEND_API_KEY || !ADMIN_EMAILS) {
     return NextResponse.json({ ok: true, skipped: true })
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   const html = `<!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"/><title>Nouvelle annonce – Terranova</title></head>
+<head><meta charset="UTF-8"/><title>Nouvelle annonce – JazzImmo</title></head>
 <body style="margin:0;padding:0;background:#F8F7F5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F7F5;padding:40px 16px;">
     <tr><td align="center">
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
         <tr>
           <td style="background:#F8F7F5;padding:20px 32px;border-top:1px solid #E2E0DB;">
             <p style="margin:0;font-size:11px;color:#94A3B8;text-align:center;">
-              Terranova Admin — Notification automatique
+              JazzImmo Admin — Notification automatique
             </p>
           </td>
         </tr>
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'Terranova <notifications@terranova.fr>',
+      from: 'JazzImmo <notifications@JazzImmo.fr>',
       to: adminList,
       subject: `📬 Nouvelle annonce : ${String(titre).slice(0, 80)}`,
       html,

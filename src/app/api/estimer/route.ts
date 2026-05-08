@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 interface EstimationRequest {
@@ -84,7 +84,7 @@ async function getDVFPrice(
 
     const res = await fetch(
       `${CEREMA_BASE}/dvf_opendata/mutations/?${params}`,
-      { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'Terranova/1.0' } }
+      { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'JazzImmo/1.0' } }
     )
     if (!res.ok) return null
 
@@ -147,7 +147,7 @@ async function getVillePriceRef(
       if (commune && !DVF_EXCLUDED_DEPTS.includes(commune.codeDept)) {
         const res = await fetch(
           `${CEREMA_BASE}/indicateurs_dv3f/communes/?code_commune=${commune.codeCommune}`,
-          { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'Terranova/1.0' } }
+          { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'JazzImmo/1.0' } }
         )
         if (res.ok) {
           const data = await res.json()
@@ -172,7 +172,7 @@ async function getVillePriceRef(
       if (commune && !DVF_EXCLUDED_DEPTS.includes(commune.codeDept)) {
         const res = await fetch(
           `${CEREMA_BASE}/indicateurs_dv3f/departements/?code_departement=${commune.codeDept}`,
-          { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'Terranova/1.0' } }
+          { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'JazzImmo/1.0' } }
         )
         if (res.ok) {
           const data = await res.json()
@@ -195,7 +195,7 @@ async function getVillePriceRef(
     try {
       const res = await fetch(
         `${CEREMA_BASE}/indicateurs_dv3f/france/`,
-        { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'Terranova/1.0' } }
+        { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'JazzImmo/1.0' } }
       )
       if (res.ok) {
         const data = await res.json()
@@ -403,7 +403,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = await createClient()
 
-    // ─── 1. Comparables Terranova ─────────────────────────────────────────
+    // ─── 1. Comparables JazzImmo ─────────────────────────────────────────
     const { data: comparablesVille } = await supabase
       .from('biens_publics')
       .select('prix, surface, categorie, type, ville')
@@ -449,7 +449,7 @@ export async function POST(req: NextRequest) {
 
     if (priceFromDB !== null && nbComparables >= 10) {
       pricePerM2 = priceFromDB
-      dataSource = 'terranova'
+      dataSource = 'JazzImmo'
     } else if (priceFromDB !== null && nbComparables >= 3 && dvfResult) {
       pricePerM2 = priceFromDB * 0.35 + dvfResult.pricePerM2 * 0.45 + refPrice * 0.20
       dataSource = 'blend-dvf'

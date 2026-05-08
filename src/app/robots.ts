@@ -1,4 +1,4 @@
-import type { MetadataRoute } from 'next'
+﻿import type { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin/', '/compte/', '/api/'],
     },
-    sitemap: `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'}/sitemap.xml`,
+    sitemap: `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'}/sitemap.xml`,
   }
 }

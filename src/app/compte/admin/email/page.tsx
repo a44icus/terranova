@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import AdminEmailForm from '@/components/compte/AdminEmailForm'
 import PageHeader from '@/components/compte/ui/PageHeader'
@@ -32,8 +32,8 @@ export default async function AdminEmailPage() {
       <AdminEmailForm
         initial={{
           api_key:    config?.api_key ?? null,
-          from_email: config?.from_email ?? 'no-reply@terranova.fr',
-          from_name:  config?.from_name ?? 'Terranova',
+          from_email: config?.from_email ?? 'no-reply@JazzImmo.fr',
+          from_name:  config?.from_name ?? 'JazzImmo',
           enabled:    config?.enabled ?? false,
         }}
       />
@@ -46,8 +46,8 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_admin boolean DEFAULT false;
 
 CREATE TABLE IF NOT EXISTS email_config (
   id integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-  api_key text, from_email text NOT NULL DEFAULT 'no-reply@terranova.fr',
-  from_name text NOT NULL DEFAULT 'Terranova',
+  api_key text, from_email text NOT NULL DEFAULT 'no-reply@JazzImmo.fr',
+  from_name text NOT NULL DEFAULT 'JazzImmo',
   enabled boolean NOT NULL DEFAULT false,
   updated_at timestamptz DEFAULT now()
 );

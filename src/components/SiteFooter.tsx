@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 
 export default function SiteFooter() {
   return (
@@ -55,7 +55,7 @@ export default function SiteFooter() {
 
       {/* Bottom bar */}
       <div className="border-t border-white/8 max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p className="text-xs text-white/20">&copy; {new Date().getFullYear()} Terranova — Tous droits réservés</p>
+        <p className="text-xs text-white/20">&copy; {new Date().getFullYear()} JazzImmo — Tous droits réservés</p>
         <p className="text-xs text-white/15">Fait avec ♥ en France</p>
       </div>
     </footer>

@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin'
+﻿import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -23,10 +23,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const admin = createAdminClient()
   const { data: reseau } = await admin.from('reseaux').select('nom, description').eq('slug', slug).single()
-  if (!reseau) return { title: 'Réseau introuvable — Terranova' }
+  if (!reseau) return { title: 'Réseau introuvable — JazzImmo' }
   return {
-    title: `${reseau.nom} — Agents & Agences — Terranova`,
-    description: reseau.description ?? `Trouvez tous les agents du réseau ${reseau.nom} sur Terranova.`,
+    title: `${reseau.nom} — Agents & Agences — JazzImmo`,
+    description: reseau.description ?? `Trouvez tous les agents du réseau ${reseau.nom} sur JazzImmo.`,
   }
 }
 

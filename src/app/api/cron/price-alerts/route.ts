@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { timingSafeEqual } from 'crypto'
 
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, sent: 0 })
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'
   let sent = 0
   const errors: string[] = []
 
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
         <tr>
           <td style="background:#F8F7F5;padding:16px 32px;border-top:1px solid #E2E0DB;">
             <p style="margin:0;font-size:11px;color:#94A3B8;text-align:center;">
-              Terranova · Vous recevez cet email car ce bien est dans vos favoris.
+              JazzImmo · Vous recevez cet email car ce bien est dans vos favoris.
             </p>
           </td>
         </tr>

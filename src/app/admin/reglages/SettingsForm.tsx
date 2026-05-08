@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { saveSettings } from './actions'
@@ -232,7 +232,7 @@ export default function SettingsForm({ settings }: { settings: SiteSettings }) {
           <Section title="Informations légales">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Field label="Raison sociale">
-                <Input value={s.legal_raison_sociale} onChange={e => set('legal_raison_sociale', e.target.value)} placeholder="SAS Terranova" />
+                <Input value={s.legal_raison_sociale} onChange={e => set('legal_raison_sociale', e.target.value)} placeholder="SAS JazzImmo" />
               </Field>
               <Field label="SIRET">
                 <Input value={s.legal_siret} onChange={e => set('legal_siret', e.target.value)} placeholder="123 456 789 00012" />
@@ -241,7 +241,7 @@ export default function SettingsForm({ settings }: { settings: SiteSettings }) {
                 <Input value={s.legal_adresse} onChange={e => set('legal_adresse', e.target.value)} placeholder="1 rue de la Paix, 75001 Paris" />
               </Field>
               <Field label="Email DPO" hint="Délégué à la Protection des Données (RGPD)">
-                <Input type="email" value={s.legal_dpo_email} onChange={e => set('legal_dpo_email', e.target.value)} placeholder="dpo@terranova.fr" />
+                <Input type="email" value={s.legal_dpo_email} onChange={e => set('legal_dpo_email', e.target.value)} placeholder="dpo@JazzImmo.fr" />
               </Field>
             </div>
           </Section>
@@ -275,7 +275,7 @@ export default function SettingsForm({ settings }: { settings: SiteSettings }) {
               <Textarea value={s.meta_description} onChange={e => set('meta_description', e.target.value)} />
             </Field>
             <Field label="Image Open Graph par défaut" hint="Affichée lors d'un partage sur réseaux sociaux si la page n'a pas de photo">
-              <Input value={s.og_image_url} onChange={e => set('og_image_url', e.target.value)} placeholder="https://terranova.fr/og-default.jpg" />
+              <Input value={s.og_image_url} onChange={e => set('og_image_url', e.target.value)} placeholder="https://JazzImmo.fr/og-default.jpg" />
             </Field>
           </Section>
 
@@ -303,7 +303,7 @@ export default function SettingsForm({ settings }: { settings: SiteSettings }) {
 
           <Section title="Matomo (analytics auto-hébergé)">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Field label="URL de votre instance Matomo" hint="Ex : https://stats.terranova.fr">
+              <Field label="URL de votre instance Matomo" hint="Ex : https://stats.JazzImmo.fr">
                 <Input value={s.matomo_url} onChange={e => set('matomo_url', e.target.value)} placeholder="https://analytics.votre-domaine.fr" />
               </Field>
               <Field label="Site ID">
@@ -553,7 +553,7 @@ export default function SettingsForm({ settings }: { settings: SiteSettings }) {
           <Section title="Notifications administrateur">
             <Field label="Email admin" hint="Toutes les notifications ci-dessous sont envoyées à cette adresse">
               <Input type="email" value={s.notif_admin_email}
-                onChange={e => set('notif_admin_email', e.target.value)} placeholder="admin@terranova.fr" />
+                onChange={e => set('notif_admin_email', e.target.value)} placeholder="admin@JazzImmo.fr" />
             </Field>
             <div className="space-y-3 pt-1">
               <Toggle checked={s.notif_nouvelle_annonce} onChange={v => set('notif_nouvelle_annonce', v)}

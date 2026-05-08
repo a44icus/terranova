@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Calcule le score de quartier d'un bien via Overpass (serveur uniquement)
  * et le persiste dans biens.score_quartier.
  *
@@ -35,7 +35,7 @@ async function fetchScore(lat: number, lng: number): Promise<number> {
           method: 'POST',
           body: `data=${encodeURIComponent(query)}`,
           signal: AbortSignal.timeout(9000),
-          headers: { 'User-Agent': 'Terranova/1.0 (immobilier)' },
+          headers: { 'User-Agent': 'JazzImmo/1.0 (immobilier)' },
         })
         if (!res.ok) continue
 

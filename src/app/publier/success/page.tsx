@@ -1,10 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Annonce soumise — Terranova',
+  title: 'Annonce soumise — JazzImmo',
 }
 
 export default async function PublierSuccessPage() {

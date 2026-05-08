@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import MarcheVilles from './MarcheVilles'
@@ -6,7 +6,7 @@ import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'Marché immobilier par ville – Terranova',
+  title: 'Marché immobilier par ville – JazzImmo',
   description: 'Découvrez les prix de l\'immobilier par ville : prix au m², évolution du marché, nombre de biens disponibles.',
 }
 

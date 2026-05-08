@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Cron — Alertes nouveaux biens
  *
  * À appeler toutes les heures (Vercel Cron ou appel HTTP avec CRON_SECRET).
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, sent: 0, reason: 'aucune alerte active' })
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'
   let sent = 0
 
   for (const alerte of alertes) {
@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
             ${cards}
             <hr style="border:none;border-top:1px solid #E2E0DB;margin:24px 0;">
             <p style="margin:0;font-size:11px;color:#94A3B8;text-align:center;">
-              Terranova · <a href="${baseUrl}/compte/alertes" style="color:#4F46E5;text-decoration:none;">Gérer mes alertes</a>
+              JazzImmo · <a href="${baseUrl}/compte/alertes" style="color:#4F46E5;text-decoration:none;">Gérer mes alertes</a>
             </p>
           </td>
         </tr>
@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         from: `${config.from_name} <${config.from_email}>`,
         to:   [alerte.email],
-        subject: `🏠 ${nbLabel} — ${criteresLabel || 'Terranova'}`,
+        subject: `🏠 ${nbLabel} — ${criteresLabel || 'JazzImmo'}`,
         html,
       }),
     })

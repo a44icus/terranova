@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 
 export default function SiteFooterSlim() {
   return (
@@ -19,7 +19,7 @@ export default function SiteFooterSlim() {
           <Link href="/legal/cgu" className="hover:text-white transition-colors">CGU</Link>
         </nav>
 
-        <p className="text-[11px] text-white/20 whitespace-nowrap">&copy; {new Date().getFullYear()} Terranova</p>
+        <p className="text-[11px] text-white/20 whitespace-nowrap">&copy; {new Date().getFullYear()} JazzImmo</p>
 
       </div>
     </footer>

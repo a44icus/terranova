@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -24,10 +24,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .select('prenom, ville')
     .eq('id', id)
     .single()
-  if (!profile) return { title: 'Chercheur introuvable — Terranova' }
+  if (!profile) return { title: 'Chercheur introuvable — JazzImmo' }
   return {
-    title: `${profile.prenom} cherche un bien — Terranova`,
-    description: `Profil chercheur actif sur Terranova. Contactez-le si vous avez un bien à vendre ou à louer.`,
+    title: `${profile.prenom} cherche un bien — JazzImmo`,
+    description: `Profil chercheur actif sur JazzImmo. Contactez-le si vous avez un bien à vendre ou à louer.`,
   }
 }
 

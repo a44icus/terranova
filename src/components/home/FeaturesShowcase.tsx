@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -507,7 +507,7 @@ export default function FeaturesShowcase() {
             <span className="h-px w-6" style={{ background: accent }} />
             <span className="text-[10px] font-mono font-semibold tracking-[0.3em] uppercase"
               style={{ color: accent }}>
-              Pourquoi Terranova
+              Pourquoi JazzImmo
             </span>
             <span className="h-px w-6" style={{ background: accent }} />
           </div>

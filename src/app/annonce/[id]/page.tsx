@@ -1,4 +1,4 @@
-import Image from 'next/image'
+﻿import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
@@ -13,6 +13,7 @@ import PhotoGallery from './PhotoGallery'
 import VirtualTour360 from './VirtualTour360'
 import ContactForm from './ContactForm'
 import ShareButton from './ShareButton'
+import SignalerAnnonce from './SignalerAnnonce'
 import QuartierScore from '@/components/annonce/QuartierScore'
 import RapportBien from '@/components/annonce/RapportBien'
 import PrixEvolutionChart from '@/components/annonce/PrixEvolutionChart'
@@ -58,10 +59,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq('statut', 'publie')
     .single()
 
-  if (!bien) return { title: 'Annonce introuvable – Terranova' }
+  if (!bien) return { title: 'Annonce introuvable – JazzImmo' }
 
   const prix = formatPrix(bien.prix, bien.type)
-  const title = `${bien.titre} – ${bien.ville} | Terranova`
+  const title = `${bien.titre} – ${bien.ville} | JazzImmo`
   const description = bien.description
     ? bien.description.slice(0, 160)
     : `${bien.type === 'vente' ? 'Vente' : 'Location'} à ${bien.ville} — ${prix}`
@@ -73,7 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       url: `${BASE_URL}/annonce/${id}`,
-      siteName: 'Terranova',
+      siteName: 'JazzImmo',
       locale: 'fr_FR',
       type: 'website',
     },
@@ -243,7 +244,12 @@ export default async function AnnoncePage({ params }: Props) {
                     </div>
                   )}
                 </div>
-                <ShareButton titre={bien.titre} prix={prix} />
+                <div className="flex flex-col items-end gap-2">
+                  <ShareButton titre={bien.titre} prix={prix} />
+                  {user?.id !== bien.user_id && (
+                    <SignalerAnnonce bienId={id} vendeurId={bien.user_id} isLoggedIn={!!user} />
+                  )}
+                </div>
               </div>
             </div>
 
