@@ -100,16 +100,41 @@ export default async function AnnoncePage({ params }: Props) {
 
   if (!bien) notFound()
 
-  // Incrémenter vues uniquement en production (évite les faux comptages en dev)
-  if (process.env.NODE_ENV === 'production') {
+  // Incrémenter vues + auto-populate couverture réseau (après envoi de la réponse)
+  {
     const _admin = createAdminClient()
     const _today = new Date().toISOString().slice(0, 10)
     after(async () => {
-      await Promise.all([
-        // Incrément atomique SQL — évite les race conditions read-then-write
-        _admin.rpc('increment_bien_vues', { p_bien_id: id }),
-        _admin.rpc('increment_vue_stat',  { p_bien_id: id, p_date: _today }),
-      ]).catch(() => {})
+      const tasks: Promise<any>[] = []
+
+      // Vues (prod seulement)
+      if (process.env.NODE_ENV === 'production') {
+        tasks.push(
+          Promise.resolve(_admin.rpc('increment_bien_vues', { p_bien_id: id })).catch(() => {}),
+          Promise.resolve(_admin.rpc('increment_vue_stat',  { p_bien_id: id, p_date: _today })).catch(() => {}),
+        )
+      }
+
+      // Auto-populate reseau_max si absent et coordonnées connues
+      if (bien.lat && bien.lng && (bien as any).reseau_max == null) {
+        tasks.push((async () => {
+          try {
+            const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
+            const res  = await fetch(`${base}/api/couverture-reseau?lat=${bien.lat}&lng=${bien.lng}`, {
+              signal: AbortSignal.timeout(12_000),
+            })
+            if (!res.ok) return
+            const coverage = await res.json()
+            const GEN_MAP: Record<string, number> = { '5G': 5, '4G': 4, '3G': 3, '2G': 2 }
+            const bestGen = ['5G', '4G', '3G', '2G'].find(g => coverage.generations?.includes(g))
+            if (bestGen) {
+              await _admin.from('biens').update({ reseau_max: GEN_MAP[bestGen] }).eq('id', id)
+            }
+          } catch { /* noop */ }
+        })())
+      }
+
+      await Promise.allSettled(tasks)
     })
   }
 

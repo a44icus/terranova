@@ -95,6 +95,13 @@ export default async function SuggestionsPage() {
 
     // Score de quartier (lié aux POI)
     if (r.score_quartier_min > 0) query = query.gte('score_quartier', r.score_quartier_min)
+
+    // Couverture réseau mobile minimum
+    if (r.reseau_min) {
+      query = query
+        .gte('reseau_max', r.reseau_min)
+        .not('reseau_max', 'is', null)
+    }
   }
 
   const { data: biens } = await query
@@ -115,6 +122,10 @@ export default async function SuggestionsPage() {
     else if (r.surface_min)         lignes.push(`${r.surface_min} m² min`)
     else if (r.surface_max)         lignes.push(`${r.surface_max} m² max`)
     if (r.pieces_min)               lignes.push(`${r.pieces_min} pièce${r.pieces_min > 1 ? 's' : ''} min`)
+    if (r.reseau_min) {
+      const genLabel: Record<number, string> = { 3: '3G min', 4: '4G min', 5: '5G' }
+      if (genLabel[r.reseau_min]) lignes.push(`📶 ${genLabel[r.reseau_min]}`)
+    }
   }
 
   // POI précis avec label et couleur

@@ -66,6 +66,7 @@ interface Recherche {
   poi_priorites: string[]
   rayon_poi_km: string
   score_quartier_min: string
+  reseau_min: string   // '' | '3' | '4' | '5'
 }
 
 interface Props {
@@ -80,7 +81,15 @@ const DEFAULT: Recherche = {
   surface_min: '', surface_max: '', pieces_min: '',
   description: '', budget_visible: true,
   poi_priorites: [], rayon_poi_km: '1', score_quartier_min: '0',
+  reseau_min: '',
 }
+
+const RESEAU_OPTIONS = [
+  { val: '',  label: 'Peu importe', icon: '—'   },
+  { val: '3', label: '3G min',      icon: '📶'  },
+  { val: '4', label: '4G min',      icon: '📶'  },
+  { val: '5', label: '5G',          icon: '🚀'  },
+]
 
 // ── Sous-composants UI ────────────────────────────────────────────────────────
 
@@ -153,6 +162,7 @@ export default function ChercheurForm({ userId, initial }: Props) {
       poi_priorites:      (initial as any).poi_priorites ?? [],
       rayon_poi_km:       String((initial as any).rayon_poi_km ?? '1'),
       score_quartier_min: String((initial as any).score_quartier_min ?? '0'),
+      reseau_min:         String((initial as any).reseau_min ?? ''),
     } : DEFAULT
   )
   const [saving, setSaving] = useState(false)
@@ -198,6 +208,7 @@ export default function ChercheurForm({ userId, initial }: Props) {
       poi_priorites:      form.poi_priorites,
       rayon_poi_km:       form.rayon_poi_km ? parseInt(form.rayon_poi_km) : 1,
       score_quartier_min: form.score_quartier_min ? parseInt(form.score_quartier_min) : 0,
+      reseau_min:         form.reseau_min ? parseInt(form.reseau_min) : null,
     }
     const { error } = initial?.id
       ? await supabase.from('recherches').update(payload).eq('id', initial.id)
@@ -414,6 +425,43 @@ export default function ChercheurForm({ userId, initial }: Props) {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Couverture réseau */}
+        <div>
+          <label className="block text-xs font-medium text-navy/45 mb-2.5">
+            Couverture réseau mobile minimum
+            {form.reseau_min && (
+              <span className="ml-1.5 text-primary font-semibold">
+                {RESEAU_OPTIONS.find(o => o.val === form.reseau_min)?.label}
+              </span>
+            )}
+          </label>
+          <div className="flex gap-2">
+            {RESEAU_OPTIONS.map(opt => {
+              const isActive = form.reseau_min === opt.val
+              const colors: Record<string, string> = {
+                '': '', '3': 'text-blue-600', '4': 'text-green-600', '5': 'text-violet-600',
+              }
+              return (
+                <button key={opt.val} type="button"
+                  onClick={() => update('reseau_min', opt.val)}
+                  className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                    isActive
+                      ? 'bg-navy text-white border-navy shadow-sm'
+                      : 'bg-white text-navy/55 border-navy/15 hover:border-navy/30 hover:text-navy'
+                  }`}>
+                  <span className={`text-base leading-none ${!isActive ? colors[opt.val] : ''}`}>
+                    {opt.icon}
+                  </span>
+                  {opt.label}
+                </button>
+              )
+            })}
+          </div>
+          <p className="text-[10px] text-navy/30 mt-1.5">
+            Basé sur les données ANFR — alimenté automatiquement à chaque visite d'annonce.
+          </p>
         </div>
       </Section>
 
