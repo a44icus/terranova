@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export const runtime   = 'nodejs'
+export const runtime    = 'nodejs'
 export const revalidate = 86400   // cache CDN 24h
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -9,51 +9,63 @@ export type Operateur   = 'Orange' | 'SFR' | 'Bouygues' | 'Free'
 export type CouvertureResult = {
   operateurs: Record<string, Generation[]>   // { Orange: ['4G','5G'], SFR: ['4G'], … }
   generations: Generation[]                  // générations disponibles (union)
-  antennes: number                           // nb d'antennes trouvées
-  rayon_km: number                           // rayon utilisé
+  antennes:   number                         // nb d'antennes trouvées
+  rayon_km:   number                         // rayon utilisé
   disponible: boolean                        // false si appel ANFR échoué
 }
 
 // ── Constantes ────────────────────────────────────────────────────────────────
+// Dataset confirmé depuis la carte ANFR : data.anfr.fr/visualisation/map/?id=observatoire_2g_3g_4g
 const ANFR_API = 'https://data.anfr.fr/anfr/api/records/1.0/search/'
-const DATASET  = 'observatoire_du_deploiement_des_reseaux_mobiles_de_telephonie_mobile'
-const RADII_M  = [2000, 5000]   // essaie 2 km puis 5 km
+const DATASET  = 'observatoire_2g_3g_4g'
+const RADII_M  = [2000, 5000]   // essaie 2 km, puis 5 km
 
-// Normalise les noms d'opérateurs (ANFR utilise des variantes)
+// ── Normalisation ─────────────────────────────────────────────────────────────
+
+// ANFR : "ORANGE", "BOUYGUES TELECOM", "FREE MOBILE", "SFR", "SOCIETE FRANCAISE…"
 function normalizeOp(raw: string): string {
-  if (/orange/i.test(raw))        return 'Orange'
-  if (/sfr/i.test(raw))           return 'SFR'
-  if (/bouygues/i.test(raw))      return 'Bouygues'
-  if (/free/i.test(raw) || /iliad/i.test(raw)) return 'Free'
+  const u = raw.toUpperCase()
+  if (u.includes('ORANGE'))   return 'Orange'
+  if (u.includes('BOUYGUES')) return 'Bouygues'
+  if (u.includes('FREE') || u.includes('ILIAD')) return 'Free'
+  if (u.includes('SFR'))      return 'SFR'
   return raw
 }
 
-// Normalise la génération (ANFR stocke "4G", "5G NR", etc.)
+// ANFR : "2G" | "3G" | "4G" | "5G"  (parfois "4G+" ou "5G NR")
 function normalizeGen(raw: string): Generation | null {
-  if (/5G/i.test(raw)) return '5G'
-  if (/4G/i.test(raw)) return '4G'
-  if (/3G/i.test(raw)) return '3G'
-  if (/2G/i.test(raw)) return '2G'
+  const u = raw.toUpperCase()
+  if (u.includes('5G') || u.includes('NR'))   return '5G'
+  if (u.includes('4G') || u.includes('LTE'))  return '4G'
+  if (u.includes('3G') || u.includes('UMTS')) return '3G'
+  if (u.includes('2G') || u.includes('GSM'))  return '2G'
   return null
 }
 
+// ── Fetch ANFR ────────────────────────────────────────────────────────────────
 async function fetchANFR(
   lat: number, lng: number, radiusM: number,
 ): Promise<CouvertureResult | null> {
   const url = new URL(ANFR_API)
-  url.searchParams.set('dataset',           DATASET)
+  url.searchParams.set('dataset',            DATASET)
   url.searchParams.set('geofilter.distance', `${lat},${lng},${radiusM}`)
-  url.searchParams.set('rows',              '200')
-  url.searchParams.set('refine.statut',     'En service')
+  url.searchParams.set('rows',               '200')
+  url.searchParams.set('refine.statut',      'En service')
 
   const res = await fetch(url.toString(), {
-    signal:  AbortSignal.timeout(10_000),
+    signal:  AbortSignal.timeout(12_000),
     headers: { 'User-Agent': 'JazzImmo/1.0 (immobilier fr)' },
+    next:    { revalidate: 86400 },
   })
-  if (!res.ok) return null
+
+  if (!res.ok) {
+    console.error('[couverture-reseau] ANFR HTTP', res.status, url.toString())
+    return null
+  }
 
   const data = await res.json()
   const records: any[] = data.records ?? []
+
   if (records.length === 0) return null
 
   const opMap: Record<string, Set<Generation>> = {}
@@ -62,7 +74,7 @@ async function fetchANFR(
   for (const r of records) {
     const op  = normalizeOp(r.fields?.adm_lb_nom ?? '')
     const gen = normalizeGen(r.fields?.generation ?? '')
-    if (!op || !gen) continue
+    if (!gen) continue
     if (!opMap[op]) opMap[op] = new Set()
     opMap[op].add(gen)
     genSet.add(gen)
@@ -98,12 +110,15 @@ export async function GET(req: NextRequest) {
           headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' },
         })
       }
-    } catch { /* continue */ }
+    } catch (err) {
+      console.error('[couverture-reseau] fetch error at radius', radiusM, err)
+      // continue au rayon suivant
+    }
   }
 
-  // Aucune antenne trouvée ou API indisponible
+  // Aucune antenne trouvée dans aucun rayon
   return NextResponse.json(
-    { operateurs: {}, generations: [], antennes: 0, rayon_km: 5, disponible: false } satisfies CouvertureResult,
+    { operateurs: {}, generations: [], antennes: 0, rayon_km: RADII_M[RADII_M.length - 1] / 1000, disponible: false } satisfies CouvertureResult,
     { headers: { 'Cache-Control': 'public, s-maxage=3600' } },
   )
 }
