@@ -1,26 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Edge Runtime = Cloudflare network (IPs différentes d'AWS/Vercel Lambda)
-// → contourne les restrictions IP de l'API ANFR sur Vercel Node.js
+// → contourne les restrictions IP des APIs ANFR/ARCEP sur Vercel Node.js
 export const runtime = 'edge'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export type Generation = '2G' | '3G' | '4G' | '5G'
 export type CouvertureResult = {
-  operateurs:  Record<string, Generation[]>
-  generations: Generation[]
-  antennes:    number
-  rayon_km:    number
-  disponible:  boolean
+  operateurs:   Record<string, Generation[]>
+  generations:  Generation[]
+  antennes:     number
+  rayon_km:     number
+  disponible:   boolean
+  fibre_arcep:  boolean | null   // null = données indisponibles chez ARCEP
 }
 
-// ── Constantes ────────────────────────────────────────────────────────────────
+// ── Constantes ANFR ───────────────────────────────────────────────────────────
 const ANFR_BASE = 'https://data.anfr.fr/d4c/api/records/1.0/search/'
 const DATASET   = 'observatoire_2g_3g_4g'
 const RADII_M   = [2000, 5000]
 const GEN_ORDER: Generation[] = ['5G', '4G', '3G', '2G']
 
-// ── Normalisation ─────────────────────────────────────────────────────────────
+// ── Constantes ARCEP fibre ────────────────────────────────────────────────────
+// data.arcep.fr = OpenDataSoft v2.1 — POINT(lng lat) en WKT
+const ARCEP_BASE    = 'https://data.arcep.fr/api/explore/v2.1/catalog/datasets'
+const ARCEP_DATASET = 'oc-deploiement-ftth'   // Observatoire du déploiement FTTH
+const FIBRE_RADIUS  = 300                      // mètres autour du point
+
+// ── Normalisation mobile ──────────────────────────────────────────────────────
 function normalizeOp(raw: string): string {
   const u = (raw ?? '').toUpperCase()
   if (u.includes('ORANGE'))                        return 'Orange'
@@ -43,10 +50,9 @@ function sortGens(s: Set<Generation>): Generation[] {
   return GEN_ORDER.filter(g => s.has(g))
 }
 
-// ── Fetch ANFR ────────────────────────────────────────────────────────────────
+// ── Fetch ANFR (mobile) ───────────────────────────────────────────────────────
 async function fetchANFR(lat: number, lng: number, radiusM: number) {
   // ⚠️ geofilter.distance doit avoir des virgules LITTÉRALES (pas %2C)
-  // → on ne passe pas par URLSearchParams pour ce paramètre
   const params = new URLSearchParams({
     dataset:          DATASET,
     rows:             '200',
@@ -56,17 +62,66 @@ async function fetchANFR(lat: number, lng: number, radiusM: number) {
 
   const res = await fetch(rawUrl, {
     headers: {
-      'Accept':       'application/json',
-      'User-Agent':   'Mozilla/5.0 (compatible; JazzImmo/1.0)',
-      'Referer':      'https://data.anfr.fr/',
-      'Origin':       'https://data.anfr.fr',
+      'Accept':     'application/json',
+      'User-Agent': 'Mozilla/5.0 (compatible; JazzImmo/1.0)',
+      'Referer':    'https://data.anfr.fr/',
+      'Origin':     'https://data.anfr.fr',
     },
   })
 
   if (!res.ok) throw new Error(`ANFR HTTP ${res.status}`)
-
   const data = await res.json()
   return { records: (data.records ?? []) as any[], url: rawUrl }
+}
+
+// ── Fetch ARCEP (fibre fixe) ──────────────────────────────────────────────────
+async function fetchARCEPFibre(
+  lat: number, lng: number
+): Promise<{ fibre: boolean | null; url: string; nhits: number; statuts: string[]; error?: string }> {
+  // WKT POINT = (longitude latitude)
+  const where  = `within_distance(geo_point_2d, geom'POINT(${lng} ${lat})', ${FIBRE_RADIUS}m)`
+  const rawUrl = `${ARCEP_BASE}/${ARCEP_DATASET}/records`
+    + `?where=${encodeURIComponent(where)}`
+    + `&select=statut_avancement,operateur`
+    + `&limit=10`
+
+  try {
+    const res = await fetch(rawUrl, {
+      headers: {
+        'Accept':     'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; JazzImmo/1.0)',
+        'Referer':    'https://data.arcep.fr/',
+        'Origin':     'https://data.arcep.fr',
+      },
+      signal: AbortSignal.timeout(8_000),
+    })
+
+    if (!res.ok) return { fibre: null, url: rawUrl, nhits: 0, statuts: [], error: `HTTP ${res.status}` }
+
+    const data  = await res.json()
+    const results: any[] = data.results ?? []
+    const nhits = data.total_count ?? results.length
+
+    if (results.length === 0) return { fibre: false, url: rawUrl, nhits: 0, statuts: [] }
+
+    // Collecte des statuts présents
+    const statuts = [...new Set(
+      results.map((r: any) => (r.statut_avancement ?? '').trim()).filter(Boolean)
+    )] as string[]
+
+    // Statuts qui confirment la disponibilité fibre
+    const STATUTS_OK = ['raccordable', 'déployé', 'en service', 'operationnel', 'opérationnel']
+    const estDisponible = statuts.some(s =>
+      STATUTS_OK.some(ok => s.toLowerCase().includes(ok))
+    )
+
+    // Si aucun statut renseigné mais des records existent → on considère disponible
+    const fibre = statuts.length === 0 ? true : estDisponible
+
+    return { fibre, url: rawUrl, nhits, statuts }
+  } catch (err: any) {
+    return { fibre: null, url: rawUrl, nhits: 0, statuts: [], error: String(err) }
+  }
 }
 
 // ── Handler ───────────────────────────────────────────────────────────────────
@@ -80,15 +135,28 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'lat/lng invalides' }, { status: 400 })
   }
 
+  // ── Fibre ARCEP (lancé en parallèle, indépendant du rayon mobile) ──────────
+  const fibrePromise = fetchARCEPFibre(lat, lng)
+
   for (const radiusM of RADII_M) {
     try {
-      const { records, url } = await fetchANFR(lat, lng, radiusM)
+      const [{ records, url }, fibreResult] = await Promise.all([
+        fetchANFR(lat, lng, radiusM),
+        fibrePromise,
+      ])
 
       if (debug) {
         return NextResponse.json({
           runtime: 'edge', radiusM, url,
           nhits: records.length,
           sample: records.slice(0, 2).map((r: any) => r.fields),
+          fibre: {
+            url:    fibreResult.url,
+            nhits:  fibreResult.nhits,
+            statuts: fibreResult.statuts,
+            result: fibreResult.fibre,
+            error:  fibreResult.error,
+          },
         })
       }
 
@@ -112,6 +180,7 @@ export async function GET(req: NextRequest) {
         antennes:    records.length,
         rayon_km:    radiusM / 1000,
         disponible:  true,
+        fibre_arcep: fibreResult.fibre,
       }
 
       return NextResponse.json(result, {
@@ -125,8 +194,14 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Aucune antenne trouvée — on retourne quand même la fibre si dispo
+  const fibreResult = await fibrePromise
   return NextResponse.json(
-    { operateurs: {}, generations: [], antennes: 0, rayon_km: 5, disponible: false } satisfies CouvertureResult,
+    {
+      operateurs: {}, generations: [], antennes: 0, rayon_km: 5,
+      disponible: false,
+      fibre_arcep: fibreResult.fibre,
+    } satisfies CouvertureResult,
     { headers: { 'Cache-Control': 'public, s-maxage=60' } },
   )
 }

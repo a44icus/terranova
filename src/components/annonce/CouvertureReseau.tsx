@@ -11,9 +11,10 @@ interface CouvertureResult {
   antennes:    number
   rayon_km:    number
   disponible:  boolean
+  fibre_arcep: boolean | null   // données ARCEP directes
 }
 
-interface Props { lat: number; lng: number }
+interface Props { lat: number; lng: number; fibre?: boolean | null }
 
 const GEN_ORDER: Generation[] = ['5G', '4G', '3G', '2G']
 
@@ -49,7 +50,7 @@ function Skeleton() {
 }
 
 // ── Composant ─────────────────────────────────────────────────────────────────
-export default function CouvertureReseau({ lat, lng }: Props) {
+export default function CouvertureReseau({ lat, lng, fibre }: Props) {
   const [data, setData]       = useState<CouvertureResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState<string | null>(null)
@@ -76,7 +77,9 @@ export default function CouvertureReseau({ lat, lng }: Props) {
   if (loading) return <Skeleton />
   if (!data)   return null
 
-  const { operateurs, generations, antennes, rayon_km, disponible } = data
+  const { operateurs, generations, antennes, rayon_km, disponible, fibre_arcep } = data
+  // fibre_arcep (ARCEP) en priorité, sinon prop DB, sinon null
+  const fibreDisplay = fibre_arcep !== undefined ? fibre_arcep : (fibre ?? null)
   const hasData   = disponible && generations.length > 0
   const opEntries = Object.entries(operateurs)
 
@@ -165,8 +168,42 @@ export default function CouvertureReseau({ lat, lng }: Props) {
         </div>
       )}
 
+      {/* Fibre optique — données ARCEP */}
+      <div className={`flex items-center gap-2 mt-2.5 px-3 py-2 rounded-xl border ${
+        fibreDisplay === true
+          ? 'bg-emerald-50 border-emerald-200'
+          : fibreDisplay === false
+            ? 'bg-navy/02 border-dashed border-navy/10'
+            : 'bg-navy/02 border-dashed border-navy/08'
+      }`}>
+        <span className="text-sm flex-shrink-0">{fibreDisplay === true ? '🌐' : '🔌'}</span>
+        <div className="flex-1 min-w-0">
+          <span className={`text-[11px] font-semibold ${fibreDisplay === true ? 'text-emerald-700' : 'text-navy/45'}`}>
+            Fibre optique
+          </span>
+          <span className={`text-[10px] ml-1.5 ${fibreDisplay === true ? 'text-emerald-600' : 'text-navy/35'}`}>
+            {fibreDisplay === true
+              ? 'Zone raccordable FTTH'
+              : fibreDisplay === false
+                ? 'Non déployée dans ce secteur'
+                : 'Données ARCEP indisponibles'}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+            fibreDisplay === true ? 'bg-emerald-100 text-emerald-700' : 'bg-navy/06 text-navy/35'
+          }`}>
+            {fibreDisplay === true ? '✓ Oui' : fibreDisplay === false ? '✗ Non' : '—'}
+          </span>
+          {fibre_arcep !== null && (
+            <span className="text-[8px] text-navy/20 uppercase tracking-wider">ARCEP</span>
+          )}
+        </div>
+      </div>
+
       <p className="text-[9px] text-navy/25 mt-2">
-        Source ANFR · {antennes} antenne{antennes > 1 ? 's' : ''} dans un rayon de {rayon_km} km
+        Réseau mobile : ANFR · {antennes} antenne{antennes > 1 ? 's' : ''} dans un rayon de {rayon_km} km
+        {fibre_arcep !== null && ' · Fibre : ARCEP open data'}
       </p>
     </div>
   )

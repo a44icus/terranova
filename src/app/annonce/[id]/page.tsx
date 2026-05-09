@@ -204,6 +204,8 @@ export default async function AnnoncePage({ params }: Props) {
     options: bien.options ?? [],
     ville: bien.ville,
     code_postal: bien.code_postal,
+    score_quartier: bien.score_quartier ?? null,
+    reseau_max: (bien as any).reseau_max ?? null,
   })
 
   return (
@@ -479,7 +481,7 @@ export default async function AnnoncePage({ params }: Props) {
             )}
 
             {bien.lat && bien.lng && (
-              <CouvertureReseau lat={bien.lat} lng={bien.lng} />
+              <CouvertureReseau lat={bien.lat} lng={bien.lng} fibre={bien.fibre ?? null} />
             )}
 
             {/* Performance énergétique */}

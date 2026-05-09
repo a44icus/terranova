@@ -43,6 +43,9 @@ interface BienData {
   ville: string
   code_postal?: string
   approx?: boolean
+  // Nouveaux critères
+  score_quartier?: number | null   // 0-100, calculé à partir des POI
+  reseau_max?: number | null       // 5=5G, 4=4G, 3=3G, 2=2G
 }
 
 // ─── Profils disponibles ──────────────────────────────────────────────────────
@@ -70,6 +73,8 @@ const PROFILS = [
       if (opts.includes('piscine')) { s += 5; raisons.push('Piscine') }
       if ((b.sdb ?? 0) >= 2) { s += 8; raisons.push('Deux salles de bain') }
       if (b.fibre) { s += 5; raisons.push('Fibre optique') }
+      if ((b.score_quartier ?? 0) >= 7) { s += 15; raisons.push(`Quartier bien équipé (score ${b.score_quartier}/10)`) }
+      else if ((b.score_quartier ?? 0) >= 5) s += 7
 
       return { score: Math.min(s, 100), raisons: raisons.slice(0, 3) }
     },
@@ -99,6 +104,8 @@ const PROFILS = [
       if (opts.includes('terrasse') || opts.includes('balcon')) { s += 10; raisons.push('Espace extérieur') }
       if (b.neuf) { s += 8; raisons.push('Bien neuf, sans travaux') }
       if (b.meuble && b.type === 'location') { s += 10; raisons.push('Meublé, prêt à emménager') }
+      if ((b.score_quartier ?? 0) >= 7) { s += 12; raisons.push(`Quartier animé avec commodités (score ${b.score_quartier}/10)`) }
+      else if ((b.score_quartier ?? 0) >= 5) s += 6
 
       return { score: Math.min(s, 100), raisons: raisons.slice(0, 3) }
     },
@@ -134,6 +141,11 @@ const PROFILS = [
 
       if ((b.pieces ?? 0) === 1 || (b.pieces ?? 0) === 2) { s += 10; raisons.push('Petite surface — rotation locataire rapide') }
 
+      if ((b.score_quartier ?? 0) >= 7) { s += 15; raisons.push(`Bon score de quartier (${b.score_quartier}/10) — attractif pour les locataires`) }
+      else if ((b.score_quartier ?? 0) >= 5) s += 8
+      if ((b.reseau_max ?? 0) >= 5) { s += 8; raisons.push('Couverture 5G — bien connecté, atout locatif') }
+      else if ((b.reseau_max ?? 0) >= 4) { s += 4; raisons.push('Bonne couverture 4G') }
+
       return { score: Math.min(Math.max(s, 0), 100), raisons: raisons.slice(0, 3) }
     },
   },
@@ -165,6 +177,9 @@ const PROFILS = [
       const depMax = b.depenses_energie_max ?? 9999
       if (depMax < 1500) { s += 12; raisons.push('Dépenses énergétiques maîtrisées') }
 
+      if ((b.score_quartier ?? 0) >= 6) { s += 15; raisons.push(`Quartier bien desservi — commerces et services accessibles (score ${b.score_quartier}/10)`) }
+      else if ((b.score_quartier ?? 0) >= 4.5) s += 7
+
       return { score: Math.min(s, 100), raisons: raisons.slice(0, 3) }
     },
   },
@@ -177,7 +192,7 @@ const PROFILS = [
       const raisons: string[] = []
       const opts = b.options ?? []
 
-      if (b.fibre) { s += 30; raisons.push('Fibre optique déployée') }
+      if (b.fibre) { s += 25; raisons.push('Fibre optique déployée') }
 
       const pieces = b.pieces ?? 0
       if (pieces >= 3) { s += 25; raisons.push(`${pieces} pièces — place pour un bureau`) }
@@ -191,6 +206,11 @@ const PROFILS = [
 
       if (b.dpe && ['A','B','C','D'].includes(b.dpe)) { s += 10; raisons.push('Charges énergétiques raisonnables') }
       if (opts.includes('climatisation')) { s += 5; raisons.push('Climatisation pour les journées chaudes') }
+
+      if ((b.reseau_max ?? 0) >= 5) { s += 20; raisons.push('Couverture 5G — connexion mobile ultra-rapide') }
+      else if ((b.reseau_max ?? 0) >= 4) { s += 12; raisons.push('Bonne couverture 4G — connexion mobile fiable') }
+      else if ((b.reseau_max ?? 0) >= 3) { s += 4 }
+      if ((b.score_quartier ?? 0) >= 6.5) { s += 8; raisons.push(`Quartier calme avec services à proximité (score ${b.score_quartier}/10)`) }
 
       return { score: Math.min(s, 100), raisons: raisons.slice(0, 3) }
     },
@@ -219,6 +239,10 @@ const PROFILS = [
 
       const dpe = b.dpe ?? 'G'
       if (['A','B','C','D'].includes(dpe)) { s += 10; raisons.push('Charges maîtrisées') }
+
+      if ((b.score_quartier ?? 0) >= 7) { s += 12; raisons.push(`Quartier bien desservi — commerces, transports (score ${b.score_quartier}/10)`) }
+      else if ((b.score_quartier ?? 0) >= 5) s += 6
+      if ((b.reseau_max ?? 0) >= 4) { s += 8; raisons.push('Bonne connexion mobile') }
 
       return { score: Math.min(s, 100), raisons: raisons.slice(0, 3) }
     },
@@ -264,6 +288,10 @@ function analyserPointsForts(b: BienData): string[] {
   if (b.neuf) pts.push('Bien neuf — garanties constructeur')
   if (b.coup_de_coeur) pts.push('Sélectionné comme coup de cœur par notre équipe')
   if (b.fibre) pts.push('Fibre optique déployée')
+  if ((b.reseau_max ?? 0) >= 5) pts.push('Couverture 5G confirmée dans le secteur')
+  else if ((b.reseau_max ?? 0) >= 4) pts.push('Bonne couverture 4G dans le secteur')
+  if ((b.score_quartier ?? 0) >= 8) pts.push(`Excellent score de quartier — ${b.score_quartier}/10`)
+  else if ((b.score_quartier ?? 0) >= 6.5) pts.push(`Bon score de quartier — ${b.score_quartier}/10`)
   if (opts.includes('piscine')) pts.push('Piscine')
   if (opts.includes('jardin') || b.surface_terrain) pts.push('Espace extérieur privatif')
   if (opts.includes('terrasse') || opts.includes('balcon')) pts.push('Terrasse ou balcon')
@@ -290,6 +318,8 @@ function analyserPointsAttention(b: BienData): string[] {
   if (b.etage && b.etage > 3 && !opts.includes('ascenseur')) pts.push(`Étage ${b.etage} sans ascenseur`)
   if (b.depenses_energie_max && b.depenses_energie_max > 2500) pts.push(`Dépenses énergétiques élevées (jusqu'à ${b.depenses_energie_max.toLocaleString('fr-FR')} €/an)`)
   if (!b.fibre) pts.push('Fibre non confirmée — se renseigner sur la connexion internet')
+  if (b.reseau_max != null && b.reseau_max <= 2) pts.push('Couverture réseau mobile limitée (2G uniquement dans ce secteur)')
+  if (b.score_quartier != null && b.score_quartier < 4) pts.push(`Score de quartier faible (${b.score_quartier}/10) — peu de services à proximité`)
   if (b.type === 'vente' && b.dpe && ['F','G'].includes(b.dpe)) pts.push('Biens DPE F/G bientôt soumis à restrictions de location')
   if (b.approx) pts.push('Localisation approximative — adresse exacte disponible sur demande')
 
@@ -303,10 +333,15 @@ function genererIdealPour(b: BienData, profils: ProfilMatch[]): string[] {
   if (top.some(p => p.id === 'famille')) phrases.push("Vous recherchez de l'espace pour toute la famille")
   if (top.some(p => p.id === 'couple')) phrases.push("Vous envisagez de vous installer à deux dans un cadre agréable")
   if (top.some(p => p.id === 'investisseur')) phrases.push("Vous envisagez un investissement locatif")
-  if (top.some(p => p.id === 'teletravail')) phrases.push("Vous travaillez depuis chez vous et avez besoin d'espace et de connectivité")
+  if (top.some(p => p.id === 'teletravail')) {
+    const connectivite = (b.reseau_max ?? 0) >= 4 ? "d'une connexion mobile fiable" : "d'espace et de connectivité"
+    phrases.push(`Vous travaillez depuis chez vous et avez besoin ${connectivite}`)
+  }
   if (top.some(p => p.id === 'retraite')) phrases.push("Vous recherchez un logement confortable et facile à entretenir")
   if (top.some(p => p.id === 'etudiant')) phrases.push("Vous recherchez un premier logement avec un budget maîtrisé")
   if (top.some(p => p.id === 'ecolo')) phrases.push("La performance énergétique est une priorité dans votre recherche")
+  if ((b.score_quartier ?? 0) >= 7.5 && top.some(p => p.id === 'famille')) phrases.push("Vous souhaitez un quartier bien équipé avec écoles et commerces à portée")
+  if ((b.reseau_max ?? 0) >= 5 && top.some(p => p.id === 'teletravail')) phrases.push("Vous avez besoin d'une connexion mobile ultra-rapide pour travailler de n'importe où")
 
   return phrases.slice(0, 3)
 }
