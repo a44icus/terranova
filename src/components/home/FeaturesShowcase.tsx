@@ -7,7 +7,7 @@ import Link from 'next/link'
 const INTERVAL = 5500 // ms entre auto-advance
 
 /* ── Couleurs accent par feature ─────────────────────────────── */
-const ACCENTS = ['#4F46E5', '#0891B2', '#059669', '#D97706', '#7C3AED']
+const ACCENTS = ['#4F46E5', '#0891B2', '#059669', '#D97706', '#7C3AED', '#16A34A', '#0284C7']
 
 /* ── Données des features ─────────────────────────────────────── */
 const FEATURES = [
@@ -55,6 +55,24 @@ const FEATURES = [
     desc:  'Photos, description, localisation précise, DPE — tout en quelques clics. Gratuit pour les particuliers, et des stats complètes dès le premier jour.',
     cta:   { href: '/publier', label: 'Publier gratuitement' },
     tags:  ['Gratuit', 'Photos illimitées', 'Localisation précise', 'Statistiques', 'Mise en ligne instantanée'],
+  },
+  {
+    key:   'poi',
+    tab:   'Proximité',
+    num:   '06',
+    title: 'Votre quartier idéal, vos règles',
+    desc:  'Choisissez les points d\'intérêt qui comptent pour vous — école, boulangerie, gare, parc — et filtrez uniquement les biens vraiment bien placés.',
+    cta:   { href: '/compte/chercheur', label: 'Définir mes critères' },
+    tags:  ['École à 5 min', 'Supermarché proche', 'Transport en commun', 'Score quartier', 'Personnalisé'],
+  },
+  {
+    key:   'reseau',
+    tab:   'Réseau',
+    num:   '07',
+    title: 'Connectivité vérifiée à l\'adresse',
+    desc:  'Couverture 5G, 4G, 3G par opérateur — données ANFR officielles affichées pour chaque bien. Filtrez par réseau minimum requis avant même de visiter.',
+    cta:   { href: '/annonces', label: 'Voir les annonces' },
+    tags:  ['5G / 4G / 3G', 'Orange · SFR · Free · Bouygues', 'Données ANFR', 'Filtre réseau min'],
   },
 ]
 
@@ -400,7 +418,147 @@ function PublierVisual({ accent }: { accent: string }) {
   )
 }
 
-const VISUALS = [CarteVisual, ScoreVisual, FiltresVisual, ContactVisual, PublierVisual]
+/* 06 — Recherche POI */
+function PoiVisual({ accent }: { accent: string }) {
+  const pois = [
+    { emoji: '🏫', label: 'École primaire', dist: '3 min', found: true,  color: '#0891B2' },
+    { emoji: '🛒', label: 'Supermarché',    dist: '5 min', found: true,  color: '#D97706' },
+    { emoji: '🚉', label: 'Gare / Métro',   dist: '8 min', found: true,  color: '#7C3AED' },
+    { emoji: '🌳', label: 'Parc',           dist: '2 min', found: true,  color: accent    },
+    { emoji: '🏋️', label: 'Salle de sport', dist: '—',     found: false, color: '#94a3b8' },
+  ]
+  return (
+    <div className="w-full h-full flex flex-col justify-center px-6 gap-3">
+      <div>
+        <div className="text-[10px] text-white/40 uppercase tracking-wider mb-2 font-semibold">
+          🎯 Mes critères de proximité
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {pois.map((poi, i) => (
+            <div key={poi.label}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium"
+              style={{
+                background:  poi.found ? `${poi.color}22` : 'rgba(255,255,255,0.04)',
+                color:       poi.found ? poi.color : 'rgba(255,255,255,0.28)',
+                border:      `1px solid ${poi.found ? poi.color + '45' : 'rgba(255,255,255,0.08)'}`,
+                animation:   `fadeSlideUp 0.4s ${0.1 * i}s ease backwards`,
+              }}>
+              <span>{poi.emoji}</span>
+              <span>{poi.label}</span>
+              {poi.found && <span className="text-[9px] opacity-55">· {poi.dist}</span>}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-px bg-white/06" />
+
+      <div>
+        <div className="text-[10px] text-white/30 mb-2">3 biens correspondent à vos critères</div>
+        {[
+          { titre: 'T3 · Quartier Haussmann', score: 87, tags: ['🏫 3 min', '🛒 4 min', '🌳 2 min'] },
+          { titre: 'Maison · Centre-ville',   score: 74, tags: ['🏫 5 min', '🚉 7 min', '🌳 1 min'] },
+        ].map((b, i) => (
+          <div key={i} className="flex items-center gap-3 bg-white/04 rounded-xl px-3 py-2.5 border border-white/06 mb-2"
+            style={{ animation: `fadeSlideUp 0.4s ${0.35 + 0.15 * i}s ease backwards` }}>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-semibold text-white/80">{b.titre}</div>
+              <div className="flex gap-2 mt-0.5 flex-wrap">
+                {b.tags.map(t => <span key={t} className="text-[9px] text-white/35">{t}</span>)}
+              </div>
+            </div>
+            <div className="text-lg font-bold" style={{ color: accent }}>{b.score}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* 07 — Couverture réseau */
+function ReseauVisual({ accent }: { accent: string }) {
+  const GEN: Record<string, { bg: string; text: string; border: string }> = {
+    '5G': { bg: 'rgba(109,40,217,0.28)',  text: '#c4b5fd', border: 'rgba(109,40,217,0.45)' },
+    '4G': { bg: 'rgba(5,150,105,0.28)',   text: '#6ee7b7', border: 'rgba(5,150,105,0.45)' },
+    '3G': { bg: 'rgba(37,99,235,0.28)',   text: '#93c5fd', border: 'rgba(37,99,235,0.45)' },
+  }
+  const ops = [
+    { name: 'Orange',   color: '#FF7900', abbr: 'OR', gens: ['5G', '4G'] },
+    { name: 'SFR',      color: '#DC2626', abbr: 'SF', gens: ['5G', '4G'] },
+    { name: 'Bouygues', color: '#0062AF', abbr: 'BY', gens: ['4G']       },
+    { name: 'Free',     color: '#6D28D9', abbr: 'FR', gens: ['4G', '3G'] },
+  ]
+  return (
+    <div className="w-full h-full flex flex-col justify-center px-6 gap-3">
+      {/* Header badges */}
+      <div className="flex items-center gap-2">
+        <div className="text-xs font-semibold text-white/70">Couverture réseau</div>
+        <div className="ml-auto flex gap-1.5">
+          {(['5G', '4G', '3G'] as const).map((g, i) => {
+            const c = GEN[g]
+            return (
+              <span key={g} className="text-[11px] font-bold px-2 py-0.5 rounded-md border"
+                style={{
+                  background: c.bg, color: c.text, borderColor: c.border,
+                  animation: `fadeSlideUp 0.3s ${0.1 * i}s ease backwards`,
+                }}>
+                {g}
+              </span>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Grille 4 opérateurs */}
+      <div className="grid grid-cols-2 gap-2">
+        {ops.map((op, i) => (
+          <div key={op.name}
+            className="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-white/08 bg-white/04"
+            style={{ animation: `fadeSlideUp 0.4s ${0.1 + 0.1 * i}s ease backwards` }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+              style={{ background: op.color }}>
+              {op.abbr}
+            </div>
+            <div>
+              <div className="text-[11px] font-semibold text-white/65">{op.name}</div>
+              <div className="flex gap-1 mt-0.5">
+                {op.gens.map(g => {
+                  const c = GEN[g]
+                  return (
+                    <span key={g} className="text-[9px] font-bold px-1 py-0.5 rounded"
+                      style={{ background: c.bg, color: c.text }}>
+                      {g}
+                    </span>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Source */}
+      <div className="flex items-center gap-2">
+        <div className="h-px flex-1 bg-white/06" />
+        <span className="text-[9px] text-white/25 uppercase tracking-wider">
+          Source ANFR · 12 antennes · rayon 2 km
+        </span>
+        <div className="h-px flex-1 bg-white/06" />
+      </div>
+
+      {/* Filtre actif */}
+      <div className="flex justify-center">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-full text-[11px] font-medium"
+          style={{ background: `${accent}22`, color: accent, border: `1px solid ${accent}45` }}>
+          <span>📶</span>
+          <span>Filtre actif : 4G minimum requis</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const VISUALS = [CarteVisual, ScoreVisual, FiltresVisual, ContactVisual, PublierVisual, PoiVisual, ReseauVisual]
 
 /* ════════════════════════════════════════════════════════════════
    COMPOSANT PRINCIPAL
@@ -517,7 +675,7 @@ export default function FeaturesShowcase() {
             <em style={{ color: accent }}>Rien de superflu.</em>
           </h2>
           <p className="text-white/40 text-sm max-w-lg mx-auto leading-relaxed">
-            Cinq outils pensés pour aller droit au but, que vous soyez acheteur, locataire ou vendeur.
+            Sept outils pensés pour aller droit au but, que vous soyez acheteur, locataire ou vendeur.
           </p>
         </div>
 
