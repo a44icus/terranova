@@ -15,12 +15,6 @@ interface CouvertureResult {
 
 interface Props { lat: number; lng: number }
 
-// ── Config ────────────────────────────────────────────────────────────────────
-// Appel direct navigateur → data.anfr.fr (CORS autorisé sur Opendatasoft)
-// Évite les restrictions IP des serveurs Vercel/AWS
-const ANFR_BASE = 'https://data.anfr.fr/d4c/api/records/1.0/search/'
-const DATASET   = 'observatoire_2g_3g_4g'
-const RADII_M   = [2000, 5000]
 const GEN_ORDER: Generation[] = ['5G', '4G', '3G', '2G']
 
 const GEN_CONFIG: Record<Generation, { bg: string; text: string; border: string }> = {
@@ -35,69 +29,6 @@ const OP_CONFIG: Record<string, { color: string; abbr: string }> = {
   SFR:      { color: '#DC2626', abbr: 'SF' },
   Bouygues: { color: '#0062AF', abbr: 'BY' },
   Free:     { color: '#6D28D9', abbr: 'FR' },
-}
-
-// ── Normalisation ─────────────────────────────────────────────────────────────
-function normalizeOp(raw: string): string {
-  const u = (raw ?? '').toUpperCase()
-  if (u.includes('ORANGE'))                        return 'Orange'
-  if (u.includes('BOUYGUES'))                      return 'Bouygues'
-  if (u.includes('FREE') || u.includes('ILIAD'))   return 'Free'
-  if (u.includes('SFR'))                           return 'SFR'
-  return raw
-}
-
-function normalizeGen(raw: string): Generation | null {
-  const u = (raw ?? '').toUpperCase()
-  if (u.includes('5G') || u.includes('NR'))    return '5G'
-  if (u.includes('4G') || u.includes('LTE'))   return '4G'
-  if (u.includes('3G') || u.includes('UMTS'))  return '3G'
-  if (u.includes('2G') || u.includes('GSM'))   return '2G'
-  return null
-}
-
-function sortGens(s: Set<Generation>): Generation[] {
-  return GEN_ORDER.filter(g => s.has(g))
-}
-
-// ── Fetch direct ANFR ─────────────────────────────────────────────────────────
-async function fetchANFR(lat: number, lng: number, radiusM: number): Promise<CouvertureResult | null> {
-  const url = new URL(ANFR_BASE)
-  url.searchParams.set('dataset',            DATASET)
-  url.searchParams.set('geofilter.distance', `${lat},${lng},${radiusM}`)
-  url.searchParams.set('rows',               '200')
-  url.searchParams.set('exclude.statut',     'Projet approuvé')
-
-  const res = await fetch(url.toString(), {
-    signal: AbortSignal.timeout(12_000),
-    headers: { 'Accept': 'application/json' },
-  })
-
-  if (!res.ok) throw new Error(`ANFR ${res.status}`)
-
-  const data = await res.json()
-  const records: any[] = data.records ?? []
-  if (records.length === 0) return null
-
-  const opMap: Record<string, Set<Generation>> = {}
-  const genSet = new Set<Generation>()
-
-  for (const r of records) {
-    const op  = normalizeOp(r.fields?.adm_lb_nom ?? '')
-    const gen = normalizeGen(r.fields?.generation ?? '')
-    if (!gen) continue
-    if (!opMap[op]) opMap[op] = new Set()
-    opMap[op].add(gen)
-    genSet.add(gen)
-  }
-
-  return {
-    operateurs:  Object.fromEntries(Object.entries(opMap).map(([op, s]) => [op, sortGens(s)])),
-    generations: sortGens(genSet),
-    antennes:    records.length,
-    rayon_km:    radiusM / 1000,
-    disponible:  true,
-  }
 }
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
@@ -126,30 +57,19 @@ export default function CouvertureReseau({ lat, lng }: Props) {
   useEffect(() => {
     let cancelled = false
 
-    async function run() {
-      for (const radiusM of RADII_M) {
-        try {
-          const result = await fetchANFR(lat, lng, radiusM)
-          if (cancelled) return
-          if (result) {
-            setData(result)
-            setLoading(false)
-            return
-          }
-        } catch (err: any) {
-          if (cancelled) return
-          console.warn('[CouvertureReseau] rayon', radiusM, err?.message)
+    fetch(`/api/couverture-reseau?lat=${lat}&lng=${lng}`)
+      .then(r => r.json())
+      .then((d: CouvertureResult) => {
+        if (!cancelled) { setData(d); setLoading(false) }
+      })
+      .catch((err: any) => {
+        if (!cancelled) {
+          console.warn('[CouvertureReseau]', err?.message)
           setError(err?.message ?? 'Erreur')
+          setLoading(false)
         }
-      }
-      // Aucun résultat dans aucun rayon
-      if (!cancelled) {
-        setData({ operateurs: {}, generations: [], antennes: 0, rayon_km: 5, disponible: false })
-        setLoading(false)
-      }
-    }
+      })
 
-    run()
     return () => { cancelled = true }
   }, [lat, lng])
 
