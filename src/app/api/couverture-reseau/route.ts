@@ -15,8 +15,10 @@ export type CouvertureResult = {
 }
 
 // ── Constantes ────────────────────────────────────────────────────────────────
-// Dataset confirmé depuis la carte ANFR : data.anfr.fr/visualisation/map/?id=observatoire_2g_3g_4g
-const ANFR_API = 'https://data.anfr.fr/anfr/api/records/1.0/search/'
+// URL confirmée : préfixe /d4c/ obligatoire sur le portail ANFR
+// Statuts : "En service" pour 2G/3G/4G · "Techniquement opérationnel" pour 5G
+// → pas de filtre statut pour capturer toutes les générations
+const ANFR_API = 'https://data.anfr.fr/d4c/api/records/1.0/search/'
 const DATASET  = 'observatoire_2g_3g_4g'
 const RADII_M  = [2000, 5000]   // essaie 2 km, puis 5 km
 
@@ -50,7 +52,7 @@ async function fetchANFR(
   url.searchParams.set('dataset',            DATASET)
   url.searchParams.set('geofilter.distance', `${lat},${lng},${radiusM}`)
   url.searchParams.set('rows',               '200')
-  url.searchParams.set('refine.statut',      'En service')
+  // Pas de filtre statut : 2G/3G/4G = "En service", 5G = "Techniquement opérationnel"
 
   const res = await fetch(url.toString(), {
     signal:  AbortSignal.timeout(12_000),
