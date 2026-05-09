@@ -45,13 +45,16 @@ function sortGens(s: Set<Generation>): Generation[] {
 
 // ── Fetch ANFR ────────────────────────────────────────────────────────────────
 async function fetchANFR(lat: number, lng: number, radiusM: number) {
-  const url = new URL(ANFR_BASE)
-  url.searchParams.set('dataset',            DATASET)
-  url.searchParams.set('geofilter.distance', `${lat},${lng},${radiusM}`)
-  url.searchParams.set('rows',               '200')
-  url.searchParams.set('exclude.statut',     'Projet approuvé')
+  // ⚠️ geofilter.distance doit avoir des virgules LITTÉRALES (pas %2C)
+  // → on ne passe pas par URLSearchParams pour ce paramètre
+  const params = new URLSearchParams({
+    dataset:          DATASET,
+    rows:             '200',
+    'exclude.statut': 'Projet approuvé',
+  })
+  const rawUrl = `${ANFR_BASE}?${params.toString()}&geofilter.distance=${lat},${lng},${radiusM}`
 
-  const res = await fetch(url.toString(), {
+  const res = await fetch(rawUrl, {
     headers: {
       'Accept':       'application/json',
       'User-Agent':   'Mozilla/5.0 (compatible; JazzImmo/1.0)',
@@ -63,7 +66,7 @@ async function fetchANFR(lat: number, lng: number, radiusM: number) {
   if (!res.ok) throw new Error(`ANFR HTTP ${res.status}`)
 
   const data = await res.json()
-  return { records: (data.records ?? []) as any[], url: url.toString() }
+  return { records: (data.records ?? []) as any[], url: rawUrl }
 }
 
 // ── Handler ───────────────────────────────────────────────────────────────────
