@@ -15,6 +15,7 @@ import ContactForm from './ContactForm'
 import ShareButton from './ShareButton'
 import SignalerAnnonce from './SignalerAnnonce'
 import QuartierScore from '@/components/annonce/QuartierScore'
+import CouvertureReseau from '@/components/annonce/CouvertureReseau'
 import RapportBien from '@/components/annonce/RapportBien'
 import PrixEvolutionChart from '@/components/annonce/PrixEvolutionChart'
 import SimulateurCredit from '@/components/annonce/SimulateurCredit'
@@ -450,6 +451,10 @@ export default async function AnnoncePage({ params }: Props) {
                 seuils={getScoreSeuils(siteSettings)}
                 userPoiPriorities={userPoiPriorities}
               />
+            )}
+
+            {bien.lat && bien.lng && (
+              <CouvertureReseau lat={bien.lat} lng={bien.lng} />
             )}
 
             {/* Performance énergétique */}
