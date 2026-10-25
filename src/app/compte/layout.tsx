@@ -1,13 +1,15 @@
-﻿import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import CompteNav from '@/components/compte/CompteNav'
 import MobileNav from '@/components/compte/MobileNav'
 import FavorisSync from '@/components/FavorisSync'
 import ImpersonationBanner from '@/components/ImpersonationBanner'
-import type { Profile, PlanType } from '@/lib/types'
+import type { PlanType } from '@/lib/types'
 import { isPlanExpired } from '@/lib/plan'
 import { getImpersonatedId } from '@/lib/impersonation'
+import { isAdminUser } from '@/lib/isAdmin'
 
 export default async function CompteLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -56,9 +58,9 @@ export default async function CompteLayout({ children }: { children: React.React
 
       {/* Header */}
       <header className="bg-navy text-white px-6 h-14 flex items-center justify-between flex-shrink-0">
-        <a href="/" className="font-serif text-[22px] tracking-wide">
+        <Link href="/" className="font-serif text-[22px] tracking-wide">
           Jazz<span className="text-primary italic">Immo</span>
-        </a>
+        </Link>
         {impersonatedId ? (
           <a href="/admin/utilisateurs" className="text-white/50 hover:text-white text-sm transition-colors">
             ← Retour admin
@@ -72,7 +74,7 @@ export default async function CompteLayout({ children }: { children: React.React
 
       <FavorisSync />
       <div className="flex min-h-[calc(100vh-56px)]">
-        <CompteNav profile={profile} counts={navCounts} />
+        <CompteNav profile={profile} counts={navCounts} isAdmin={!impersonatedId && isAdminUser(user)} />
         <main className="flex-1 overflow-auto pb-14 md:pb-0">
           {children}
         </main>

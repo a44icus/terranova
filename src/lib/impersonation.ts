@@ -2,7 +2,9 @@ import { cookies } from 'next/headers'
 import { isAdminUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
-const COOKIE = 'tn_impersonate'
+/** Cookie portant l'id de l'utilisateur consulté (préfixe historique « tn » = terranova). */
+export const IMPERSONATION_COOKIE = 'tn_impersonate'
+const COOKIE = IMPERSONATION_COOKIE
 
 async function isCallerAdmin(): Promise<boolean> {
   const supabase = await createClient()

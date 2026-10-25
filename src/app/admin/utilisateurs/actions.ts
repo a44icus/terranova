@@ -1,17 +1,18 @@
 'use server'
 
 import { requireAdmin } from '@/lib/auth'
+import { logAdminAction } from '@/lib/audit'
+import { IMPERSONATION_COOKIE as COOKIE } from '@/lib/impersonation'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-const COOKIE = 'tn_impersonate'
-
 async function assertAdmin() {
-  await requireAdmin()
+  return await requireAdmin()
 }
 
 export async function startImpersonation(userId: string) {
-  await assertAdmin()
+  const admin = await assertAdmin()
+  await logAdminAction(admin, 'impersonation_start', userId)
   const jar = await cookies()
   jar.set(COOKIE, userId, {
     httpOnly: true,
@@ -24,8 +25,9 @@ export async function startImpersonation(userId: string) {
 }
 
 export async function stopImpersonation() {
-  await assertAdmin()
+  const admin = await assertAdmin()
   const jar = await cookies()
+  await logAdminAction(admin, 'impersonation_stop', jar.get(COOKIE)?.value)
   jar.delete(COOKIE)
   redirect('/admin/utilisateurs')
 }

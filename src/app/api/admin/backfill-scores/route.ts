@@ -5,7 +5,7 @@
  */
 
 import { NextResponse } from 'next/server'
-import { requireAdmin } from '@/lib/auth'
+import { requireAdminApi } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { computeAndStoreScore } from '@/lib/computeBienScore'
 
@@ -13,8 +13,9 @@ export const runtime = 'nodejs'
 export const maxDuration = 300 // 5 min (Vercel Pro) — sinon 60s sur hobby
 
 export async function POST() {
-  // Vérification admin centralisée (redirige si non connecté ou non-admin)
-  await requireAdmin()
+  // Vérification admin centralisée (401/403 JSON si non connecté ou non-admin)
+  const admin = await requireAdminApi()
+  if (admin instanceof NextResponse) return admin
 
   const adminClient = createAdminClient()
 
