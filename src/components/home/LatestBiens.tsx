@@ -29,7 +29,8 @@ interface Bien {
 
 interface Props {
   biens: Bien[]
-  nearbyCity?: string | null
+  /** Biens triés par proximité : autour de la ville du profil, ou de la région (géoloc IP). */
+  nearby?: { ville: string } | { region: true } | null
 }
 
 const FILTRES = [
@@ -46,7 +47,7 @@ function isNouveau(date?: string | null) {
   return days < 7
 }
 
-export default function LatestBiens({ biens, nearbyCity }: Props) {
+export default function LatestBiens({ biens, nearby }: Props) {
   const [filter, setFilter] = useState('all')
 
   const filtered = useMemo(() => {
@@ -74,11 +75,15 @@ export default function LatestBiens({ biens, nearbyCity }: Props) {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-8">
         <div>
           <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#4F46E5]">
-            {nearbyCity ? 'Près de vous' : 'Sélection'}
+            {nearby ? 'Près de vous' : 'Sélection'}
           </span>
           <h2 className="font-serif text-2xl lg:text-4xl text-[#0F172A] mt-1"
             style={{ fontFamily: "'DM Serif Display', serif" }}>
-            {nearbyCity ? <>Annonces près de <em style={{ color: '#4F46E5' }}>{nearbyCity}</em></> : 'Dernières annonces'}
+            {!nearby
+              ? 'Dernières annonces'
+              : 'ville' in nearby
+                ? <>Annonces près de <em style={{ color: '#4F46E5' }}>{nearby.ville}</em></>
+                : <>Annonces dans <em style={{ color: '#4F46E5' }}>votre région</em></>}
           </h2>
         </div>
         <Link href="/annonces"
@@ -260,7 +265,7 @@ function BienCardSmall({ bien }: { bien: Bien }) {
         </div>
         <div className="text-[11px] text-white/90 truncate">{bien.titre}</div>
         <div className="text-[10px] text-[#818CF8] mt-1.5 font-medium flex items-center gap-1">
-          Voir l'annonce <span className="ml-auto">→</span>
+          Voir l&apos;annonce <span className="ml-auto">→</span>
         </div>
       </div>
     </Link>

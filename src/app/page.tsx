@@ -12,6 +12,7 @@ import VendeurSection from '@/components/home/VendeurSection'
 import HomeHamburger from '@/components/HomeHamburger'
 import { getPlanConfig, ALL_FEATURES } from '@/lib/plan'
 import type { PlanConfig } from '@/lib/plan'
+import { getBiensProches } from '@/lib/biensProches'
 
 export const metadata: Metadata = {
   title: "JazzImmo \u2013 L'immobilier autrement",
@@ -49,15 +50,12 @@ export default async function LandingPage() {
   const supabase = await createClient()
 
   // ── Géoloc du visiteur via headers Vercel / Cloudflare (pas d'appel externe) ──
+  // Précision : la région au mieux. L'IP situe le point de raccordement du fournisseur
+  // d'accès (souvent une grande ville), pas le domicile : on n'affiche donc pas cette ville.
   const h = await headers()
-  const visitorLat = parseFloat(h.get('x-vercel-ip-latitude') || h.get('cf-iplatitude') || '')
-  const visitorLng = parseFloat(h.get('x-vercel-ip-longitude') || h.get('cf-iplongitude') || '')
-  const rawCity   = h.get('x-vercel-ip-city') || h.get('cf-ipcity') || ''
-  const visitorCity = rawCity ? decodeURIComponent(rawCity) : null
-  const hasGeo = Number.isFinite(visitorLat) && Number.isFinite(visitorLng)
-
-  // Si géoloc dispo : on récupère 30 biens récents pour pouvoir trier par distance
-  const fetchLimit = hasGeo ? 30 : 6
+  const ipLat = parseFloat(h.get('x-vercel-ip-latitude') || h.get('cf-iplatitude') || '')
+  const ipLng = parseFloat(h.get('x-vercel-ip-longitude') || h.get('cf-iplongitude') || '')
+  const hasIpGeo = Number.isFinite(ipLat) && Number.isFinite(ipLng)
 
   const supabaseAdmin = createAdminClient()
 
@@ -76,7 +74,7 @@ export default async function LandingPage() {
     supabase.from('biens_publics').select('*')
       .order('featured', { ascending: false })
       .order('publie_at', { ascending: false })
-      .limit(fetchLimit),
+      .limit(6),
     supabase.from('biens_publics').select('*', { count: 'exact', head: true }),
     supabase.from('biens').select('ville', { count: 'exact', head: true }).eq('statut', 'publie'),
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
@@ -86,7 +84,7 @@ export default async function LandingPage() {
     supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('type', 'pro'),
   ])
 
-  const totalRegions = new Set((regionsData ?? []).map((b: any) => b.region)).size
+  const totalRegions = new Set((regionsData ?? []).map((b: { region: string }) => b.region)).size
 
   const heroPhotos = (heroPhotosData ?? []).map(p => p.url)
 
@@ -132,14 +130,23 @@ export default async function LandingPage() {
     },
   ].filter(p => p.actif)
 
-  // Tri par proximité si géoloc disponible (distance euclidienne — assez précis à l'échelle ville)
-  const biens = hasGeo
-    ? (latestBiens ?? [])
-        .filter(b => b.lat != null && b.lng != null)
-        .map(b => ({ ...b, _dist: Math.pow(b.lat - visitorLat, 2) + Math.pow(b.lng - visitorLng, 2) }))
-        .sort((a, b) => a._dist - b._dist)
-        .slice(0, 6)
-    : (latestBiens ?? []).slice(0, 6)
+  // ── Point de référence « près de vous » ─────────────────────────────────────
+  // 1. visiteur connecté avec une position dans son profil → sa ville
+  // 2. sinon géoloc IP → « votre région »
+  const { data: profilGeo } = user
+    ? await supabase.from('profiles').select('ville, lat, lng').eq('id', user.id).maybeSingle()
+    : { data: null }
+  const profilOk = profilGeo?.lat != null && profilGeo?.lng != null
+  const origine = profilOk
+    ? { lat: profilGeo!.lat as number, lng: profilGeo!.lng as number, ville: (profilGeo!.ville as string | null) || null }
+    : hasIpGeo ? { lat: ipLat, lng: ipLng, ville: null } : null
+
+  // Vraie recherche des biens les plus proches dans toute la base (pas seulement les récents)
+  const proches = origine ? await getBiensProches(supabase, origine.lat, origine.lng, 6) : []
+  const biens = proches.length ? proches : (latestBiens ?? []).slice(0, 6)
+  const nearby = proches.length && origine
+    ? (origine.ville ? { ville: origine.ville } : { region: true as const })
+    : null
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -333,7 +340,7 @@ export default async function LandingPage() {
       </div>
 
       {/* ── Sélection magazine (composant client : filtres + cartes animées) ── */}
-      <LatestBiens biens={biens} nearbyCity={hasGeo ? visitorCity : null} />
+      <LatestBiens biens={biens} nearby={nearby} />
 
 
       {/* ── Features ─────────────────────────────────────────────── */}
