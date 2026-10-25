@@ -1,56 +1,37 @@
-﻿/**
+/**
  * Cron — Alertes nouveaux biens
  *
  * À appeler toutes les heures (Vercel Cron ou appel HTTP avec CRON_SECRET).
- * Cherche les biens publiés dans la dernière heure, les compare aux alertes actives
- * et envoie des emails aux abonnés qui ont un match.
+ * Pour chaque alerte active, cherche les biens publiés depuis sa dernière notification
+ * (derniere_notif_at, ou sa création) et envoie un email à l'abonné s'il y a un match.
+ * Un passage en retard ou sauté ne perd donc rien, et deux passages rapprochés
+ * n'envoient pas deux fois les mêmes biens.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { timingSafeEqual } from 'crypto'
+import { checkCronAuth } from '@/lib/cronAuth'
+import { escHtml, emailLayout, emailEyebrow, emailTitle, sendEmail, getDbEmailConfig } from '@/lib/emails'
+import { SITE_NAME, SITE_URL } from '@/lib/site'
 
-function escHtml(s: unknown): string {
-  if (typeof s !== 'string') return ''
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
+/** Ancienneté maximale d'un bien pour être notifié (évite d'envoyer un historique entier). */
+const FENETRE_MAX_MS = 7 * 24 * 60 * 60 * 1000
+
+// GET pour Vercel Cron, POST pour les appels externes
+export async function GET(req: NextRequest) { return POST(req) }
 
 export async function POST(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
-    console.error('[Cron new-biens] CRON_SECRET non configuré — accès refusé')
-    return NextResponse.json({ error: 'Not configured' }, { status: 500 })
-  }
-  const provided = req.headers.get('x-cron-secret') ?? ''
-  const safe =
-    provided.length === cronSecret.length &&
-    timingSafeEqual(Buffer.from(provided), Buffer.from(cronSecret))
-  if (!safe) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const refus = checkCronAuth(req, 'new-biens')
+  if (refus) return refus
 
+  // Borne haute fixée avant toute lecture : un bien publié pendant l'exécution
+  // sera pris au passage suivant au lieu d'être couvert par derniere_notif_at.
+  const runAt = new Date()
   const admin = createAdminClient()
 
-  /* Config email */
-  const { data: config } = await admin
-    .from('email_config')
-    .select('api_key, from_email, from_name, enabled')
-    .eq('id', 1)
-    .single()
-
-  if (!config?.enabled || !config.api_key) {
+  /* Config email saisie dans l'admin (/compte/admin/email) */
+  const config = await getDbEmailConfig()
+  if (!config?.enabled) {
     return NextResponse.json({ ok: true, skipped: true, reason: 'email non configuré' })
-  }
-
-  /* Biens publiés dans la dernière heure */
-  const since = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-  const { data: nouveauxBiens } = await admin
-    .from('biens')
-    .select('id, titre, ville, code_postal, type, categorie, prix, surface, pieces, photo_url')
-    .eq('statut', 'publie')
-    .gte('publie_at', since)
-
-  if (!nouveauxBiens?.length) {
-    return NextResponse.json({ ok: true, sent: 0, reason: 'aucun nouveau bien' })
   }
 
   /* Alertes actives */
@@ -63,12 +44,37 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, sent: 0, reason: 'aucune alerte active' })
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'
+  /* Seuil propre à chaque alerte : dernière notification, sinon création, borné à FENETRE_MAX_MS */
+  const plancher = runAt.getTime() - FENETRE_MAX_MS
+  const seuilDe = (alerte: { derniere_notif_at?: string | null; created_at?: string | null }) => {
+    const t = Date.parse(alerte.derniere_notif_at ?? alerte.created_at ?? '')
+    return Number.isNaN(t) ? runAt.getTime() - 60 * 60 * 1000 : Math.max(t, plancher)
+  }
+  const seuilMin = Math.min(...alertes.map(seuilDe))
+
+  /* Biens publiés depuis le plus ancien seuil */
+  const { data: nouveauxBiens, error: biensError } = await admin
+    .from('biens')
+    .select('id, titre, ville, code_postal, type, categorie, prix, surface, pieces, photo_url, publie_at')
+    .eq('statut', 'publie')
+    .gt('publie_at', new Date(seuilMin).toISOString())
+    .lte('publie_at', runAt.toISOString())
+
+  if (biensError) {
+    console.error('[Cron new-biens] Lecture des biens impossible:', biensError.message)
+    return NextResponse.json({ error: 'Database error' }, { status: 500 })
+  }
+  if (!nouveauxBiens?.length) {
+    return NextResponse.json({ ok: true, sent: 0, reason: 'aucun nouveau bien' })
+  }
+
   let sent = 0
 
   for (const alerte of alertes) {
-    /* Biens qui matchent CETTE alerte */
+    /* Biens qui matchent CETTE alerte, publiés depuis sa dernière notification */
+    const seuil = seuilDe(alerte)
     const matches = nouveauxBiens.filter(b => {
+      if (Date.parse(b.publie_at) <= seuil) return false
       if (alerte.type     && alerte.type     !== b.type)     return false
       if (alerte.categorie && alerte.categorie !== b.categorie) return false
       if (alerte.ville    && !b.ville.toLowerCase().includes(alerte.ville.toLowerCase())) return false
@@ -103,7 +109,7 @@ export async function POST(req: NextRequest) {
               ${b.pieces  ? `<span style="background:#F1F5F9;border-radius:6px;padding:3px 8px;font-size:11px;color:#64748B;">${b.pieces} pièces</span>` : ''}
               <span style="background:${b.type === 'vente' ? '#EDE9FE' : '#E0F2FE'};color:${b.type === 'vente' ? '#4F46E5' : '#0891B2'};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;">${b.type === 'vente' ? 'Vente' : 'Location'}</span>
             </div>
-            <a href="${baseUrl}/annonce/${b.id}" style="display:inline-block;background:#4F46E5;color:#FFF;font-size:12px;font-weight:600;padding:8px 16px;border-radius:8px;text-decoration:none;">
+            <a href="${SITE_URL}/annonce/${b.id}" style="display:inline-block;background:#4F46E5;color:#FFF;font-size:12px;font-weight:600;padding:8px 16px;border-radius:8px;text-decoration:none;">
               Voir l'annonce →
             </a>
           </div>
@@ -112,70 +118,39 @@ export async function POST(req: NextRequest) {
 
     const nbLabel = matches.length === 1 ? '1 nouveau bien correspond' : `${matches.length} nouveaux biens correspondent`
 
-    const html = `<!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
-<body style="margin:0;padding:0;background:#F8F7F5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F7F5;padding:40px 16px;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#FFFFFF;border-radius:16px;overflow:hidden;border:1px solid #E2E0DB;">
-        <tr>
-          <td style="background:#0F172A;padding:24px 32px;">
-            <span style="font-family:Georgia,serif;font-size:24px;color:#FFFFFF;letter-spacing:0.04em;">
-              Jazz<span style="color:#818CF8;font-style:italic;">Immo</span>
-            </span>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:32px;">
-            <p style="margin:0 0 8px;font-size:13px;color:#64748B;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;">Alerte nouveaux biens</p>
-            <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:22px;color:#0F172A;line-height:1.3;">
-              🔔 ${nbLabel} à votre alerte
-            </h1>
-            <p style="margin:0 0 24px;font-size:13px;color:#64748B;">
-              Critères : ${[
-                alerte.type && (alerte.type === 'vente' ? 'Vente' : 'Location'),
-                alerte.categorie,
-                alerte.ville,
-                alerte.prix_max && `max ${alerte.prix_max.toLocaleString('fr-FR')} €`,
-                alerte.surface_min && `min ${alerte.surface_min} m²`,
-              ].filter(Boolean).join(' · ') || 'Tous les biens'}
-            </p>
-            ${cards}
-            <hr style="border:none;border-top:1px solid #E2E0DB;margin:24px 0;">
-            <p style="margin:0;font-size:11px;color:#94A3B8;text-align:center;">
-              JazzImmo · <a href="${baseUrl}/compte/alertes" style="color:#4F46E5;text-decoration:none;">Gérer mes alertes</a>
-            </p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`
+    const criteres = [
+      alerte.type && (alerte.type === 'vente' ? 'Vente' : 'Location'),
+      alerte.categorie,
+      alerte.ville,
+      alerte.prix_max && `max ${alerte.prix_max.toLocaleString('fr-FR')} €`,
+      alerte.surface_min && `min ${alerte.surface_min} m²`,
+    ].filter(Boolean).map(escHtml).join(' · ') || 'Tous les biens'
+
+    const html = emailLayout({
+      content: `
+        ${emailEyebrow('Alerte nouveaux biens')}
+        ${emailTitle(`🔔 ${nbLabel} à votre alerte`)}
+        <p style="margin:0 0 24px;font-size:13px;color:#64748B;">Critères : ${criteres}</p>
+        ${cards}`,
+      footer: `${SITE_NAME} · <a href="${SITE_URL}/compte/alertes" style="color:#4F46E5;text-decoration:none;">Gérer mes alertes</a>`,
+    })
 
     const criteresLabel = [
       alerte.type && (alerte.type === 'vente' ? 'Vente' : 'Location'),
       alerte.ville,
     ].filter(Boolean).join(' ')
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${config.api_key}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: `${config.from_name} <${config.from_email}>`,
-        to:   [alerte.email],
-        subject: `🏠 ${nbLabel} — ${criteresLabel || 'JazzImmo'}`,
-        html,
-      }),
+    const res = await sendEmail({
+      apiKey:  config.apiKey,
+      from:    config.from,
+      to:      alerte.email,
+      subject: `🏠 ${nbLabel} — ${criteresLabel || SITE_NAME}`,
+      html,
     })
 
     if (res.ok) {
       await admin.from('alertes')
-        .update({ derniere_notif_at: new Date().toISOString() })
+        .update({ derniere_notif_at: runAt.toISOString() })
         .eq('id', alerte.id)
       sent++
     }
