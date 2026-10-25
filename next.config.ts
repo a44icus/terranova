@@ -52,7 +52,7 @@ const ContentSecurityPolicy = [
     // Overpass API — données POI (3 serveurs en fallback)
     "https://overpass-api.de",
     "https://overpass.kumi.systems",
-    "https://overpass.openstreetmap.ru",
+    "https://overpass.private.coffee",
     // OSRM — calcul d'itinéraires (pied, vélo, voiture)
     "https://routing.openstreetmap.de",
   ].join(' '),

@@ -200,14 +200,15 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
       flyTo3D([bien.lng, bien.lat], 15)
 
       // Afficher immédiatement le score stocké en DB si disponible
-      const hasDbScore = typeof bien.score_quartier === 'number'
+      // Un score enregistré à 0 vient presque toujours d'une panne Overpass : on l'ignore
+      const hasDbScore = typeof bien.score_quartier === 'number' && bien.score_quartier > 0
       if (hasDbScore) {
         renderInsights({}, bien.score_quartier as number)
       }
 
       if (bien.approx) addApproxZone(bien)
 
-      // Charger les POI pour les marqueurs (CDN-caché 24h après le 1er appel)
+      // Charger les POI pour les marqueurs (Overpass depuis le navigateur, cache de session)
       // Si le score DB existe déjà, on ne bloque pas l'affichage sur ce fetch
       loadPOI(bien.id, bien.lat, bien.lng).then(result => {
         if (!result) return

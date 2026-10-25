@@ -282,8 +282,8 @@ export const OVERPASS_QUERY = (bbox: string) => `
 
 export const OVERPASS_SERVERS = [
   'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.openstreetmap.ru/api/interpreter',
 ]
 
 // Rayons testés successivement — partagés par usePOI et QuartierScore

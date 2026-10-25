@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react'
 import {
   POI_CATEGORIES, scoreLabel, DEFAULT_SCORE_SEUILS, type ScoreSeuils,
-  getPoiCategory, findPoiByKey,
+  getPoiCategory, findPoiByKey, computeNeighborhoodScore,
 } from '@/lib/poi'
+import { fetchPOI } from '@/lib/poiClient'
 
 interface Props {
   lat: number
@@ -22,7 +23,9 @@ function fmtDist(m: number) {
 }
 
 export default function QuartierScore({ lat, lng, storedScore, poiWeights, seuils = DEFAULT_SCORE_SEUILS, userPoiPriorities = [] }: Props) {
-  const hasStoredScore = typeof storedScore === 'number'
+  // Un score enregistré à 0 vient presque toujours d'une panne Overpass lors du calcul :
+  // on l'ignore et on recalcule en direct.
+  const hasStoredScore = typeof storedScore === 'number' && storedScore > 0
   const [score, setScore]         = useState<number | null>(hasStoredScore ? storedScore : null)
   const [best, setBest]           = useState<Record<string, POIResult>>({})
   const [radiusKm, setRadiusKm]   = useState(1)
@@ -33,17 +36,27 @@ export default function QuartierScore({ lat, lng, storedScore, poiWeights, seuil
     let cancelled = false
     async function run() {
       try {
-        const params = new URLSearchParams({ lat: String(lat), lng: String(lng) })
-        if (poiWeights) params.set('weights', JSON.stringify(poiWeights))
-        const res = await fetch(`/api/quartier-score?${params}`, { signal: AbortSignal.timeout(15000) })
-        if (!res.ok) throw new Error()
-        const data = await res.json()
+        // Requête Overpass depuis le navigateur (voir lib/poiClient.ts)
+        const data = await fetchPOI(lat, lng)
         if (cancelled) return
-        setBest(data.best ?? {})
-        setRadiusKm(data.radiusKm ?? 1)
-        if (!hasStoredScore) setScore(typeof data.score === 'number' ? data.score : 0)
+        if (!data) {
+          // Overpass injoignable : on n'affiche pas un faux score de 0
+          if (!hasStoredScore) setScore(null)
+          return
+        }
+        const results: Record<string, POIResult> = {}
+        for (const [key, poi] of Object.entries(data.best)) {
+          results[key] = {
+            name:     poi.tags.name || poi.tags['name:fr'] || '',
+            distance: poi.distance,
+            emoji:    POI_CATEGORIES.find(c => c.key === key)?.emoji ?? '📍',
+          }
+        }
+        setBest(results)
+        setRadiusKm(data.radiusKm)
+        if (!hasStoredScore) setScore(computeNeighborhoodScore(results, poiWeights))
       } catch {
-        if (!cancelled && !hasStoredScore) setScore(0)
+        if (!cancelled && !hasStoredScore) setScore(null)
       } finally {
         if (!cancelled) setLoading(false)
       }

@@ -38,8 +38,9 @@ export async function POST() {
 
   for (const bien of biens) {
     try {
-      await computeAndStoreScore(bien.id, bien.lat, bien.lng, adminClient)
-      processed++
+      const score = await computeAndStoreScore(bien.id, bien.lat, bien.lng, adminClient)
+      if (score === null) errors++
+      else processed++
       // Pause de 1,5s entre chaque appel pour respecter les rate limits Overpass
       await new Promise(r => setTimeout(r, 1500))
     } catch {
