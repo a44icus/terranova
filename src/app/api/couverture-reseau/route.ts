@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Edge Runtime = Cloudflare network (IPs différentes d'AWS/Vercel Lambda)
-// → contourne les restrictions IP des APIs ANFR/ARCEP sur Vercel Node.js
+// Edge Runtime = Cloudflare (IPs différentes d'AWS/Vercel Lambda)
 export const runtime = 'edge'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export type Generation = '2G' | '3G' | '4G' | '5G'
 export type CouvertureResult = {
-  operateurs:   Record<string, Generation[]>
-  generations:  Generation[]
-  antennes:     number
-  rayon_km:     number
-  disponible:   boolean
-  fibre_arcep:  boolean | null   // null = données indisponibles chez ARCEP
+  operateurs:    Record<string, Generation[]>
+  generations:   Generation[]
+  antennes:      number
+  rayon_km:      number
+  disponible:    boolean
+  fibre_arcep:   boolean | null   // true si ≥ 50 % des locaux éligibles FTTH
+  fibre_taux:    number | null    // % de locaux éligibles FTTH dans la commune
+  fibre_commune: string | null    // nom de la commune (source geo.api.gouv.fr)
 }
 
 // ── Constantes ANFR ───────────────────────────────────────────────────────────
@@ -22,27 +23,29 @@ const RADII_M   = [2000, 5000]
 const GEN_ORDER: Generation[] = ['5G', '4G', '3G', '2G']
 
 // ── Constantes ARCEP fibre ────────────────────────────────────────────────────
-// data.arcep.fr = OpenDataSoft v2.1 — POINT(lng lat) en WKT
-const ARCEP_BASE    = 'https://data.arcep.fr/api/explore/v2.1/catalog/datasets'
-const ARCEP_DATASET = 'oc-deploiement-ftth'   // Observatoire du déploiement FTTH
-const FIBRE_RADIUS  = 300                      // mètres autour du point
+// commune_techno.csv — séparateur ; — colonnes :
+//   code_insee;nom_com;code_dep;code_reg;nbr;type;elig_ftth;elig_coax;...
+const GEO_API         = 'https://geo.api.gouv.fr/communes'
+const ARCEP_CSV_URL   = 'https://data.arcep.fr/fixe/maconnexioninternet/statistiques/last/commune/commune_techno.csv'
+const COL_NBR         = 4   // total locaux
+const COL_ELIG_FTTH   = 6   // locaux éligibles FTTH
 
 // ── Normalisation mobile ──────────────────────────────────────────────────────
 function normalizeOp(raw: string): string {
   const u = (raw ?? '').toUpperCase()
-  if (u.includes('ORANGE'))                        return 'Orange'
-  if (u.includes('BOUYGUES'))                      return 'Bouygues'
-  if (u.includes('FREE') || u.includes('ILIAD'))   return 'Free'
-  if (u.includes('SFR'))                           return 'SFR'
+  if (u.includes('ORANGE'))                       return 'Orange'
+  if (u.includes('BOUYGUES'))                     return 'Bouygues'
+  if (u.includes('FREE') || u.includes('ILIAD'))  return 'Free'
+  if (u.includes('SFR'))                          return 'SFR'
   return raw
 }
 
 function normalizeGen(raw: string): Generation | null {
   const u = (raw ?? '').toUpperCase()
-  if (u.includes('5G') || u.includes('NR'))    return '5G'
-  if (u.includes('4G') || u.includes('LTE'))   return '4G'
-  if (u.includes('3G') || u.includes('UMTS'))  return '3G'
-  if (u.includes('2G') || u.includes('GSM'))   return '2G'
+  if (u.includes('5G') || u.includes('NR'))   return '5G'
+  if (u.includes('4G') || u.includes('LTE'))  return '4G'
+  if (u.includes('3G') || u.includes('UMTS')) return '3G'
+  if (u.includes('2G') || u.includes('GSM'))  return '2G'
   return null
 }
 
@@ -68,59 +71,83 @@ async function fetchANFR(lat: number, lng: number, radiusM: number) {
       'Origin':     'https://data.anfr.fr',
     },
   })
-
   if (!res.ok) throw new Error(`ANFR HTTP ${res.status}`)
   const data = await res.json()
   return { records: (data.records ?? []) as any[], url: rawUrl }
 }
 
-// ── Fetch ARCEP (fibre fixe) ──────────────────────────────────────────────────
-async function fetchARCEPFibre(
-  lat: number, lng: number
-): Promise<{ fibre: boolean | null; url: string; nhits: number; statuts: string[]; error?: string }> {
-  // WKT POINT = (longitude latitude)
-  const where  = `within_distance(geo_point_2d, geom'POINT(${lng} ${lat})', ${FIBRE_RADIUS}m)`
-  const rawUrl = `${ARCEP_BASE}/${ARCEP_DATASET}/records`
-    + `?where=${encodeURIComponent(where)}`
-    + `&select=statut_avancement,operateur`
-    + `&limit=10`
+// ── Fetch ARCEP fibre (commune_techno.csv) ────────────────────────────────────
+async function fetchARCEPFibre(lat: number, lng: number): Promise<{
+  fibre:    boolean | null
+  taux:     number | null
+  commune:  string | null
+  insee:    string | null
+  csv_url:  string
+  error?:   string
+}> {
+  // 1. Code INSEE de la commune via geo.api.gouv.fr
+  let inseeCode: string | null = null
+  let communeName: string | null = null
+  const geoUrl = `${GEO_API}?lat=${lat}&lon=${lng}&fields=code,nom&format=json`
 
   try {
-    const res = await fetch(rawUrl, {
-      headers: {
-        'Accept':     'application/json',
-        'User-Agent': 'Mozilla/5.0 (compatible; JazzImmo/1.0)',
-        'Referer':    'https://data.arcep.fr/',
-        'Origin':     'https://data.arcep.fr',
-      },
-      signal: AbortSignal.timeout(8_000),
+    const geoRes = await fetch(geoUrl, { signal: AbortSignal.timeout(4_000) })
+    if (geoRes.ok) {
+      const geoData: any[] = await geoRes.json()
+      if (geoData.length > 0) {
+        inseeCode   = geoData[0].code  ?? null
+        communeName = geoData[0].nom   ?? null
+      }
+    }
+  } catch (e: any) {
+    return { fibre: null, taux: null, commune: null, insee: null, csv_url: ARCEP_CSV_URL, error: `geo: ${e?.message}` }
+  }
+
+  if (!inseeCode) {
+    return { fibre: null, taux: null, commune: communeName, insee: null, csv_url: ARCEP_CSV_URL, error: 'insee introuvable' }
+  }
+
+  // 2. Télécharger commune_techno.csv et chercher la ligne de la commune
+  //    Le fichier est mis en cache par l'edge CDN (Cache-Control du serveur ARCEP)
+  try {
+    const csvRes = await fetch(ARCEP_CSV_URL, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; JazzImmo/1.0)' },
+      signal: AbortSignal.timeout(12_000),
+      // Mise en cache Next.js du fichier ARCEP pendant 24 h
+      next: { revalidate: 86400 },
     })
+    if (!csvRes.ok) {
+      return { fibre: null, taux: null, commune: communeName, insee: inseeCode, csv_url: ARCEP_CSV_URL, error: `CSV HTTP ${csvRes.status}` }
+    }
 
-    if (!res.ok) return { fibre: null, url: rawUrl, nhits: 0, statuts: [], error: `HTTP ${res.status}` }
+    const csvText = await csvRes.text()
 
-    const data  = await res.json()
-    const results: any[] = data.results ?? []
-    const nhits = data.total_count ?? results.length
+    // Recherche efficace sans découper toutes les lignes en tableau
+    const searchKey = '\n' + inseeCode + ';'
+    const idx = csvText.indexOf(searchKey)
+    if (idx === -1) {
+      return { fibre: null, taux: null, commune: communeName, insee: inseeCode, csv_url: ARCEP_CSV_URL, error: 'commune absente du CSV' }
+    }
 
-    if (results.length === 0) return { fibre: false, url: rawUrl, nhits: 0, statuts: [] }
+    const lineStart = idx + 1
+    const lineEnd   = csvText.indexOf('\n', lineStart)
+    const line      = lineEnd === -1 ? csvText.slice(lineStart) : csvText.slice(lineStart, lineEnd)
+    const cols      = line.split(';')
 
-    // Collecte des statuts présents
-    const statuts = [...new Set(
-      results.map((r: any) => (r.statut_avancement ?? '').trim()).filter(Boolean)
-    )] as string[]
+    const nbr      = parseInt(cols[COL_NBR]      ?? '0', 10)
+    const eligFtth = parseInt(cols[COL_ELIG_FTTH] ?? '0', 10)
 
-    // Statuts qui confirment la disponibilité fibre
-    const STATUTS_OK = ['raccordable', 'déployé', 'en service', 'operationnel', 'opérationnel']
-    const estDisponible = statuts.some(s =>
-      STATUTS_OK.some(ok => s.toLowerCase().includes(ok))
-    )
+    if (nbr === 0) {
+      return { fibre: null, taux: null, commune: communeName, insee: inseeCode, csv_url: ARCEP_CSV_URL }
+    }
 
-    // Si aucun statut renseigné mais des records existent → on considère disponible
-    const fibre = statuts.length === 0 ? true : estDisponible
+    const taux  = Math.round((eligFtth / nbr) * 100)
+    const fibre = taux >= 50
 
-    return { fibre, url: rawUrl, nhits, statuts }
-  } catch (err: any) {
-    return { fibre: null, url: rawUrl, nhits: 0, statuts: [], error: String(err) }
+    return { fibre, taux, commune: communeName, insee: inseeCode, csv_url: ARCEP_CSV_URL }
+
+  } catch (e: any) {
+    return { fibre: null, taux: null, commune: communeName, insee: inseeCode, csv_url: ARCEP_CSV_URL, error: `csv: ${e?.message}` }
   }
 }
 
@@ -135,12 +162,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'lat/lng invalides' }, { status: 400 })
   }
 
-  // ── Fibre ARCEP (lancé en parallèle, indépendant du rayon mobile) ──────────
+  // Fibre ARCEP lancé en parallèle dès le début (indépendant du rayon mobile)
   const fibrePromise = fetchARCEPFibre(lat, lng)
 
   for (const radiusM of RADII_M) {
     try {
-      const [{ records, url }, fibreResult] = await Promise.all([
+      const [{ records, url }, fibreData] = await Promise.all([
         fetchANFR(lat, lng, radiusM),
         fibrePromise,
       ])
@@ -148,15 +175,9 @@ export async function GET(req: NextRequest) {
       if (debug) {
         return NextResponse.json({
           runtime: 'edge', radiusM, url,
-          nhits: records.length,
+          nhits:  records.length,
           sample: records.slice(0, 2).map((r: any) => r.fields),
-          fibre: {
-            url:    fibreResult.url,
-            nhits:  fibreResult.nhits,
-            statuts: fibreResult.statuts,
-            result: fibreResult.fibre,
-            error:  fibreResult.error,
-          },
+          fibre: fibreData,
         })
       }
 
@@ -175,12 +196,14 @@ export async function GET(req: NextRequest) {
       }
 
       const result: CouvertureResult = {
-        operateurs:  Object.fromEntries(Object.entries(opMap).map(([op, s]) => [op, sortGens(s)])),
-        generations: sortGens(genSet),
-        antennes:    records.length,
-        rayon_km:    radiusM / 1000,
-        disponible:  true,
-        fibre_arcep: fibreResult.fibre,
+        operateurs:    Object.fromEntries(Object.entries(opMap).map(([op, s]) => [op, sortGens(s)])),
+        generations:   sortGens(genSet),
+        antennes:      records.length,
+        rayon_km:      radiusM / 1000,
+        disponible:    true,
+        fibre_arcep:   fibreData.fibre,
+        fibre_taux:    fibreData.taux,
+        fibre_commune: fibreData.commune,
       }
 
       return NextResponse.json(result, {
@@ -188,19 +211,18 @@ export async function GET(req: NextRequest) {
       })
 
     } catch (err: any) {
-      if (debug) {
-        return NextResponse.json({ runtime: 'edge', error: String(err), radiusM })
-      }
+      if (debug) return NextResponse.json({ runtime: 'edge', error: String(err), radiusM })
     }
   }
 
-  // Aucune antenne trouvée — on retourne quand même la fibre si dispo
-  const fibreResult = await fibrePromise
+  // Aucune antenne mobile — on retourne quand même la fibre si disponible
+  const fibreData = await fibrePromise
   return NextResponse.json(
     {
-      operateurs: {}, generations: [], antennes: 0, rayon_km: 5,
-      disponible: false,
-      fibre_arcep: fibreResult.fibre,
+      operateurs: {}, generations: [], antennes: 0, rayon_km: 5, disponible: false,
+      fibre_arcep:   fibreData.fibre,
+      fibre_taux:    fibreData.taux,
+      fibre_commune: fibreData.commune,
     } satisfies CouvertureResult,
     { headers: { 'Cache-Control': 'public, s-maxage=60' } },
   )

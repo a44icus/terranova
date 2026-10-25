@@ -1,35 +1,3 @@
-// ════════════════════════════════════════════════════════════════════
-//  MODIFICATIONS À APPLIQUER — src/app/carte/page.tsx
-// ════════════════════════════════════════════════════════════════════
-//
-// 1. Ajouter l'import du type MapAd après les autres imports :
-//
-//    import type { MapAd } from '@/lib/mapAds'
-//
-//
-// 2. Dans la fonction CartePage, après la récupération de `biens`,
-//    ajouter la requête pour les pubs :
-//
-//    const { data: ads } = await supabase
-//      .from('map_ads')
-//      .select('*')
-//      .eq('actif', true)
-//
-//
-// 3. Passer les ads à MapApp :
-//
-//    <MapApp
-//      biens={biens ?? []}
-//      user={user}
-//      initialBienId={initialBienId}
-//      carteSettings={carteSettings}
-//      ads={ads ?? []}          // ← AJOUTER
-//    />
-//
-// ════════════════════════════════════════════════════════════════════
-//  VERSION COMPLÈTE DU FICHIER MODIFIÉ
-// ════════════════════════════════════════════════════════════════════
-
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import MapApp from '@/components/map/MapApp'

@@ -6,12 +6,14 @@ import { useEffect, useState } from 'react'
 type Generation = '2G' | '3G' | '4G' | '5G'
 
 interface CouvertureResult {
-  operateurs:  Record<string, Generation[]>
-  generations: Generation[]
-  antennes:    number
-  rayon_km:    number
-  disponible:  boolean
-  fibre_arcep: boolean | null   // données ARCEP directes
+  operateurs:    Record<string, Generation[]>
+  generations:   Generation[]
+  antennes:      number
+  rayon_km:      number
+  disponible:    boolean
+  fibre_arcep:   boolean | null
+  fibre_taux:    number | null    // % locaux éligibles FTTH dans la commune
+  fibre_commune: string | null    // nom de la commune
 }
 
 interface Props { lat: number; lng: number; fibre?: boolean | null }
@@ -77,7 +79,7 @@ export default function CouvertureReseau({ lat, lng, fibre }: Props) {
   if (loading) return <Skeleton />
   if (!data)   return null
 
-  const { operateurs, generations, antennes, rayon_km, disponible, fibre_arcep } = data
+  const { operateurs, generations, antennes, rayon_km, disponible, fibre_arcep, fibre_taux, fibre_commune } = data
   // fibre_arcep (ARCEP) en priorité, sinon prop DB, sinon null
   const fibreDisplay = fibre_arcep !== undefined ? fibre_arcep : (fibre ?? null)
   const hasData   = disponible && generations.length > 0
@@ -168,42 +170,52 @@ export default function CouvertureReseau({ lat, lng, fibre }: Props) {
         </div>
       )}
 
-      {/* Fibre optique — données ARCEP */}
-      <div className={`flex items-center gap-2 mt-2.5 px-3 py-2 rounded-xl border ${
-        fibreDisplay === true
-          ? 'bg-emerald-50 border-emerald-200'
-          : fibreDisplay === false
-            ? 'bg-navy/02 border-dashed border-navy/10'
-            : 'bg-navy/02 border-dashed border-navy/08'
-      }`}>
-        <span className="text-sm flex-shrink-0">{fibreDisplay === true ? '🌐' : '🔌'}</span>
-        <div className="flex-1 min-w-0">
-          <span className={`text-[11px] font-semibold ${fibreDisplay === true ? 'text-emerald-700' : 'text-navy/45'}`}>
-            Fibre optique
-          </span>
-          <span className={`text-[10px] ml-1.5 ${fibreDisplay === true ? 'text-emerald-600' : 'text-navy/35'}`}>
-            {fibreDisplay === true
-              ? 'Zone raccordable FTTH'
-              : fibreDisplay === false
-                ? 'Non déployée dans ce secteur'
-                : 'Données ARCEP indisponibles'}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-            fibreDisplay === true ? 'bg-emerald-100 text-emerald-700' : 'bg-navy/06 text-navy/35'
-          }`}>
-            {fibreDisplay === true ? '✓ Oui' : fibreDisplay === false ? '✗ Non' : '—'}
-          </span>
-          {fibre_arcep !== null && (
-            <span className="text-[8px] text-navy/20 uppercase tracking-wider">ARCEP</span>
-          )}
-        </div>
-      </div>
+      {/* Fibre optique — données ARCEP commune_techno */}
+      {(() => {
+        const t = fibre_taux   // % locaux éligibles FTTH
+        // Couleurs graduées selon le taux de couverture
+        const cfg =
+          t === null              ? { bg: 'bg-navy/02',      border: 'border-dashed border-navy/08', label: 'text-navy/45', sub: 'text-navy/30', badge: 'bg-navy/06 text-navy/35' }
+          : t >= 80               ? { bg: 'bg-emerald-50',   border: 'border-emerald-200',            label: 'text-emerald-700', sub: 'text-emerald-600', badge: 'bg-emerald-100 text-emerald-700' }
+          : t >= 50               ? { bg: 'bg-sky-50',       border: 'border-sky-200',                label: 'text-sky-700', sub: 'text-sky-600', badge: 'bg-sky-100 text-sky-700' }
+          : t >= 20               ? { bg: 'bg-amber-50',     border: 'border-amber-200',              label: 'text-amber-700', sub: 'text-amber-600', badge: 'bg-amber-100 text-amber-700' }
+          :                         { bg: 'bg-navy/02',      border: 'border-dashed border-navy/10',  label: 'text-navy/45', sub: 'text-navy/30', badge: 'bg-navy/06 text-navy/35' }
+
+        const icon  = t !== null && t >= 50 ? '🌐' : '🔌'
+        const label = t !== null && t >= 50 ? 'Fibre optique disponible' : 'Fibre optique'
+        const sub   = t === null
+          ? 'Données ARCEP indisponibles'
+          : t >= 80 ? `Zone très bien couverte — ${t}% des locaux éligibles FTTH`
+          : t >= 50 ? `Bonne couverture — ${t}% des locaux éligibles FTTH`
+          : t >= 20 ? `Déploiement en cours — ${t}% des locaux éligibles FTTH`
+          :           `Peu déployée — ${t}% des locaux éligibles FTTH`
+        const badge = t === null ? '—' : `${t}%`
+
+        return (
+          <div className={`flex items-center gap-2 mt-2.5 px-3 py-2 rounded-xl border ${cfg.bg} ${cfg.border}`}>
+            <span className="text-sm flex-shrink-0">{icon}</span>
+            <div className="flex-1 min-w-0">
+              <span className={`text-[11px] font-semibold ${cfg.label}`}>{label}</span>
+              <span className={`text-[10px] ml-1.5 ${cfg.sub}`}>{sub}</span>
+              {fibre_commune && (
+                <span className="text-[9px] text-navy/25 ml-1.5">· {fibre_commune}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${cfg.badge}`}>
+                {badge}
+              </span>
+              {t !== null && (
+                <span className="text-[8px] text-navy/20 uppercase tracking-wider">ARCEP</span>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       <p className="text-[9px] text-navy/25 mt-2">
         Réseau mobile : ANFR · {antennes} antenne{antennes > 1 ? 's' : ''} dans un rayon de {rayon_km} km
-        {fibre_arcep !== null && ' · Fibre : ARCEP open data'}
+        {fibre_taux !== null && ' · Fibre : ARCEP commune_techno'}
       </p>
     </div>
   )
