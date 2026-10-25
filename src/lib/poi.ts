@@ -280,10 +280,12 @@ export const OVERPASS_QUERY = (bbox: string) => `
   out qt;
 `
 
+// Instance OSM France en premier : l'instance principale est saturée.
+// Appel côté serveur uniquement (pas de CORS sur l'instance OSM France).
 export const OVERPASS_SERVERS = [
+  'https://overpass.openstreetmap.fr/api/interpreter',
   'https://overpass-api.de/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
 ]
 
 // Rayons testés successivement — partagés par usePOI et QuartierScore
