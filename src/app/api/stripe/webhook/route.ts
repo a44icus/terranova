@@ -1,12 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { getStripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getPlanConfig, type PlanConfigs } from '@/lib/plan'
 import type { PlanType } from '@/lib/types'
 
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY
-  if (!key) throw new Error('STRIPE_SECRET_KEY non configuré')
-  return new Stripe(key, { apiVersion: '2026-03-25.dahlia' })
+/**
+ * Fin de la période en cours, en ISO.
+ * Depuis l'API 2025-03-31, current_period_end est porté par chaque item et non plus par
+ * l'abonnement. On garde la lecture de l'ancien champ pour les événements plus anciens,
+ * puis on retombe sur la durée du plan si Stripe ne fournit rien.
+ */
+function getPeriodEnd(subscription: Stripe.Subscription, plan: PlanType): string {
+  const legacy = (subscription as Stripe.Subscription & { current_period_end?: number }).current_period_end
+  const rawEnd = subscription.items?.data?.[0]?.current_period_end ?? legacy
+  const dureeFallback = plan.includes('annuel') ? 365 : 30
+  const periodEnd = (typeof rawEnd === 'number' && rawEnd > 0)
+    ? rawEnd
+    : Math.floor(Date.now() / 1000) + dureeFallback * 24 * 3600
+  if (periodEnd !== rawEnd) console.warn(`[Webhook] current_period_end absent, repli sur ${dureeFallback} jours`)
+  return new Date(periodEnd * 1000).toISOString()
+}
+
+/**
+ * Plan correspondant à l'abonnement, déduit du prix facturé.
+ * Les métadonnées ne sont fixées qu'au checkout : elles restent sur l'ancien plan si
+ * l'utilisateur en change via le portail client. Elles ne servent donc que de repli.
+ */
+function getPlanFromSubscription(subscription: Stripe.Subscription, configs: PlanConfigs): PlanType | null {
+  const priceId = subscription.items?.data?.[0]?.price?.id
+  if (priceId) {
+    const match = (Object.keys(configs) as PlanType[])
+      .find(p => p !== 'gratuit' && configs[p].stripe_price_id === priceId)
+    if (match) return match
+    console.warn(`[Webhook] price ${priceId} inconnu dans plan_config, repli sur les métadonnées`)
+  }
+  const meta = subscription.metadata?.plan
+  return meta && meta !== 'gratuit' && meta in configs ? meta as PlanType : null
+}
+
+/** Identifiant de l'abonnement d'une facture (déplacé dans parent.subscription_details depuis l'API 2025-03-31). */
+function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const sub = invoice.parent?.subscription_details?.subscription
+    ?? (invoice as Stripe.Invoice & { subscription?: string | Stripe.Subscription | null }).subscription
+  if (!sub) return null
+  return typeof sub === 'string' ? sub : sub.id
 }
 
 export async function POST(req: NextRequest) {
@@ -22,8 +60,8 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event
   try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
-  } catch (err: any) {
-    console.error('[Webhook] Signature invalide:', err.message)
+  } catch (err) {
+    console.error('[Webhook] Signature invalide:', err instanceof Error ? err.message : err)
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
@@ -37,28 +75,22 @@ export async function POST(req: NextRequest) {
         if (session.mode !== 'subscription') break
 
         const userId = session.metadata?.user_id
-        const plan = session.metadata?.plan as PlanType
-        if (!userId || !plan) break
+        if (!userId) break
 
         const subscriptionId = session.subscription as string
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-        // current_period_end a changé de place dans les nouvelles versions de l'API Stripe
-        const sub = subscription as any
-        const rawEnd = sub.current_period_end
-          ?? sub.items?.data?.[0]?.current_period_end
-        const dureeFallback = plan.includes('annuel') ? 365 : 30
-        const periodEnd = (typeof rawEnd === 'number' && rawEnd > 0)
-          ? rawEnd
-          : Math.floor(Date.now() / 1000) + dureeFallback * 24 * 3600
-        const currentPeriodEnd = new Date(periodEnd * 1000).toISOString()
-        console.log(`[Webhook] periodEnd source: ${typeof rawEnd === 'number' ? 'stripe' : 'fallback'}, value: ${periodEnd}`)
+        const plan = getPlanFromSubscription(subscription, await getPlanConfig())
+          ?? session.metadata?.plan as PlanType | undefined
+        if (!plan) break
+
+        const currentPeriodEnd = getPeriodEnd(subscription, plan)
 
         await supabase.from('profiles').update({
           plan,
           plan_expire_at: currentPeriodEnd,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: subscriptionId,
-        }).eq('id', userId)
+        }).eq('id', userId).throwOnError()
 
         console.log(`[Webhook] Plan ${plan} activé pour user ${userId}, expire le ${currentPeriodEnd}`)
         break
@@ -66,27 +98,21 @@ export async function POST(req: NextRequest) {
 
       // Renouvellement automatique réussi
       case 'invoice.payment_succeeded': {
-        const invoice = event.data.object as any
-        if (!invoice.subscription) break
+        const invoice = event.data.object as Stripe.Invoice
+        const subscriptionId = getInvoiceSubscriptionId(invoice)
+        if (!subscriptionId) break
 
-        const subscriptionId = typeof invoice.subscription === 'string'
-          ? invoice.subscription
-          : invoice.subscription.id
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
         const userId = subscription.metadata?.user_id
-        const plan = subscription.metadata?.plan as PlanType
+        const plan = getPlanFromSubscription(subscription, await getPlanConfig())
         if (!userId || !plan) break
 
-        const sub2 = subscription as any
-        const periodEnd2 = sub2.current_period_end
-          ?? sub2.items?.data?.[0]?.current_period_end
-          ?? Math.floor(Date.now() / 1000) + 30 * 24 * 3600
-        const currentPeriodEnd = new Date(periodEnd2 * 1000).toISOString()
+        const currentPeriodEnd = getPeriodEnd(subscription, plan)
 
         await supabase.from('profiles').update({
           plan,
           plan_expire_at: currentPeriodEnd,
-        }).eq('id', userId)
+        }).eq('id', userId).throwOnError()
 
         console.log(`[Webhook] Renouvellement ${plan} pour user ${userId}, expire le ${currentPeriodEnd}`)
         break
@@ -94,12 +120,10 @@ export async function POST(req: NextRequest) {
 
       // Paiement échoué
       case 'invoice.payment_failed': {
-        const invoice = event.data.object as any
-        if (!invoice.subscription) break
+        const invoice = event.data.object as Stripe.Invoice
+        const subId = getInvoiceSubscriptionId(invoice)
+        if (!subId) break
 
-        const subId = typeof invoice.subscription === 'string'
-          ? invoice.subscription
-          : invoice.subscription.id
         const subscription = await stripe.subscriptions.retrieve(subId)
         const userId = subscription.metadata?.user_id
         if (!userId) break
@@ -119,7 +143,7 @@ export async function POST(req: NextRequest) {
           plan: 'gratuit',
           plan_expire_at: null,
           stripe_subscription_id: null,
-        }).eq('id', userId)
+        }).eq('id', userId).throwOnError()
 
         console.log(`[Webhook] Abonnement annulé pour user ${userId}, retour au plan gratuit`)
         break
@@ -129,16 +153,20 @@ export async function POST(req: NextRequest) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription
         const userId = subscription.metadata?.user_id
-        const plan = subscription.metadata?.plan as PlanType
-        if (!userId || !plan) break
+        if (!userId) break
 
-        // Si actif, mettre à jour l'expiration
-        if (subscription.status === 'active') {
-          const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000).toISOString()
+        // Si actif, mettre à jour le plan (il a pu changer via le portail) et l'expiration
+        if (subscription.status === 'active' || subscription.status === 'trialing') {
+          const plan = getPlanFromSubscription(subscription, await getPlanConfig())
+          if (!plan) break
+
+          const currentPeriodEnd = getPeriodEnd(subscription, plan)
           await supabase.from('profiles').update({
             plan,
             plan_expire_at: currentPeriodEnd,
-          }).eq('id', userId)
+          }).eq('id', userId).throwOnError()
+
+          console.log(`[Webhook] Abonnement mis à jour : ${plan} pour user ${userId}, expire le ${currentPeriodEnd}`)
         }
         break
       }
@@ -147,7 +175,7 @@ export async function POST(req: NextRequest) {
         // Événement non géré, ignorer
         break
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error('[Webhook] Erreur traitement:', err)
     return NextResponse.json({ error: 'Webhook handler error' }, { status: 500 })
   }
