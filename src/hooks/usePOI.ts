@@ -11,8 +11,8 @@ export function usePOI(_maxDistM = 1000) {
 
   const loadPOI = useCallback(async (
     bienId: string,
-    lat: number,
-    lng: number,
+    _lat?: number,
+    _lng?: number,
   ): Promise<POIResult | null> => {
     // Annuler la requête précédente en vol
     abortController.current?.abort()
@@ -23,8 +23,8 @@ export function usePOI(_maxDistM = 1000) {
     if (cache.current[bienId]) return cache.current[bienId]
 
     try {
-      // Requête Overpass depuis le navigateur (voir lib/poiClient.ts)
-      const data = await fetchPOI(lat, lng, { signal: controller.signal })
+      // POI stockés pour ce bien (voir lib/poisBien.ts)
+      const data = await fetchPOI(bienId, { signal: controller.signal })
       if (data) cache.current[bienId] = data
       return data
     } catch {

@@ -1,9 +1,8 @@
 /**
- * lib/poiClient.ts — Récupération des POI depuis le navigateur, via /api/poi.
+ * lib/poiClient.ts — POI d'un bien, depuis le navigateur, via /api/poi.
  *
- * La route serveur interroge Overpass (OpenStreetMap) et met le résultat en
- * cache CDN 24 h. Ici, on ajoute un cache de session pour ne pas redemander
- * les mêmes POI à chaque clic.
+ * Les POI sont stockés par bien côté serveur (voir lib/poisBien.ts).
+ * Un cache de session évite de les redemander à chaque clic.
  */
 
 import type { POIItem, POIResult } from '@/lib/poiFetch'
@@ -25,17 +24,16 @@ function writeCache(key: string, value: POIResult) {
   try { sessionStorage.setItem(key, JSON.stringify(value)) } catch { /* quota ou mode privé */ }
 }
 
-/** Retourne null si le service POI est indisponible. */
+/** Retourne null si les POI du bien ne sont pas (encore) disponibles. */
 export async function fetchPOI(
-  lat: number,
-  lng: number,
+  bienId: string,
   opts: { signal?: AbortSignal } = {},
 ): Promise<POIResult | null> {
-  const cacheKey = `${CACHE_PREFIX}${lat.toFixed(4)},${lng.toFixed(4)}`
+  const cacheKey = `${CACHE_PREFIX}${bienId}`
   const cached = readCache(cacheKey)
   if (cached) return cached
 
-  const res = await fetch(`/api/poi?lat=${lat}&lng=${lng}`, { signal: opts.signal })
+  const res = await fetch(`/api/poi?id=${encodeURIComponent(bienId)}`, { signal: opts.signal })
   if (!res.ok) return null
   const data = await res.json() as POIResult
   writeCache(cacheKey, data)

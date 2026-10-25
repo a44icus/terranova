@@ -1,6 +1,6 @@
 /**
  * POST /api/admin/backfill-scores
- * Calcule score_quartier pour tous les biens publiés qui n'en ont pas encore.
+ * Calcule les POI et le score de quartier des biens publiés qui n'en ont pas encore.
  * Réservé aux admins. Traitement séquentiel pour ne pas surcharger Overpass.
  */
 
@@ -23,7 +23,7 @@ export async function POST() {
     .from('biens')
     .select('id, lat, lng')
     .eq('statut', 'publie')
-    .is('score_quartier', null)
+    .is('pois', null)
     .not('lat', 'is', null)
     .not('lng', 'is', null)
 
@@ -31,7 +31,7 @@ export async function POST() {
     console.error('[backfill-scores]', error)
     return NextResponse.json({ error: 'Erreur lors de la récupération des biens.' }, { status: 500 })
   }
-  if (!biens?.length) return NextResponse.json({ ok: true, processed: 0, message: 'Tous les biens ont déjà un score.' })
+  if (!biens?.length) return NextResponse.json({ ok: true, processed: 0, message: 'Tous les biens ont déjà leurs POI.' })
 
   let processed = 0
   let errors = 0

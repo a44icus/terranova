@@ -8,6 +8,7 @@ import {
 import { fetchPOI } from '@/lib/poiClient'
 
 interface Props {
+  bienId: string
   lat: number
   lng: number
   storedScore?: number | null
@@ -22,7 +23,7 @@ function fmtDist(m: number) {
   return m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`
 }
 
-export default function QuartierScore({ lat, lng, storedScore, poiWeights, seuils = DEFAULT_SCORE_SEUILS, userPoiPriorities = [] }: Props) {
+export default function QuartierScore({ bienId, lat, lng, storedScore, poiWeights, seuils = DEFAULT_SCORE_SEUILS, userPoiPriorities = [] }: Props) {
   // Un score enregistré à 0 vient presque toujours d'une panne Overpass lors du calcul :
   // on l'ignore et on recalcule en direct.
   const hasStoredScore = typeof storedScore === 'number' && storedScore > 0
@@ -36,11 +37,11 @@ export default function QuartierScore({ lat, lng, storedScore, poiWeights, seuil
     let cancelled = false
     async function run() {
       try {
-        // Requête Overpass depuis le navigateur (voir lib/poiClient.ts)
-        const data = await fetchPOI(lat, lng)
+        // POI stockés pour ce bien (voir lib/poisBien.ts)
+        const data = await fetchPOI(bienId)
         if (cancelled) return
         if (!data) {
-          // Overpass injoignable : on n'affiche pas un faux score de 0
+          // POI pas encore disponibles : on n'affiche pas un faux score de 0
           if (!hasStoredScore) setScore(null)
           return
         }
@@ -63,7 +64,7 @@ export default function QuartierScore({ lat, lng, storedScore, poiWeights, seuil
     }
     run()
     return () => { cancelled = true }
-  }, [lat, lng, poiWeights])
+  }, [bienId, lat, lng, poiWeights])
 
   if (loading) return (
     <div className="bg-white rounded-2xl p-4 border border-navy/08">

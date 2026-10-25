@@ -471,6 +471,7 @@ export default async function AnnoncePage({ params }: Props) {
             {/* Score quartier */}
             {bien.lat && bien.lng && (
               <QuartierScore
+                bienId={bien.id}
                 lat={bien.lat}
                 lng={bien.lng}
                 storedScore={bien.score_quartier ?? null}

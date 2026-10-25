@@ -37,4 +37,8 @@ Les scripts SQL de `supabase/` et `supabase/migrations/` s'exécutent dans l'éd
 
 ## Tâches planifiées
 
-`/api/cron/new-biens` et `/api/cron/price-alerts` attendent un POST avec l'en-tête `x-cron-secret` égal à `CRON_SECRET`.
+`/api/cron/new-biens`, `/api/cron/price-alerts` et `/api/cron/pois` attendent un POST avec l'en-tête `x-cron-secret` égal à `CRON_SECRET`.
+
+## POI (points d'intérêt)
+
+Les POI autour de chaque bien viennent d'OpenStreetMap, via Overpass (instance OSM France en priorité). Ils sont récupérés une fois puis stockés dans `biens.pois` : l'affichage ne dépend pas de la disponibilité d'Overpass. Les biens sans POI (nouvelles annonces, biens déplacés, pannes d'Overpass) sont traités toutes les heures par le workflow GitHub Actions `.github/workflows/pois.yml`, qui nécessite les secrets `SITE_URL` et `CRON_SECRET`.
