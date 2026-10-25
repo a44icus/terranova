@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JazzImmo (projet terranova)
 
-## Getting Started
+Plateforme d'annonces immobilières avec carte interactive, comptes vendeurs, abonnements et back-office.
 
-First, run the development server:
+## Stack
+
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Supabase (Postgres, Auth, Storage), MapLibre GL, Zustand, Stripe (abonnements) et Resend (emails). Hébergement sur Vercel, déploiement automatique depuis la branche `main`.
+
+## Démarrer
 
 ```bash
+npm install
+cp .env.example .env.local   # puis remplir les valeurs
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Le site tourne sur http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+  app/          pages, routes API et server actions (App Router)
+  components/   composants React par domaine (map, sidebar, compte, admin…)
+  hooks/        hooks client (carte, biens, géolocalisation, POI…)
+  lib/          logique partagée : auth, plans, Supabase, géo, rate limiting
+  store/        état global Zustand de la carte
+  proxy.ts      middleware (session, maintenance, accès admin)
+public/         fichiers statiques et pages internes (changelog, roadmap…)
+supabase/       scripts SQL et migrations à exécuter dans Supabase
+docs/           documentation interne
+```
 
-## Learn More
+## Base de données
 
-To learn more about Next.js, take a look at the following resources:
+Les scripts SQL de `supabase/` et `supabase/migrations/` s'exécutent dans l'éditeur SQL de Supabase.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tâches planifiées
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`/api/cron/new-biens` et `/api/cron/price-alerts` attendent un POST avec l'en-tête `x-cron-secret` égal à `CRON_SECRET`.
