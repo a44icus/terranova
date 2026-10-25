@@ -1,18 +1,12 @@
-﻿import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
-import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
-
-function escHtml(s: unknown): string {
-  return String(s ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#x27;')
-}
-
-function isEmail(v: unknown): v is string {
-  return typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 254
-}
+import { isEmailRateLimited, rateLimitKey } from '@/lib/emailRateLimit'
+import {
+  escHtml, escHtmlMultiline, isEmail, emailLayout, emailEyebrow, emailTitle, emailQuote,
+  emailFields, emailMailto, emailButton, emailButtons, sendEmail, isEmailConfigured,
+} from '@/lib/emails'
+import { SITE_NAME } from '@/lib/site'
 
 export async function POST(req: NextRequest) {
   // ── Authentification requise ───────────────────────────────
@@ -21,8 +15,7 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // ── Rate limiting ──────────────────────────────────────────
-  const ip = getClientIp(req)
-  if (await isEmailRateLimited(ip, 'contact-agent')) {
+  if (await isEmailRateLimited(rateLimitKey(req, user.id), 'contact-agent')) {
     return NextResponse.json({ error: 'Trop de messages envoyés. Réessayez dans une heure.' }, { status: 429 })
   }
 
@@ -47,15 +40,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'telephone invalide' }, { status: 400 })
   }
 
-  const safeNom     = escHtml(nom.trim())
-  const safeEmail   = escHtml((email as string).trim())
-  const safeTel     = telephone ? escHtml((telephone as string).trim()) : ''
-  const safeMessage = escHtml(message.trim()).replace(/\n/g, '<br/>')
-
   // ── Envoi ─────────────────────────────────────────────────
-  const RESEND_API_KEY = process.env.RESEND_API_KEY
-  if (!RESEND_API_KEY) {
-    console.error('[contact-agent] RESEND_API_KEY manquant')
+  if (!(await isEmailConfigured())) {
+    console.error('[contact-agent] aucune clé Resend (config admin ou RESEND_API_KEY)')
     return NextResponse.json({ error: 'Service email non configuré' }, { status: 500 })
   }
 
@@ -69,37 +56,31 @@ export async function POST(req: NextRequest) {
     if (!agent) return NextResponse.json({ error: 'Agent introuvable' }, { status: 404 })
 
     const agentEmail = userData.user?.email
-    const agentName  = escHtml(agent.agence || `${agent.prenom} ${agent.nom}`)
+    const safeNom    = escHtml(nom.trim())
+    const safeEmail  = escHtml(email.trim())
 
     if (agentEmail) {
-      const resend = new Resend(RESEND_API_KEY)
-      await resend.emails.send({
-        from:    'JazzImmo <noreply@JazzImmo-beta.vercel.app>',
+      await sendEmail({
         to:      agentEmail,
-        replyTo: (email as string).trim(),
-        subject: `Nouveau message de ${nom.trim()} via JazzImmo`,
-        html: `
-          <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#0F172A">
-            <h2 style="font-size:20px;margin-bottom:4px">Nouveau message</h2>
-            <p style="color:#64748B;font-size:14px;margin-bottom:24px">Via votre profil JazzImmo — ${agentName}</p>
-            <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:20px">
-              <p style="margin:0 0 8px"><strong>De :</strong> ${safeNom}</p>
-              <p style="margin:0 0 8px"><strong>Email :</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
-              ${safeTel ? `<p style="margin:0 0 8px"><strong>Téléphone :</strong> ${safeTel}</p>` : ''}
-              <p style="margin:0 0 4px"><strong>Message :</strong></p>
-              <p style="margin:0;color:#334155">${safeMessage}</p>
-            </div>
-            <a href="mailto:${safeEmail}?subject=Re: votre message sur JazzImmo"
-              style="display:inline-block;background:#4F46E5;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">
-              Répondre à ${safeNom}
-            </a>
-          </div>
-        `,
+        replyTo: email.trim(),
+        subject: `Nouveau message de ${nom.trim()} via ${SITE_NAME}`,
+        html: emailLayout({
+          content: `
+            ${emailEyebrow('Nouveau message')}
+            ${emailTitle(`${safeNom} vous a écrit`)}
+            <p style="margin:0 0 24px;font-size:13px;color:#64748B;">Via votre profil ${SITE_NAME} — ${escHtml(agent.agence || `${agent.prenom} ${agent.nom}`)}</p>
+            ${emailQuote(escHtmlMultiline(message.trim()))}
+            ${emailFields([
+              ['Email',     emailMailto(email.trim())],
+              ['Téléphone', typeof telephone === 'string' ? escHtml(telephone.trim()) : ''],
+            ], 'Coordonnées')}
+            ${emailButtons(emailButton(`mailto:${safeEmail}?subject=Re: votre message sur ${SITE_NAME}`, `Répondre à ${safeNom}`))}`,
+        }),
       })
     }
 
     return NextResponse.json({ ok: true })
-  } catch (err: any) {
+  } catch (err) {
     console.error('[contact-agent]', err)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }

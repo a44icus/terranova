@@ -1,8 +1,10 @@
-﻿'use server'
+'use server'
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { emailLayout, emailEyebrow, emailTitle, emailButton, emailButtons, sendEmail, isEmailConfigured } from '@/lib/emails'
+import { SITE_NAME, SITE_URL } from '@/lib/site'
 
 export async function sendReply(contactId: string, contenu: string): Promise<{ ok?: boolean; error?: string }> {
   if (!contenu.trim()) return { error: 'Message vide' }
@@ -44,18 +46,13 @@ export async function sendReply(contactId: string, contenu: string): Promise<{ o
     await adminClient.from('contacts').update({ lu: true }).eq('id', contactId)
   }
 
-  // Notifier par email si RESEND_API_KEY disponible
-  if (process.env.RESEND_API_KEY) {
+  // Notifier le destinataire par email (silencieux — ne fait jamais échouer l'envoi)
+  if (await isEmailConfigured()) {
     try {
-      const { Resend } = await import('resend')
-      const resend = new Resend(process.env.RESEND_API_KEY)
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
-
-      // Récupérer l'email du destinataire
       let toEmail = ''
       if (isVendeur) {
-        // Vendeur répond → notifier l'acheteur
-        toEmail = contact.email // email du contact initial
+        // Vendeur répond → notifier l'acheteur (email du contact initial)
+        toEmail = contact.email
       } else {
         // Acheteur répond → notifier le vendeur
         const { data: { user: vendeur } } = await adminClient.auth.admin.getUserById(contact.vendeur_id)
@@ -63,12 +60,17 @@ export async function sendReply(contactId: string, contenu: string): Promise<{ o
       }
 
       if (toEmail) {
-        await resend.emails.send({
-          from: 'JazzImmo <messages@terranova.fr>',
+        await sendEmail({
           to: toEmail,
-          subject: `💬 Nouveau message sur JazzImmo`,
-          html: `<p>Vous avez reçu un nouveau message concernant votre annonce.</p><a href="${baseUrl}/compte/messages/${contactId}" style="display:inline-block;background:#4F46E5;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;">Voir le message →</a>`,
-        }).catch(() => {})
+          subject: `💬 Nouveau message sur ${SITE_NAME}`,
+          html: emailLayout({
+            content: `
+              ${emailEyebrow('Nouveau message')}
+              ${emailTitle('Vous avez reçu une réponse')}
+              <p style="margin:0 0 24px;font-size:14px;color:#334155;">Vous avez reçu un nouveau message concernant une annonce.</p>
+              ${emailButtons(emailButton(`${SITE_URL}/compte/messages/${encodeURIComponent(contactId)}`, 'Voir le message →'))}`,
+          }),
+        })
       }
     } catch {}
   }
