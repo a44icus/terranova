@@ -22,11 +22,20 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
-  const { data: bien } = await admin
+  const { data: bien, error } = await admin
     .from('biens')
     .select('id, lat, lng, statut, pois, pois_attempt_at')
     .eq('id', id)
     .maybeSingle()
+
+  if (error) {
+    // Ex. colonnes absentes : migration supabase/migrations/20261025_biens_pois.sql non exécutée
+    console.error('[api/poi] Lecture du bien impossible :', error.message)
+    return NextResponse.json(
+      { error: 'Erreur base de données' },
+      { status: 500, headers: { 'Cache-Control': 'no-store' } },
+    )
+  }
 
   if (!bien || !['publie', 'vendue'].includes(bien.statut)) {
     return NextResponse.json({ error: 'Bien introuvable' }, { status: 404 })
