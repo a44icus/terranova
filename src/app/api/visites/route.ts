@@ -1,25 +1,18 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { Resend } from 'resend'
-import { isEmailRateLimited, getClientIp } from '@/lib/emailRateLimit'
-
-function escHtml(s: unknown): string {
-  return String(s ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#x27;')
-}
-
-function isEmail(v: unknown): v is string {
-  return typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 254
-}
+import {
+  escHtml, escHtmlMultiline, isEmail, emailLayout, emailEyebrow, emailTitle, emailQuote,
+  emailFields, emailMailto, emailButton, emailButtons, sendEmail, isEmailConfigured,
+} from '@/lib/emails'
+import { SITE_URL } from '@/lib/site'
+import { isEmailRateLimited, rateLimitKey } from '@/lib/emailRateLimit'
 
 function isDate(v: unknown): v is string {
   return typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)
 }
 
 export async function POST(req: NextRequest) {
-  const ip = getClientIp(req)
-  if (await isEmailRateLimited(ip, 'visites')) {
+  if (await isEmailRateLimited(rateLimitKey(req), 'visites')) {
     return NextResponse.json({ error: 'Trop de demandes. Réessayez dans une heure.' }, { status: 429 })
   }
 
@@ -83,57 +76,42 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 
-  // Envoie email au vendeur
-  const RESEND_API_KEY = process.env.RESEND_API_KEY
-  if (RESEND_API_KEY) {
+  // Envoie email au vendeur (on ne bloque pas si l'email échoue)
+  if (await isEmailConfigured()) {
     try {
       const { data: vendeurData } = await admin.auth.admin.getUserById(vendeurId)
       const vendeurEmail = vendeurData.user?.email
 
       if (vendeurEmail) {
-        const resend = new Resend(RESEND_API_KEY)
         const dateFormatted = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-        const safNom    = escHtml(demandeurNom.trim())
-        const safEmail  = escHtml((demandeurEmail as string).trim())
-        const safTel    = demandeurTel ? escHtml(String(demandeurTel).trim()) : ''
-        const safMsg    = message ? escHtml(String(message).trim()).replace(/\n/g, '<br/>') : ''
-        const safBien   = escHtml(bien.titre)
-        const safVille  = escHtml(bien.ville)
-        const safCr     = creneau ? escHtml(String(creneau)) : ''
+        const safNom  = escHtml(demandeurNom.trim())
+        const safBien = escHtml(bien.titre)
 
-        await resend.emails.send({
-          from:    'JazzImmo <noreply@JazzImmo-beta.vercel.app>',
+        await sendEmail({
           to:      vendeurEmail,
-          replyTo: (demandeurEmail as string).trim(),
+          replyTo: demandeurEmail.trim(),
           subject: `Demande de visite — ${bien.titre}`,
-          html: `
-            <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#0F172A">
-              <h2 style="font-size:20px;margin-bottom:4px">Nouvelle demande de visite 🏠</h2>
-              <p style="color:#64748B;font-size:14px;margin-bottom:24px">
-                Pour votre annonce <strong>${safBien}</strong> à ${safVille}
-              </p>
-              <div style="background:#F8FAFC;border-radius:12px;padding:20px;margin-bottom:20px">
-                <p style="margin:0 0 8px"><strong>De :</strong> ${safNom}</p>
-                <p style="margin:0 0 8px"><strong>Email :</strong> <a href="mailto:${safEmail}">${safEmail}</a></p>
-                ${safTel ? `<p style="margin:0 0 8px"><strong>Téléphone :</strong> ${safTel}</p>` : ''}
-                <p style="margin:0 0 8px"><strong>Date souhaitée :</strong> ${dateFormatted}</p>
-                ${safCr ? `<p style="margin:0 0 8px"><strong>Créneau :</strong> ${safCr}</p>` : ''}
-                ${safMsg ? `<p style="margin:0 0 4px"><strong>Message :</strong></p><p style="margin:0;color:#334155">${safMsg}</p>` : ''}
-              </div>
-              <a href="mailto:${safEmail}?subject=Re: demande de visite — ${safBien}"
-                style="display:inline-block;background:#4F46E5;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">
-                Répondre à ${safNom}
-              </a>
-              <p style="margin-top:20px;font-size:12px;color:#94A3B8">
-                Gérez vos demandes de visite dans <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'}/compte/visites" style="color:#4F46E5">votre espace vendeur</a>.
-              </p>
-            </div>
-          `,
+          html: emailLayout({
+            content: `
+              ${emailEyebrow('Nouvelle demande de visite')}
+              ${emailTitle(`${safNom} souhaite visiter votre bien 🏠`)}
+              <p style="margin:0 0 24px;font-size:14px;color:#64748B;">Pour votre annonce <strong>${safBien}</strong> à ${escHtml(bien.ville)}</p>
+              ${emailFields([
+                ['Email',          emailMailto(demandeurEmail.trim())],
+                ['Téléphone',      demandeurTel ? escHtml(String(demandeurTel).trim()) : ''],
+                ['Date souhaitée', escHtml(dateFormatted)],
+                ['Créneau',        creneau ? escHtml(String(creneau)) : ''],
+              ])}
+              ${message ? emailQuote(escHtmlMultiline(String(message).trim())) : ''}
+              ${emailButtons(
+                emailButton(`mailto:${escHtml(demandeurEmail.trim())}?subject=Re: demande de visite — ${safBien}`, `Répondre à ${safNom}`),
+                emailButton(`${SITE_URL}/compte/visites`, 'Mes demandes de visite', 'secondary'),
+              )}`,
+          }),
         })
       }
     } catch (e) {
       console.error('[visites] email error', e)
-      // On ne bloque pas si l'email échoue
     }
   }
 

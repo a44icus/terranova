@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { saveEmailConfig } from '@/app/compte/admin/email/actions'
 
 interface Config {
   api_key: string | null
@@ -15,7 +15,6 @@ interface Props {
 }
 
 export default function AdminEmailForm({ initial }: Props) {
-  const supabase = createClient()
   const [form, setForm] = useState<Config>(initial)
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
@@ -28,19 +27,10 @@ export default function AdminEmailForm({ initial }: Props) {
   async function handleSave() {
     setSaving(true)
     setMsg(null)
-    const { error } = await supabase
-      .from('email_config')
-      .update({
-        api_key:    form.api_key || null,
-        from_email: form.from_email,
-        from_name:  form.from_name,
-        enabled:    form.enabled,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', 1)
+    const { error } = await saveEmailConfig(form)
     setSaving(false)
     setMsg(error
-      ? { type: 'error', text: error.message }
+      ? { type: 'error', text: error }
       : { type: 'success', text: 'Configuration sauvegardée.' }
     )
   }
@@ -109,7 +99,7 @@ export default function AdminEmailForm({ initial }: Props) {
         <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-navy/08 hover:bg-navy/02 transition-colors">
           <input type="checkbox" checked={form.enabled} onChange={e => update('enabled', e.target.checked)} className="accent-primary w-4 h-4" />
           <div>
-            <p className="text-sm font-medium text-navy">Activer les envois d'emails</p>
+            <p className="text-sm font-medium text-navy">Activer les envois d&apos;emails</p>
             <p className="text-xs text-navy/40">Les alertes prix seront envoyées dès que la queue est traitée.</p>
           </div>
         </label>
@@ -133,7 +123,7 @@ export default function AdminEmailForm({ initial }: Props) {
       </div>
 
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-2">
-        <p className="text-xs font-medium text-amber-900">Variable d'environnement alternative</p>
+        <p className="text-xs font-medium text-amber-900">Variable d&apos;environnement alternative</p>
         <p className="text-xs text-amber-700">
           Vous pouvez aussi définir <code className="bg-amber-100 px-1 rounded">RESEND_API_KEY</code> dans votre <code className="bg-amber-100 px-1 rounded">.env.local</code>.
           La clé DB a priorité si les deux sont présentes.
@@ -144,7 +134,7 @@ export default function AdminEmailForm({ initial }: Props) {
         <h2 className="text-xs font-medium text-navy/50 uppercase tracking-wider mb-3">Déclencher manuellement</h2>
         <p className="text-xs text-navy/50 mb-3">
           Traite la queue des alertes prix sans attendre le cron.
-          Nécessite <code className="bg-navy/05 px-1 rounded">CRON_SECRET</code> dans vos variables d'env.
+          Nécessite <code className="bg-navy/05 px-1 rounded">CRON_SECRET</code> dans vos variables d&apos;env.
         </p>
         <CronTrigger />
       </div>
@@ -168,8 +158,8 @@ function CronTrigger() {
       })
       const data = await res.json()
       setResult(JSON.stringify(data, null, 2))
-    } catch (e: any) {
-      setResult(e.message)
+    } catch (e) {
+      setResult(e instanceof Error ? e.message : String(e))
     } finally {
       setRunning(false)
     }

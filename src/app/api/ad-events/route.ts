@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getClientIp } from '@/lib/clientIp'
+
+type AdminClient = ReturnType<typeof createAdminClient>
 
 // ── Détection de bots par User-Agent ─────────────────────────────────────────
 const BOT_PATTERN = /bot|crawl|spider|slurp|mediapartners|bingpreview|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegram|discord|applebot|googlebot|yandex|baidu|duckduck|semrush|ahrefs|moz|screaming|sitebulb|wget|curl|python|java|go-http|axios|node-fetch/i
@@ -44,7 +47,7 @@ function anonymizeIp(ip: string): string {
 
 // ── Rate limiting DB-based : 1 requête par (ip, fenêtre 60s) ─────────────────
 // Fiable sur Vercel serverless contrairement au rate limiting en mémoire
-async function isRateLimited(supabase: any, ip: string): Promise<boolean> {
+async function isRateLimited(supabase: AdminClient, ip: string): Promise<boolean> {
   const since = new Date(Date.now() - 60_000).toISOString()
   const { count } = await supabase
     .from('map_ad_events')
@@ -55,7 +58,7 @@ async function isRateLimited(supabase: any, ip: string): Promise<boolean> {
 }
 
 // ── Déduplication : 1 événement par (ad_id, ip, type, jour) ──────────────────
-async function alreadyTracked(supabase: any, ad_id: string, ip: string, event_type: string): Promise<boolean> {
+async function alreadyTracked(supabase: AdminClient, ad_id: string, ip: string, event_type: string): Promise<boolean> {
   const today = new Date().toISOString().slice(0, 10)
   const { count } = await supabase
     .from('map_ad_events')
@@ -73,14 +76,7 @@ export async function POST(req: NextRequest) {
     const ua = req.headers.get('user-agent')
     if (isBot(ua)) return NextResponse.json({ ok: true })
 
-    // Lire x-real-ip en priorité (injecté par l'infra, non spoofable),
-    // puis le DERNIER élément de x-forwarded-for (ajouté par notre edge).
-    const xff = req.headers.get('x-forwarded-for')
-    const rawIp =
-      req.headers.get('x-real-ip')?.trim() ??
-      (xff ? xff.split(',').at(-1)?.trim() : undefined) ??
-      'unknown'
-    const ip = anonymizeIp(rawIp)
+    const ip = anonymizeIp(getClientIp(req) || 'unknown')
 
     const body = await req.json()
     const { ad_id, event_type } = body

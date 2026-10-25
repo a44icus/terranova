@@ -1,14 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { NextResponse } from 'next/server'
+import { getStripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
+import { SITE_URL } from '@/lib/site'
 
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY
-  if (!key) throw new Error('STRIPE_SECRET_KEY non configuré')
-  return new Stripe(key, { apiVersion: '2026-03-25.dahlia' })
-}
-
-export async function POST(req: NextRequest) {
+export async function POST() {
   const stripe = getStripe()
   try {
     const supabase = await createClient()
@@ -25,15 +20,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Aucun abonnement Stripe trouvé' }, { status: 400 })
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
-
     const session = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
-      return_url: `${baseUrl}/compte/plan`,
+      return_url: `${SITE_URL}/compte/plan`,
     })
 
     return NextResponse.json({ url: session.url })
-  } catch (err: any) {
+  } catch (err) {
     console.error('[Stripe portal]', err)
     return NextResponse.json({ error: 'Une erreur est survenue. Veuillez réessayer.' }, { status: 500 })
   }

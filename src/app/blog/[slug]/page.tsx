@@ -1,11 +1,12 @@
-﻿import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
+import { SITE_URL } from '@/lib/site'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
+const BASE_URL = SITE_URL
 
 const CAT_LABELS: Record<string, string> = {
   guide:     'Guide',
@@ -151,7 +152,7 @@ export default async function ArticlePage({ params }: Props) {
           <section className="mt-14">
             <h2 className="font-serif text-2xl text-navy mb-6">Articles connexes</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {connexes.map((a: any) => (
+              {connexes.map((a: { slug: string; titre: string; photo_url: string | null }) => (
                 <Link key={a.slug} href={`/blog/${a.slug}`}
                   className="group bg-white rounded-2xl border border-navy/08 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
                   <div className="h-32 relative overflow-hidden bg-navy/08">

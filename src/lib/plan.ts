@@ -102,36 +102,40 @@ export const DEFAULT_PLAN_CONFIG: PlanConfigs = {
 }
 
 // ── Récupère la config depuis la DB ──────────────────────────────────────────
-// Stratégie deux sources :
-//   - plan_config (table existante) → données numériques + Stripe
-//   - site_settings.plans_meta (JSONB) → label, description, actif, features
+// Source unique : la table plan_config (une ligne par plan). DEFAULT_PLAN_CONFIG ne sert
+// que si la table est absente ou qu'une valeur manque.
 export async function getPlanConfig(): Promise<PlanConfigs> {
   try {
     const supabase = createAdminClient()
-
-    const [{ data: rows }, { data: settings }] = await Promise.all([
-      supabase.from('plan_config').select('*'),
-      supabase.from('site_settings').select('settings').eq('id', 1).single(),
-    ])
+    const { data: rows } = await supabase.from('plan_config').select('*')
 
     const config = structuredClone(DEFAULT_PLAN_CONFIG) as PlanConfigs
+    let colonnesMeta = true
 
-    // 1. Données numériques depuis plan_config
     for (const row of rows ?? []) {
       const plan = row.plan as PlanType
-      if (!(plan in config)) continue
-      config[plan].annonces        = row.annonces        ?? config[plan].annonces
-      config[plan].photos          = row.photos          ?? config[plan].photos
-      config[plan].duree_jours     = row.duree_jours     ?? config[plan].duree_jours
-      config[plan].prix            = row.prix            ?? config[plan].prix
-      config[plan].stripe_price_id = row.stripe_price_id ?? config[plan].stripe_price_id
+      if (!Object.hasOwn(config, plan)) continue
+      const c = config[plan]
+      c.annonces        = row.annonces        ?? c.annonces
+      c.photos          = row.photos          ?? c.photos
+      c.duree_jours     = row.duree_jours     ?? c.duree_jours
+      c.prix            = row.prix            ?? c.prix
+      c.stripe_price_id = row.stripe_price_id ?? c.stripe_price_id
+      if (!('features' in row)) { colonnesMeta = false; continue }
+      c.label       = row.label       ?? c.label
+      c.description = row.description ?? c.description
+      c.actif       = row.actif       ?? c.actif
+      c.features    = row.features    ?? c.features
     }
 
-    // 2. Métadonnées depuis site_settings.plans_meta
-    const meta = (settings?.settings as Record<string, unknown>)?.plans_meta as Record<string, Partial<PlanConfig>> | undefined
-    if (meta) {
+    // Transition : tant que la migration 20261026_plan_config_unifie.sql n'est pas jouée,
+    // les libellés, l'état actif et les features sont encore dans site_settings.plans_meta.
+    if (!colonnesMeta) {
+      console.warn('[plan] colonnes label/actif/features absentes de plan_config — exécutez la migration 20261026_plan_config_unifie.sql')
+      const { data: settings } = await supabase.from('site_settings').select('settings').eq('id', 1).single()
+      const meta = (settings?.settings as Record<string, unknown>)?.plans_meta as Record<string, Partial<PlanConfig>> | undefined
       for (const plan of Object.keys(config) as PlanType[]) {
-        const m = meta[plan]
+        const m = meta?.[plan]
         if (!m) continue
         if (m.label       !== undefined) config[plan].label       = m.label
         if (m.description !== undefined) config[plan].description = m.description

@@ -14,6 +14,7 @@ interface NavCounts {
 interface Props {
   profile: Profile
   counts?: NavCounts
+  isAdmin?: boolean
 }
 
 export const NAV = [
@@ -44,7 +45,7 @@ export function isNavActive(pathname: string, href: string) {
 }
 
 /** Sidebar desktop uniquement — cachée sur mobile via CSS */
-export default function CompteNav({ profile, counts }: Props) {
+export default function CompteNav({ profile, counts, isAdmin = false }: Props) {
   const pathname = usePathname()
   const router   = useRouter()
   const supabase = createClient()
@@ -125,7 +126,7 @@ export default function CompteNav({ profile, counts }: Props) {
           )
         })}
 
-        {profile.is_admin && (
+        {isAdmin && (
           <div className="mt-3 pt-3 border-t border-navy/08">
             <p className="text-[10px] font-medium text-navy/30 uppercase tracking-wider px-3 mb-1">Admin</p>
             <Link href="/compte/admin/email"

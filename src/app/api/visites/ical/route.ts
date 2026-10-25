@@ -1,6 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { SITE_URL, SITE_DOMAIN } from '@/lib/site'
 
 /* Échappe les caractères spéciaux iCal */
 function esc(s: string): string {
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
   }
 
-  const bien = visite.biens as any
+  const bien = visite.biens as unknown as { id?: string; titre?: string; ville?: string; adresse?: string } | null
   const start = new Date(visite.date_souhaitee)
   const end   = new Date(start.getTime() + 60 * 60 * 1000) // +1h
 
@@ -64,8 +65,8 @@ export async function GET(req: NextRequest) {
   ].filter(Boolean).join('\n')
 
   const now  = toIcalDate(new Date().toISOString())
-  const uid  = `visite-${id}@JazzImmo.fr`
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'
+  const uid  = `visite-${id}@${SITE_DOMAIN}`
+  const baseUrl = SITE_URL
 
   const lines = [
     'BEGIN:VCALENDAR',

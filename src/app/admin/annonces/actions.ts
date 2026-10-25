@@ -1,8 +1,10 @@
-﻿'use server'
+'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { escHtml, escHtmlMultiline, emailLayout, emailEyebrow, emailTitle, emailQuote, emailButton, emailButtons, sendEmail } from '@/lib/emails'
+import { SITE_NAME, SITE_URL, siteEmail } from '@/lib/site'
 
 async function checkAdmin() { return await requireAdmin() }
 
@@ -42,26 +44,30 @@ export async function approuverAnnonce(bienId: string): Promise<{ ok?: boolean; 
 
   // Notifier les alertes correspondantes
   try {
-    const { notifierAlertes } = await import('@/app/api/alertes/actions')
+    const { notifierAlertes } = await import('@/lib/alertes')
     await notifierAlertes(bienId)
   } catch (err) {
     console.error('[Admin] Erreur notification alertes:', err)
   }
 
-  // Send approval email (silent — never fails the action)
+  // Email d'approbation au vendeur (silencieux — ne fait jamais échouer l'action)
   try {
     const { data: bien } = await adminClient.from('biens').select('titre, ville, user_id').eq('id', bienId).single()
     if (bien) {
       const { data: { user: seller } } = await adminClient.auth.admin.getUserById(bien.user_id)
-      if (process.env.RESEND_API_KEY && seller?.email) {
-        const { Resend } = await import('resend')
-        const resend = new Resend(process.env.RESEND_API_KEY)
-        await resend.emails.send({
-          from: 'JazzImmo <noreply@JazzImmo.fr>',
+      if (seller?.email) {
+        await sendEmail({
+          from: `${SITE_NAME} <${siteEmail('noreply')}>`,
           to: seller.email,
           subject: `✅ Votre annonce "${bien.titre}" est en ligne`,
-          html: `<p>Bonjour,</p><p>Votre annonce <strong>${bien.titre}</strong> à ${bien.ville} a été approuvée et est maintenant visible sur JazzImmo.</p><p><a href="${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo.fr'}/annonce/${bienId}">Voir mon annonce</a></p>`,
-        }).catch(() => {})
+          html: emailLayout({
+            content: `
+              ${emailEyebrow('Annonce approuvée')}
+              ${emailTitle('Votre annonce est en ligne')}
+              <p style="margin:0 0 24px;font-size:14px;color:#334155;line-height:1.6;">Votre annonce <strong>${escHtml(bien.titre)}</strong> à ${escHtml(bien.ville)} a été approuvée et est maintenant visible sur ${SITE_NAME}.</p>
+              ${emailButtons(emailButton(`${SITE_URL}/annonce/${encodeURIComponent(bienId)}`, 'Voir mon annonce'))}`,
+          }),
+        })
       }
     }
   } catch {
@@ -93,20 +99,25 @@ export async function refuserAnnonce(bienId: string, raison?: string): Promise<{
   revalidatePath('/admin/annonces')
   revalidatePath('/admin/annonces/toutes')
 
-  // Send refusal email (silent — never fails the action)
+  // Email de refus au vendeur (silencieux — ne fait jamais échouer l'action)
   try {
     const { data: bien } = await adminClient.from('biens').select('titre, ville, user_id').eq('id', bienId).single()
     if (bien) {
       const { data: { user: seller } } = await adminClient.auth.admin.getUserById(bien.user_id)
-      if (process.env.RESEND_API_KEY && seller?.email) {
-        const { Resend } = await import('resend')
-        const resend = new Resend(process.env.RESEND_API_KEY)
-        await resend.emails.send({
-          from: 'JazzImmo <noreply@JazzImmo.fr>',
+      if (seller?.email) {
+        await sendEmail({
+          from: `${SITE_NAME} <${siteEmail('noreply')}>`,
           to: seller.email,
-          subject: `Votre annonce n'a pas été approuvée — JazzImmo`,
-          html: `<p>Bonjour,</p><p>Votre annonce <strong>${bien.titre}</strong> à ${bien.ville} n'a malheureusement pas pu être approuvée.${raison ? `</p><p>Motif : ${raison}` : ''}</p><p>N'hésitez pas à nous contacter pour plus d'informations.</p>`,
-        }).catch(() => {})
+          subject: `Votre annonce n'a pas été approuvée — ${SITE_NAME}`,
+          html: emailLayout({
+            content: `
+              ${emailEyebrow('Annonce non approuvée')}
+              ${emailTitle(escHtml(bien.titre))}
+              <p style="margin:0 0 16px;font-size:14px;color:#334155;line-height:1.6;">Votre annonce à ${escHtml(bien.ville)} n'a malheureusement pas pu être approuvée.</p>
+              ${raison ? emailQuote(`Motif : ${escHtmlMultiline(raison)}`) : ''}
+              <p style="margin:0;font-size:14px;color:#334155;line-height:1.6;">N'hésitez pas à nous contacter pour plus d'informations.</p>`,
+          }),
+        })
       }
     }
   } catch {

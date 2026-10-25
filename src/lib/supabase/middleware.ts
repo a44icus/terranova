@@ -1,5 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isAdminUser } from '@/lib/isAdmin'
+import { getClientIp } from '@/lib/clientIp'
 
 interface MiddlewareSettings {
   maintenance: boolean
@@ -39,31 +41,6 @@ async function getMiddlewareSettings(): Promise<MiddlewareSettings> {
   }
 }
 
-function isAdminUser(user: { email?: string; user_metadata?: Record<string, unknown>; app_metadata?: Record<string, unknown> } | null): boolean {
-  if (!user) return false
-  const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim()).filter(Boolean)
-  // NOTE : user_metadata est volontairement exclu — il est modifiable par l'utilisateur lui-même.
-  return (
-    user.app_metadata?.role === 'admin' ||
-    adminEmails.includes(user.email ?? '')
-  )
-}
-
-function getClientIp(request: NextRequest): string {
-  // Sur Vercel, x-real-ip est injecté par l'infrastructure (non-spoofable depuis le client).
-  // Sinon, on prend le dernier IP de x-forwarded-for (le plus proche de notre edge),
-  // ce qui limite le spoofing à condition que le proxy de confiance soit le dernier maillon.
-  const xRealIp = request.headers.get('x-real-ip')
-  if (xRealIp) return xRealIp.trim()
-  const xff = request.headers.get('x-forwarded-for')
-  if (xff) {
-    // Prendre le DERNIER IP de la chaîne (ajouté par notre propre infrastructure)
-    const parts = xff.split(',')
-    return parts[parts.length - 1].trim()
-  }
-  return ''
-}
-
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -87,7 +64,9 @@ export async function updateSession(request: NextRequest) {
   const settings = await getMiddlewareSettings()
 
   // ── Mode maintenance ──────────────────────────────────────
-  const isMaintenanceExempt = pathname.startsWith('/maintenance') || pathname.startsWith('/auth') || pathname.startsWith('/admin')
+  // /api est exempté : une redirection 307 ferait échouer le webhook Stripe et les crons
+  // (ils ne suivent pas les redirections), et une API n'a pas à renvoyer une page HTML.
+  const isMaintenanceExempt = pathname.startsWith('/maintenance') || pathname.startsWith('/auth') || pathname.startsWith('/admin') || pathname.startsWith('/api')
   if (!isMaintenanceExempt && settings.maintenance && !isAdminUser(user)) {
     const url = request.nextUrl.clone()
     url.pathname = '/maintenance'

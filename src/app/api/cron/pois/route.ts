@@ -3,11 +3,11 @@
  *
  * Calcule les POI OpenStreetMap des biens qui n'en ont pas encore (nouvelles
  * annonces, biens déplacés, échecs précédents d'Overpass). Appelée toutes les
- * heures par GitHub Actions (.github/workflows/pois.yml) avec CRON_SECRET.
+ * heures par GitHub Actions (.github/workflows/crons.yml) avec CRON_SECRET.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { timingSafeEqual } from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { checkCronAuth } from '@/lib/cronAuth'
 import { computeAndStorePois } from '@/lib/poisBien'
 
 export const runtime = 'nodejs'
@@ -16,19 +16,12 @@ export const maxDuration = 60
 const LOT        = 8       // biens traités au maximum par passage
 const BUDGET_MS  = 45_000  // marge sous la durée maximale de la fonction
 
+// GET pour Vercel Cron, POST pour les appels externes
+export async function GET(req: NextRequest) { return POST(req) }
+
 export async function POST(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
-    console.error('[Cron pois] CRON_SECRET non configuré — accès refusé')
-    return NextResponse.json({ error: 'Not configured' }, { status: 500 })
-  }
-  const provided = req.headers.get('x-cron-secret') ?? ''
-  const safe =
-    provided.length === cronSecret.length &&
-    timingSafeEqual(Buffer.from(provided), Buffer.from(cronSecret))
-  if (!safe) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const refus = checkCronAuth(req, 'pois')
+  if (refus) return refus
 
   const admin = createAdminClient()
   const debut = Date.now()

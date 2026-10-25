@@ -1,22 +1,13 @@
-﻿import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { requireAdmin } from '@/lib/auth'
+import { createAdminClient } from '@/lib/supabase/admin'
 import AdminEmailForm from '@/components/compte/AdminEmailForm'
 import PageHeader from '@/components/compte/ui/PageHeader'
+import { SITE_NAME, siteEmail } from '@/lib/site'
 
 export default async function AdminEmailPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  await requireAdmin()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_admin')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile?.is_admin) redirect('/compte')
-
-  const { data: config } = await supabase
+  const { data: config } = await createAdminClient()
     .from('email_config')
     .select('api_key, from_email, from_name, enabled')
     .eq('id', 1)
@@ -32,8 +23,8 @@ export default async function AdminEmailPage() {
       <AdminEmailForm
         initial={{
           api_key:    config?.api_key ?? null,
-          from_email: config?.from_email ?? 'no-reply@JazzImmo.fr',
-          from_name:  config?.from_name ?? 'JazzImmo',
+          from_email: config?.from_email ?? siteEmail('no-reply'),
+          from_name:  config?.from_name ?? SITE_NAME,
           enabled:    config?.enabled ?? false,
         }}
       />
@@ -42,8 +33,7 @@ export default async function AdminEmailPage() {
       <details className="mt-8">
         <summary className="text-xs text-navy/30 cursor-pointer hover:text-navy/50">SQL requis (si tables manquantes)</summary>
         <pre className="mt-2 text-[10px] bg-navy/04 rounded-xl p-4 text-navy/60 font-mono overflow-x-auto whitespace-pre-wrap">{`-- Fichier complet : supabase/prix-alerts.sql
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_admin boolean DEFAULT false;
-
+-- puis supabase/migrations/20261026_securite_admin.sql
 CREATE TABLE IF NOT EXISTS email_config (
   id integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),
   api_key text, from_email text NOT NULL DEFAULT 'no-reply@JazzImmo.fr',
