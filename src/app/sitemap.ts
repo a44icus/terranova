@@ -1,7 +1,8 @@
-﻿import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/site'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://JazzImmo-beta.vercel.app'
+const BASE_URL = SITE_URL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createAdminClient()

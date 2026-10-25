@@ -1,4 +1,4 @@
-﻿import Image from 'next/image'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
@@ -8,7 +8,7 @@ import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 import { formatPrix } from '@/lib/geo'
 import type { Metadata } from 'next'
-import type { BienPublic } from '@/lib/types'
+import type { BienPublic, Photo } from '@/lib/types'
 import PhotoGallery from './PhotoGallery'
 import VirtualTour360 from './VirtualTour360'
 import ContactForm from './ContactForm'
@@ -22,8 +22,9 @@ import SimulateurCredit from '@/components/annonce/SimulateurCredit'
 import DemandeVisiteForm from '@/components/annonce/DemandeVisiteForm'
 import { genererRapport } from '@/lib/profils'
 import { getSiteSettings, getPoiWeights, getScoreSeuils } from '@/lib/siteSettings'
+import { SITE_URL } from '@/lib/site'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://terranova.fr'
+const BASE_URL = SITE_URL
 
 const CAT_ICON: Record<string, string> = {
   appartement: '🏛️', maison: '🌿', studio: '🛋️', villa: '🏰', chalet: '🏔️', loft: '🎨', colocation: '👥',
@@ -105,7 +106,7 @@ export default async function AnnoncePage({ params }: Props) {
     const _admin = createAdminClient()
     const _today = new Date().toISOString().slice(0, 10)
     after(async () => {
-      const tasks: Promise<any>[] = []
+      const tasks: Promise<unknown>[] = []
 
       // Vues (prod seulement)
       if (process.env.NODE_ENV === 'production') {
@@ -116,7 +117,7 @@ export default async function AnnoncePage({ params }: Props) {
       }
 
       // Auto-populate reseau_max si absent et coordonnées connues
-      if (bien.lat && bien.lng && (bien as any).reseau_max == null) {
+      if (bien.lat && bien.lng && bien.reseau_max == null) {
         tasks.push((async () => {
           try {
             const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
@@ -146,7 +147,7 @@ export default async function AnnoncePage({ params }: Props) {
       .select('poi_priorites')
       .eq('user_id', user.id)
       .single()
-    userPoiPriorities = (recherche as any)?.poi_priorites ?? []
+    userPoiPriorities = (recherche as { poi_priorites?: string[] } | null)?.poi_priorites ?? []
   }
 
   // Fetch settings + vendeur + biens similaires + email vendeur en parallèle
@@ -174,10 +175,10 @@ export default async function AnnoncePage({ params }: Props) {
 
   const prix = formatPrix(bien.prix, bien.type)
   const icon = CAT_ICON[bien.categorie] ?? '🏠'
-  const sortedPhotos = (photos ?? [])
-    .sort((a: any, b: any) => (b.principale ? 1 : 0) - (a.principale ? 1 : 0) || a.ordre - b.ordre)
-  const photoUrls: string[] = sortedPhotos.filter((p: any) => !p.is_360).map((p: any) => p.url)
-  const tour360Urls: string[] = sortedPhotos.filter((p: any) => p.is_360).map((p: any) => p.url)
+  const sortedPhotos = ((photos ?? []) as Photo[])
+    .sort((a, b) => (b.principale ? 1 : 0) - (a.principale ? 1 : 0) || a.ordre - b.ordre)
+  const photoUrls: string[] = sortedPhotos.filter(p => !p.is_360).map(p => p.url)
+  const tour360Urls: string[] = sortedPhotos.filter(p => p.is_360).map(p => p.url)
 
   const rapport = genererRapport({
     type: bien.type,
@@ -205,7 +206,7 @@ export default async function AnnoncePage({ params }: Props) {
     ville: bien.ville,
     code_postal: bien.code_postal,
     score_quartier: bien.score_quartier ?? null,
-    reseau_max: (bien as any).reseau_max ?? null,
+    reseau_max: bien.reseau_max ?? null,
   })
 
   return (
@@ -238,7 +239,7 @@ export default async function AnnoncePage({ params }: Props) {
             <span className="text-2xl">✅</span>
             <div>
               <p className="font-semibold text-emerald-800 text-sm">Ce bien a été vendu</p>
-              <p className="text-xs text-emerald-600 mt-0.5">Cette annonce est conservée à titre de référence. Le contact avec le vendeur n'est plus disponible.</p>
+              <p className="text-xs text-emerald-600 mt-0.5">Cette annonce est conservée à titre de référence. Le contact avec le vendeur n&apos;est plus disponible.</p>
             </div>
           </div>
         )}
@@ -624,10 +625,10 @@ export default async function AnnoncePage({ params }: Props) {
 
               {/* Contact card */}
               <div className="bg-white rounded-2xl p-6 border border-navy/08">
-                <h2 className="font-medium text-navy mb-4">Contacter l'annonceur</h2>
+                <h2 className="font-medium text-navy mb-4">Contacter l&apos;annonceur</h2>
                 {bien.statut === 'vendue' ? (
                   <div className="text-sm text-navy/50 bg-navy/04 rounded-xl px-4 py-3 text-center">
-                    Ce bien a été vendu — le contact n'est plus disponible.
+                    Ce bien a été vendu — le contact n&apos;est plus disponible.
                   </div>
                 ) : (
                   <ContactForm
