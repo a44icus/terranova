@@ -90,34 +90,17 @@ export async function updatePlanConfig(formData: FormData) {
     },
   ] as const
 
-  // 1. Données numériques + Stripe → plan_config (colonnes existantes)
-  for (const row of planRows) {
-    const { label, description, actif, features: _f, ...numeric } = row
-    const { error } = await supabase
-      .from('plan_config')
-      .upsert({ ...numeric, updated_at: new Date().toISOString() }, { onConflict: 'plan' })
-    if (error) throw new Error(`Erreur plan ${row.plan}: ${error.message}`)
+  // Tout va dans plan_config, source unique (voir getPlanConfig dans lib/plan.ts)
+  const updated_at = new Date().toISOString()
+  const { error } = await supabase
+    .from('plan_config')
+    .upsert(planRows.map(row => ({ ...row, features: [...row.features], updated_at })), { onConflict: 'plan' })
+  if (error) {
+    const migration = /column .* does not exist|Could not find the '.*' column/i.test(error.message)
+      ? ' — exécutez supabase/migrations/20261026_plan_config_unifie.sql'
+      : ''
+    throw new Error(`Erreur plan_config: ${error.message}${migration}`)
   }
-
-  // 2. Métadonnées → site_settings.plans_meta (JSONB, pas de migration requise)
-  const plans_meta: Record<string, object> = {}
-  for (const row of planRows) {
-    plans_meta[row.plan] = {
-      label:       row.label,
-      description: row.description,
-      actif:       row.actif,
-      features:    row.features,
-    }
-  }
-
-  const { data: existing } = await supabase
-    .from('site_settings').select('settings').eq('id', 1).single()
-  const current = (existing?.settings as Record<string, unknown>) ?? {}
-
-  const { error: metaError } = await supabase
-    .from('site_settings')
-    .upsert({ id: 1, settings: { ...current, plans_meta } }, { onConflict: 'id' })
-  if (metaError) throw new Error(`Erreur métadonnées: ${metaError.message}`)
 
   revalidatePath('/admin/parametres')
   revalidatePath('/compte/plan')
