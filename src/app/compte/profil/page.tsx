@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import ProfilForm from '@/components/compte/ProfilForm'
 import { getViewUserId } from '@/lib/impersonation'
 import PageHeader from '@/components/compte/ui/PageHeader'
+import MesDonnees from '@/components/compte/MesDonnees'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -25,6 +26,8 @@ export default async function ProfilPage() {
     <div className="p-4 sm:p-8 max-w-2xl">
       <PageHeader title="Mon profil" description="Gérez vos informations personnelles" />
       <ProfilForm profile={profile} userEmail={viewEmail} />
+      {/* Export et suppression : uniquement pour le titulaire du compte, pas en consultation admin */}
+      {viewId === user.id && <MesDonnees />}
     </div>
   )
 }
