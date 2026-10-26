@@ -10,7 +10,7 @@ import LatestBiens from '@/components/home/LatestBiens'
 import FeaturesShowcase from '@/components/home/FeaturesShowcase'
 import VendeurSection from '@/components/home/VendeurSection'
 import HomeHamburger from '@/components/HomeHamburger'
-import { getPlanConfig, ALL_FEATURES } from '@/lib/plan'
+import { getPlanConfig, featuresVendables } from '@/lib/plan'
 import type { PlanConfig } from '@/lib/plan'
 import { getBiensProches } from '@/lib/biensProches'
 
@@ -38,9 +38,8 @@ function buildHomePlanFeatures(config: PlanConfig): string[] {
   if (config.annonces >= 999) lines.push('Annonces illimitées')
   else lines.push(`${config.annonces} annonce${config.annonces > 1 ? 's' : ''} active${config.annonces > 1 ? 's' : ''}`)
   lines.push(`${config.photos} photos par annonce`)
-  for (const key of config.features) {
-    const def = ALL_FEATURES.find(f => f.key === key)
-    if (def) lines.push(def.label)
+  for (const def of featuresVendables(config)) {
+    lines.push(def.label)
     if (lines.length >= 5) break
   }
   return lines

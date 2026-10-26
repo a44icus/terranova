@@ -25,6 +25,7 @@ interface Props {
   userEmail: string
   siteSettings: SiteSettings
   planPhotosMax?: number   // limite photos du plan courant (live depuis DB)
+  peutRefAgence?: boolean  // plan avec la feature « ref_agence »
 }
 
 const CATEGORIES: { value: BienCategorie; label: string; icon: string }[] = [
@@ -88,7 +89,7 @@ const CAT_GROUPS = [
   { label: 'Autre',            values: ['parking'] },
 ]
 
-export default function PublierForm({ profile, userEmail, siteSettings, planPhotosMax }: Props) {
+export default function PublierForm({ profile, userEmail, siteSettings, planPhotosMax, peutRefAgence = false }: Props) {
   const router = useRouter()
   const supabase = createClient()
   // Utilise la limite live passée par le serveur ; 10 en dernier recours
@@ -1190,8 +1191,8 @@ export default function PublierForm({ profile, userEmail, siteSettings, planPhot
                   </div>
                 </label>
 
-                {/* Référence agence (si pro) */}
-                {profile.type === 'pro' && (
+                {/* Référence agence (feature du plan) */}
+                {peutRefAgence && (
                   <div>
                     <label className="block text-xs font-medium text-navy/60 mb-2">Référence interne</label>
                     <input

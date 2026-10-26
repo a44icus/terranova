@@ -5,6 +5,8 @@ import { formatPrix } from '@/lib/geo'
 import PeriodChart from '@/components/stats/PeriodChart'
 import DonutChart from '@/components/stats/DonutChart'
 import { getViewUserId } from '@/lib/impersonation'
+import { getDroits } from '@/lib/droits'
+import FonctionReservee from '@/components/compte/FonctionReservee'
 import Link from 'next/link'
 
 function last30Days(): string[] {
@@ -36,6 +38,12 @@ export default async function StatistiquesPage() {
 
   const admin    = createAdminClient()
   const viewId   = await getViewUserId() ?? user.id
+
+  // Statistiques réservées aux plans qui incluent « stats_avancees »
+  const droits = await getDroits(viewId)
+  if (!droits.a('stats_avancees')) return <FonctionReservee titre="Statistiques avancées"
+    texte="Suivez les vues, les contacts et l'évolution de vos annonces dans le temps." />
+
   const todayStr = new Date().toISOString().slice(0, 10)
   const days     = last30Days()
 

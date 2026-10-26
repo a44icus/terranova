@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import PublierForm from '@/components/PublierForm'
 import Link from 'next/link'
 import { getPlanConfig, getEffectivePlan, PLAN_LABEL } from '@/lib/plan'
+import { droitsDepuis } from '@/lib/droits'
 import { getSiteSettings } from '@/lib/siteSettings'
 import type { PlanType } from '@/lib/types'
 
@@ -76,6 +77,7 @@ export default async function PublierPage() {
       userEmail={user.email ?? ''}
       siteSettings={siteSettings}
       planPhotosMax={limite.photos}
+      peutRefAgence={droitsDepuis(effectivePlan, null, planConfig).a('ref_agence')}
     />
   )
 }

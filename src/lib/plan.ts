@@ -2,33 +2,49 @@ import { createAdminClient } from './supabase/admin'
 import type { PlanType } from './types'
 
 // ── Toutes les features disponibles ───────────────────────────────────────────
+/**
+ * Statut d'une feature :
+ *   - 'controle' : réservée aux plans qui l'incluent, vérifiée dans le code et en base
+ *   - 'service'  : engagement humain (pas de code), affiché sur les plans qui l'incluent
+ *   - 'public'   : offerte à tous, jamais présentée comme un avantage d'un plan
+ *   - 'a_venir'  : pas encore développée — masquée des offres tant qu'elle n'existe pas
+ */
+export type FeatureStatut = 'controle' | 'service' | 'public' | 'a_venir'
+
 export interface FeatureDef {
-  key:   string
-  label: string
-  hint:  string
-  group: string
+  key:    string
+  label:  string
+  hint:   string
+  group:  string
+  statut: FeatureStatut
 }
 
 export const ALL_FEATURES: FeatureDef[] = [
   // Publication
-  { key: 'photos_360',              group: 'Publication',   label: 'Photos 360°',               hint: 'Upload et visualisation de photos immersives' },
-  { key: 'badge_pro',               group: 'Publication',   label: 'Badge Pro',                  hint: 'Badge affiché sur les annonces de l\'utilisateur' },
-  { key: 'annonces_mises_en_avant', group: 'Publication',   label: 'Mise en avant',              hint: 'Annonces prioritaires en tête de liste et sur la carte' },
-  { key: 'coup_de_coeur',           group: 'Publication',   label: 'Label Coup de cœur',         hint: 'Badge spécial visible sur la fiche annonce' },
-  { key: 'ref_agence',              group: 'Publication',   label: 'Référence agence',           hint: 'Champ référence interne sur les annonces' },
+  { key: 'photos_360',              group: 'Publication',   statut: 'controle', label: 'Photos 360°',               hint: 'Upload et visualisation de photos immersives' },
+  { key: 'badge_pro',               group: 'Publication',   statut: 'controle', label: 'Badge Pro',                  hint: 'Badge affiché sur les annonces de l\'utilisateur' },
+  { key: 'annonces_mises_en_avant', group: 'Publication',   statut: 'controle', label: 'Mise en avant',              hint: 'Annonces prioritaires en tête de liste et sur la carte' },
+  { key: 'coup_de_coeur',           group: 'Publication',   statut: 'controle', label: 'Label Coup de cœur',         hint: 'Badge spécial visible sur la fiche annonce (attribué par l\'équipe)' },
+  { key: 'ref_agence',              group: 'Publication',   statut: 'controle', label: 'Référence agence',           hint: 'Champ référence interne sur les annonces' },
   // Statistiques
-  { key: 'stats_avancees',          group: 'Statistiques',  label: 'Statistiques avancées',      hint: 'Vues, contacts, évolution dans le temps' },
-  { key: 'score_quartier',          group: 'Statistiques',  label: 'Score de quartier',          hint: 'Calcul et affichage du score OSM sur les fiches' },
-  { key: 'estimation',              group: 'Statistiques',  label: 'Estimateur de prix',         hint: 'Accès à l\'outil d\'estimation automatique' },
+  { key: 'stats_avancees',          group: 'Statistiques',  statut: 'controle', label: 'Statistiques avancées',      hint: 'Vues, contacts, évolution dans le temps' },
+  { key: 'score_quartier',          group: 'Statistiques',  statut: 'controle', label: 'Score de quartier',          hint: 'Affichage du score OSM sur les fiches' },
+  { key: 'estimation',              group: 'Statistiques',  statut: 'public',   label: 'Estimateur de prix',         hint: 'Outil d\'estimation automatique, ouvert à tous les visiteurs' },
   // Communication
-  { key: 'messagerie',              group: 'Communication', label: 'Messagerie intégrée',        hint: 'Réception et envoi de messages depuis la plateforme' },
-  { key: 'demande_visite',          group: 'Communication', label: 'Demandes de visite',         hint: 'Formulaire de demande de visite sur les annonces' },
-  { key: 'alerte_email',            group: 'Communication', label: 'Alertes email',              hint: 'Notification email à chaque nouveau message ou contact' },
+  { key: 'messagerie',              group: 'Communication', statut: 'controle', label: 'Messagerie intégrée',        hint: 'Formulaire de contact sur les annonces' },
+  { key: 'demande_visite',          group: 'Communication', statut: 'controle', label: 'Demandes de visite',         hint: 'Formulaire de demande de visite sur les annonces' },
+  { key: 'alerte_email',            group: 'Communication', statut: 'public',   label: 'Alertes email',              hint: 'Notification email à chaque nouveau message ou contact (tous les vendeurs)' },
   // Pro / Agence
-  { key: 'multi_utilisateurs',      group: 'Pro / Agence',  label: 'Multi-utilisateurs',         hint: 'Gestion de plusieurs agents sous un compte agence' },
-  { key: 'api_acces',               group: 'Pro / Agence',  label: 'Accès API',                  hint: 'Accès à l\'API REST pour import/export de biens' },
-  { key: 'support_prioritaire',     group: 'Pro / Agence',  label: 'Support prioritaire',        hint: 'Réponse sous 24h par email ou chat dédié' },
+  { key: 'multi_utilisateurs',      group: 'Pro / Agence',  statut: 'a_venir',  label: 'Multi-utilisateurs',         hint: 'Gestion de plusieurs agents sous un compte agence' },
+  { key: 'api_acces',               group: 'Pro / Agence',  statut: 'a_venir',  label: 'Accès API',                  hint: 'Accès à l\'API REST pour import/export de biens' },
+  { key: 'support_prioritaire',     group: 'Pro / Agence',  statut: 'service',  label: 'Support prioritaire',        hint: 'Réponse sous 24h par email ou chat dédié' },
 ]
+
+/** Features à présenter comme avantages d'un plan (ni « public » ni « à venir »). */
+export function featuresVendables(config: Pick<PlanConfig, 'features'>): FeatureDef[] {
+  return ALL_FEATURES.filter(f =>
+    (f.statut === 'controle' || f.statut === 'service') && config.features?.includes(f.key))
+}
 
 export const FEATURE_GROUPS = [...new Set(ALL_FEATURES.map(f => f.group))]
 

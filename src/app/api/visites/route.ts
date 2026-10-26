@@ -6,6 +6,7 @@ import {
 } from '@/lib/emails'
 import { SITE_URL } from '@/lib/site'
 import { isEmailRateLimited, rateLimitKey } from '@/lib/emailRateLimit'
+import { getDroits } from '@/lib/droits'
 
 function isDate(v: unknown): v is string {
   return typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)
@@ -57,6 +58,8 @@ export async function POST(req: NextRequest) {
     .maybeSingle()
 
   if (!bien) return NextResponse.json({ error: 'Bien introuvable' }, { status: 404 })
+  if (!(await getDroits(vendeurId)).a('demande_visite'))
+    return NextResponse.json({ error: 'Demande de visite indisponible pour cette annonce' }, { status: 403 })
 
   // Insère la visite
   const { data: visite, error } = await admin.from('visites').insert({

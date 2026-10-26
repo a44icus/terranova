@@ -102,6 +102,10 @@ export async function updatePlanConfig(formData: FormData) {
     throw new Error(`Erreur plan_config: ${error.message}${migration}`)
   }
 
+  // Les avantages déjà appliqués aux annonces (badge Pro, mise en avant…) suivent la nouvelle config
+  const { error: syncError } = await supabase.rpc('sync_biens_plan')
+  if (syncError) console.warn('[updatePlanConfig] sync_biens_plan:', syncError.message)
+
   revalidatePath('/admin/parametres')
   revalidatePath('/compte/plan')
 }

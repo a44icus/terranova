@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth'
+import { getDroits } from '@/lib/droits'
 import { revalidatePath } from 'next/cache'
 import { escHtml, escHtmlMultiline, emailLayout, emailEyebrow, emailTitle, emailQuote, emailButton, emailButtons, sendEmail } from '@/lib/emails'
 import { SITE_NAME, SITE_URL, siteEmail } from '@/lib/site'
@@ -130,6 +131,13 @@ export async function refuserAnnonce(bienId: string, raison?: string): Promise<{
 export async function toggleCoupDeCoeur(bienId: string, value: boolean): Promise<{ ok?: boolean; error?: string }> {
   const user = await checkAdmin()
   if (!user) return { error: 'Non autorisé' }
+  // Le label est un avantage de certains plans : on ne l'attribue qu'aux vendeurs éligibles
+  if (value) {
+    const { data: bien } = await createAdminClient().from('biens').select('user_id').eq('id', bienId).maybeSingle()
+    if (!bien) return { error: 'Annonce introuvable' }
+    if (!(await getDroits(bien.user_id)).a('coup_de_coeur'))
+      return { error: 'Le plan du vendeur n\'inclut pas le label Coup de cœur' }
+  }
   const { error } = await createAdminClient().from('biens').update({ coup_de_coeur: value }).eq('id', bienId)
   if (error) {
     console.error('[toggleCoupDeCoeur]', error)

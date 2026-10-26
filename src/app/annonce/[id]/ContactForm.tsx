@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -7,8 +7,6 @@ interface Props {
   bienId: string
   vendeurId: string
   bienTitre?: string
-  vendeurEmail?: string
-  vendeurNom?: string
   delaiReponse?: string
   antispamMinutes?: number
 }
@@ -18,7 +16,7 @@ type State = 'idle' | 'loading' | 'success' | 'error' | 'spam'
 const ANTISPAM_KEY = 'terranova_last_contact'
 
 export default function ContactForm({
-  bienId, vendeurId, bienTitre = '', vendeurEmail, vendeurNom = '',
+  bienId, vendeurId,
   delaiReponse, antispamMinutes = 5,
 }: Props) {
   const [state, setState] = useState<State>('idle')
@@ -85,23 +83,20 @@ export default function ContactForm({
     // Marquer le timestamp anti-spam
     if (antispamMinutes > 0) localStorage.setItem(ANTISPAM_KEY, String(Date.now()))
 
-    // Notification email vendeur (silencieux si erreur)
-    if (vendeurEmail) {
-      try {
-        await fetch('/api/email/contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            vendeurEmail, vendeurNom,
-            acheteurNom: form.nom.trim(),
-            acheteurEmail: form.email.trim(),
-            acheteurTel: form.telephone.trim() || null,
-            message: form.message.trim(),
-            bienTitre, bienId,
-          }),
-        })
-      } catch { /* non bloquant */ }
-    }
+    // Notification email vendeur (silencieux si erreur ; destinataire déterminé côté serveur)
+    try {
+      await fetch('/api/email/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          acheteurNom: form.nom.trim(),
+          acheteurEmail: form.email.trim(),
+          acheteurTel: form.telephone.trim() || null,
+          message: form.message.trim(),
+          bienId,
+        }),
+      })
+    } catch { /* non bloquant */ }
 
     setState('success')
   }

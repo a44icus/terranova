@@ -23,6 +23,7 @@ import DemandeVisiteForm from '@/components/annonce/DemandeVisiteForm'
 import { genererRapport } from '@/lib/profils'
 import { getSiteSettings, getPoiWeights, getScoreSeuils } from '@/lib/siteSettings'
 import { SITE_URL } from '@/lib/site'
+import { getDroits } from '@/lib/droits'
 
 const BASE_URL = SITE_URL
 
@@ -151,8 +152,7 @@ export default async function AnnoncePage({ params }: Props) {
   }
 
   // Fetch settings + vendeur + biens similaires + email vendeur en parallèle
-  const adminClient = createAdminClient()
-  const [{ data: vendeur }, { data: similaires }, { data: vendeurAuthData }, siteSettings] = await Promise.all([
+  const [{ data: vendeur }, { data: similaires }, droitsVendeur, siteSettings] = await Promise.all([
     supabase
       .from('profiles')
       .select('prenom, nom, type, agence, avatar_url, logo_url')
@@ -166,12 +166,10 @@ export default async function AnnoncePage({ params }: Props) {
       .neq('id', id)
       .order('featured', { ascending: false })
       .limit(4),
-    adminClient.auth.admin.getUserById(bien.user_id),
+    getDroits(bien.user_id),
     getSiteSettings(),
   ])
 
-  const vendeurEmail = vendeurAuthData?.user?.email
-  const vendeurNom = [vendeur?.prenom, vendeur?.nom].filter(Boolean).join(' ')
 
   const prix = formatPrix(bien.prix, bien.type)
   const icon = CAT_ICON[bien.categorie] ?? '🏠'
@@ -469,8 +467,8 @@ export default async function AnnoncePage({ params }: Props) {
 
             </div>
 
-            {/* Score quartier */}
-            {bien.lat && bien.lng && (
+            {/* Score quartier (feature du plan du vendeur) */}
+            {bien.lat && bien.lng && droitsVendeur.a('score_quartier') && (
               <QuartierScore
                 bienId={bien.id}
                 lat={bien.lat}
@@ -630,13 +628,14 @@ export default async function AnnoncePage({ params }: Props) {
                   <div className="text-sm text-navy/50 bg-navy/04 rounded-xl px-4 py-3 text-center">
                     Ce bien a été vendu — le contact n&apos;est plus disponible.
                   </div>
+                ) : !droitsVendeur.a('messagerie') ? (
+                  <div className="text-sm text-navy/50 bg-navy/04 rounded-xl px-4 py-3 text-center">
+                    Le contact via la plateforme n&apos;est pas disponible pour cette annonce.
+                  </div>
                 ) : (
                   <ContactForm
                     bienId={bien.id}
                     vendeurId={bien.user_id}
-                    bienTitre={bien.titre}
-                    vendeurEmail={vendeurEmail}
-                    vendeurNom={vendeurNom}
                     delaiReponse={siteSettings.contact_delai_reponse}
                     antispamMinutes={siteSettings.contact_antispam_minutes}
                   />
@@ -678,13 +677,13 @@ export default async function AnnoncePage({ params }: Props) {
                 <SimulateurCredit prixBien={bien.prix} />
               )}
 
-              {/* Demande de visite */}
-              <DemandeVisiteForm
+              {/* Demande de visite (feature du plan du vendeur) */}
+              {droitsVendeur.a('demande_visite') && <DemandeVisiteForm
                 bienId={bien.id}
                 vendeurId={bien.user_id}
                 bienTitre={bien.titre}
                 userId={user?.id}
-              />
+              />}
             </div>
           </div>
         </div>

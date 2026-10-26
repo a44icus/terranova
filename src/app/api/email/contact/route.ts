@@ -7,6 +7,8 @@ import {
   emailFields, emailMailto, emailButton, emailButtons, sendEmail,
 } from '@/lib/emails'
 import { SITE_NAME, SITE_URL } from '@/lib/site'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getDroits } from '@/lib/droits'
 
 export async function POST(req: NextRequest) {
   // ── 1. Authentification obligatoire ───────────────────────────────────────
@@ -39,9 +41,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { vendeurEmail, acheteurNom, acheteurEmail, acheteurTel, message, bienTitre, bienId } = body
+  // Le destinataire n'est jamais fourni par le navigateur : il est déduit du bien,
+  // sinon cette route permettrait d'envoyer des emails depuis notre domaine à n'importe qui.
+  const { acheteurNom, acheteurEmail, acheteurTel, message, bienId } = body
 
-  if (!isEmail(vendeurEmail))   return NextResponse.json({ error: 'vendeurEmail invalide' },  { status: 400 })
   if (!isEmail(acheteurEmail))  return NextResponse.json({ error: 'acheteurEmail invalide' }, { status: 400 })
 
   // L'email expéditeur doit correspondre à l'utilisateur connecté
@@ -53,8 +56,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'message invalide' },    { status: 400 })
   if (typeof acheteurNom !== 'string' || acheteurNom.trim().length === 0 || acheteurNom.length > 120)
     return NextResponse.json({ error: 'acheteurNom invalide' }, { status: 400 })
-  if (typeof bienTitre   !== 'string' || bienTitre.trim().length  === 0 || bienTitre.length  > 200)
-    return NextResponse.json({ error: 'bienTitre invalide' },  { status: 400 })
   if (typeof bienId !== 'string' && typeof bienId !== 'number')
     return NextResponse.json({ error: 'bienId invalide' },     { status: 400 })
   if (acheteurTel !== undefined && acheteurTel !== null && acheteurTel !== '') {
@@ -62,7 +63,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'acheteurTel invalide' }, { status: 400 })
   }
 
-  // ── 3. Email ──────────────────────────────────────────────────────────────
+  // ── 3. Bien et vendeur ────────────────────────────────────────────────────
+  const admin = createAdminClient()
+  const { data: bien } = await admin
+    .from('biens').select('titre, user_id, statut').eq('id', String(bienId)).maybeSingle()
+  if (!bien || bien.statut !== 'publie') return NextResponse.json({ error: 'Annonce introuvable' }, { status: 404 })
+  if (!(await getDroits(bien.user_id)).a('messagerie'))
+    return NextResponse.json({ error: 'Contact indisponible pour cette annonce' }, { status: 403 })
+  const { data: vendeurAuth } = await admin.auth.admin.getUserById(bien.user_id)
+  const vendeurEmail = vendeurAuth?.user?.email
+  if (!vendeurEmail) return NextResponse.json({ ok: true, skipped: true })
+  const bienTitre: string = bien.titre
+
+  // ── 4. Email ──────────────────────────────────────────────────────────────
   const safeAcheteurEmail = escHtml(acheteurEmail)
   const safeBienId        = encodeURIComponent(String(bienId))
   const safeTitreEnc      = encodeURIComponent(bienTitre)

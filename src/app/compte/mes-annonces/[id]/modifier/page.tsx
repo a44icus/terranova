@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import EditAnnonceForm from '@/components/compte/EditAnnonceForm'
 import { getPlanConfig, getEffectivePlan } from '@/lib/plan'
+import { droitsDepuis } from '@/lib/droits'
 import type { PlanType } from '@/lib/types'
 
 interface Props {
@@ -28,6 +29,7 @@ export default async function ModifierAnnoncePage({ params }: Props) {
     profile?.plan_expire_at
   )
   const planPhotosMax = planConfig[effectivePlan].photos
+  const droits = droitsDepuis(effectivePlan, null, planConfig)
 
   return (
     <div className="p-4 sm:p-8 max-w-2xl">
@@ -35,7 +37,8 @@ export default async function ModifierAnnoncePage({ params }: Props) {
         <h1 className="font-serif text-2xl text-navy">Modifier l'annonce</h1>
         <p className="text-sm text-navy/50 mt-0.5 truncate">{bien.titre}</p>
       </div>
-      <EditAnnonceForm bien={bien} photos={photos ?? []} profile={profile} planPhotosMax={planPhotosMax} />
+      <EditAnnonceForm bien={bien} photos={photos ?? []} profile={profile} planPhotosMax={planPhotosMax}
+        peutRefAgence={droits.a('ref_agence')} peut360={droits.a('photos_360')} />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getPlanConfig, ALL_FEATURES, PLAN_LABEL, getPlanTier } from '@/lib/plan'
+import { getPlanConfig, featuresVendables, PLAN_LABEL, getPlanTier } from '@/lib/plan'
 import { getEffectivePlan, isPlanExpired } from '@/lib/plan'
 import type { PlanType } from '@/lib/types'
 import PlanCheckoutButton from '@/components/compte/PlanCheckoutButton'
@@ -23,10 +23,7 @@ function buildFeatureLines(config: { annonces: number; photos: number; features:
   const lines: string[] = []
   lines.push(config.annonces >= 999 ? 'Annonces illimitées' : `${config.annonces} annonce${config.annonces > 1 ? 's' : ''} active${config.annonces > 1 ? 's' : ''}`)
   lines.push(`${config.photos} photos par annonce`)
-  for (const key of config.features) {
-    const def = ALL_FEATURES.find(f => f.key === key)
-    if (def) lines.push(def.label)
-  }
+  for (const def of featuresVendables(config)) lines.push(def.label)
   return lines
 }
 

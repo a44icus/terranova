@@ -13,6 +13,8 @@ interface Props {
   photos: Photo[]
   profile: Profile
   planPhotosMax?: number   // limite photos du plan (live depuis DB)
+  peutRefAgence?: boolean  // plan avec la feature « ref_agence »
+  peut360?: boolean        // plan avec la feature « photos_360 »
 }
 
 const CATEGORIES: { value: BienCategorie; label: string; icon: string }[] = [
@@ -75,7 +77,7 @@ const CAT_GROUPS = [
   { label: 'Autre',            values: ['parking'] },
 ]
 
-export default function EditAnnonceForm({ bien, photos: initialPhotos, profile, planPhotosMax }: Props) {
+export default function EditAnnonceForm({ bien, photos: initialPhotos, profile, planPhotosMax, peutRefAgence = false, peut360 = false }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const photoLimit = planPhotosMax ?? 10
@@ -958,7 +960,7 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile, 
               </div>
             </label>
 
-            {profile.type === 'pro' && (
+            {peutRefAgence && (
               <div>
                 <label className={labelCls}>Référence interne</label>
                 <input type="text" value={form.ref_agence} onChange={e => update('ref_agence', e.target.value)} placeholder="REF-2024-001" className={inputCls} />
@@ -1038,7 +1040,8 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile, 
             )}
           </div>
 
-          {/* Section 360° */}
+          {/* Section 360° (feature du plan « photos_360 ») */}
+          {peut360 && (
           <div className="bg-white rounded-2xl p-5 border border-navy/08 space-y-3">
             <div>
               <h3 className="text-xs font-medium text-navy/50 uppercase tracking-wider mb-0.5">Visite virtuelle 360°</h3>
@@ -1080,6 +1083,7 @@ export default function EditAnnonceForm({ bien, photos: initialPhotos, profile, 
               <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleNew360Photos} className="hidden" />
             </label>
           </div>
+          )}
 
           <div className="flex gap-3">
             <button onClick={() => setStep(2)} className="border border-navy/15 text-navy/60 rounded-xl py-3 px-5 text-sm font-medium hover:border-navy/30 transition-colors">← Retour</button>

@@ -306,7 +306,14 @@ NEXT_PUBLIC_BASE_URL=https://votre-domaine.fr`}
                                     defaultChecked={featureSet.has(feat.key)}
                                     className="accent-primary mt-0.5 flex-shrink-0" />
                                   <div>
-                                    <p className="text-xs font-medium text-navy/80 leading-tight">{feat.label}</p>
+                                    <p className="text-xs font-medium text-navy/80 leading-tight">
+                                      {feat.label}
+                                      {feat.statut !== 'controle' && (
+                                        <span className="ml-1.5 text-[9px] font-semibold uppercase tracking-wide text-navy/40 bg-navy/05 px-1 py-px rounded">
+                                          {feat.statut === 'a_venir' ? 'À venir — non affichée' : feat.statut === 'public' ? 'Offerte à tous' : 'Service'}
+                                        </span>
+                                      )}
+                                    </p>
                                     <p className="text-[10px] text-navy/40 leading-tight mt-0.5">{feat.hint}</p>
                                   </div>
                                 </label>

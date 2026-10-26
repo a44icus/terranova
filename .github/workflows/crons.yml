@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false        # un cron en échec n'empêche pas les autres
       matrix:
-        route: [new-biens, price-alerts, pois]
+        route: [new-biens, price-alerts, pois, plans-expires]
     steps:
       - name: Appel /api/cron/${{ matrix.route }}
         env:
