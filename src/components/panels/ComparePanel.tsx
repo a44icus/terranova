@@ -34,7 +34,7 @@ export default function ComparePanel({ onClose }: Props) {
             <button onClick={clearCompare} className="text-xs border border-navy/15 px-3 py-1.5 rounded-lg text-navy/60 hover:border-navy/30 transition-colors">
               Tout effacer
             </button>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-navy/07 flex items-center justify-center text-sm hover:bg-navy/15 transition-colors">✕</button>
+            <button aria-label="Fermer" onClick={onClose} className="w-8 h-8 rounded-full bg-navy/07 flex items-center justify-center text-sm hover:bg-navy/15 transition-colors">✕</button>
           </div>
         </div>
 

@@ -19,7 +19,7 @@ export default function Toast({ message, type = 'info', onClose }: Props) {
     <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 ${colors[type]} text-white px-5 py-3 rounded-xl text-sm shadow-lg flex items-center gap-3 z-50`}>
       <span>{message}</span>
       {onClose && (
-        <button onClick={onClose} className="text-white/60 hover:text-white ml-2">✕</button>
+        <button aria-label="Fermer" onClick={onClose} className="text-white/60 hover:text-white ml-2">✕</button>
       )}
     </div>
   )

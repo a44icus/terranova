@@ -423,7 +423,7 @@ export default function GameClient() {
       {journalOpen && phase !== 'intro' && (
         <div className="eg-journal">
           <div className="eg-card">
-            <div className="eg-jhead"><b>📖 Journal de bord</b><button className="eg-x" onClick={() => setJournalOpen(false)}>✕</button></div>
+            <div className="eg-jhead"><b>📖 Journal de bord</b><button aria-label="Fermer le journal" className="eg-x" onClick={() => setJournalOpen(false)}>✕</button></div>
             {solvedSteps.length === 0 && <div className="eg-jempty">Aucun indice découvert pour l’instant. La piste commence…</div>}
             {solvedSteps.map((s, i) => (
               <div key={i} className="eg-jentry">

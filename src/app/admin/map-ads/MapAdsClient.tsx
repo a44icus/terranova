@@ -498,7 +498,7 @@ export default function MapAdsClient({ ads: initialAds }: { ads: AdWithStats[] }
               <h2 className="font-serif text-xl text-[#0F172A]">
                 {editingAd ? 'Modifier la publicité' : 'Nouvelle publicité'}
               </h2>
-              <button onClick={() => setShowForm(false)} className="text-[#0F172A]/40 hover:text-[#0F172A] text-xl">✕</button>
+              <button aria-label="Fermer" onClick={() => setShowForm(false)} className="text-[#0F172A]/40 hover:text-[#0F172A] text-xl">✕</button>
             </div>
 
             <div className="px-6 py-5">

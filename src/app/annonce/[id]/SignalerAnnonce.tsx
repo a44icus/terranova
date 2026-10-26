@@ -80,7 +80,7 @@ export default function SignalerAnnonce({ bienId, vendeurId, isLoggedIn }: Props
                 <p className="text-sm text-navy/50 mb-5">
                   Merci. Notre équipe va examiner cette annonce.
                 </p>
-                <button onClick={handleClose}
+                <button aria-label="Fermer" onClick={handleClose}
                   className="bg-navy text-white text-sm font-medium px-6 py-2.5 rounded-xl hover:bg-primary transition-colors">
                   Fermer
                 </button>

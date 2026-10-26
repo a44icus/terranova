@@ -163,7 +163,7 @@ export default function RoutePanel({ origin, mapRef, picking, onPlaceDest, onCan
               className="flex-1 text-xs outline-none bg-transparent text-navy placeholder-navy/35"
             />
             {destValue && (
-              <button onClick={() => { setDestValue(''); setSugOpen(false) }} className="text-navy/30 text-xs">✕</button>
+              <button aria-label="Effacer la destination" onClick={() => { setDestValue(''); setSugOpen(false) }} className="text-navy/30 text-xs">✕</button>
             )}
           </div>
 

@@ -76,7 +76,7 @@ export default function MapApp({ biens, user, initialBienId, carteSettings, ads 
                 return (
                   <div key={id} className="bg-white/10 rounded-lg px-3 py-1.5 text-xs flex items-center gap-2">
                     <span>{b.titre.split(' ').slice(0, 3).join(' ')}</span>
-                    <button onClick={() => useMapStore.getState().toggleCompare(id)} className="text-white/50 hover:text-white">✕</button>
+                    <button aria-label="Retirer de la comparaison" onClick={() => useMapStore.getState().toggleCompare(id)} className="text-white/50 hover:text-white">✕</button>
                   </div>
                 )
               })}

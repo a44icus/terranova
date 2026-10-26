@@ -113,7 +113,7 @@ export default function SearchBar() {
           <span className="pr-4 text-xs text-navy/30 animate-spin">⟳</span>
         )}
         {value && !loading && (
-          <button onClick={clear} className="pr-4 text-navy/30 hover:text-navy text-sm">✕</button>
+          <button aria-label="Effacer la recherche" onClick={clear} className="pr-4 text-navy/30 hover:text-navy text-sm">✕</button>
         )}
       </div>
 

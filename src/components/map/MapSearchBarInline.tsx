@@ -105,7 +105,7 @@ export default function MapSearchBarInline() {
           <span className="text-white/30 text-xs animate-spin">⟳</span>
         )}
         {value && !loading && (
-          <button onClick={clear} className="text-white/30 hover:text-white/70 text-xs leading-none">✕</button>
+          <button aria-label="Effacer la recherche" onClick={clear} className="text-white/30 hover:text-white/70 text-xs leading-none">✕</button>
         )}
       </div>
 

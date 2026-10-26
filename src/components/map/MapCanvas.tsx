@@ -904,7 +904,7 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
           ))}
 
           {/* 🏢 Bâtiments — emoji → fond clair uniquement */}
-          <button onClick={toggleBuildings}
+          <button aria-label="Afficher ou masquer les bâtiments 3D" onClick={toggleBuildings}
             className="w-9 h-9 bg-white border border-navy/12 rounded-lg flex items-center justify-center text-sm shadow-sm transition-all hover:border-navy/40 hover:bg-slate-50 active:bg-slate-100">
             🏢
           </button>
@@ -976,7 +976,7 @@ export default function MapCanvas({ carteSettings, ads = [] }: { carteSettings: 
           </button>
 
           {/* Géoloc — SVG currentColor → fond coloré OK */}
-          <button onClick={toggleGeoloc}
+          <button aria-label="Me localiser sur la carte" onClick={toggleGeoloc}
             className={`w-9 h-9 border-2 rounded-lg flex items-center justify-center shadow-sm transition-all ${
               geoActive
                 ? 'bg-[#2980b9] border-[#2980b9] text-white'

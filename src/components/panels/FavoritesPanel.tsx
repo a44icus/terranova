@@ -17,7 +17,7 @@ export default function FavoritesPanel({ onClose }: Props) {
     <div className="fixed inset-0 bg-surface z-[160] overflow-y-auto">
       <div className="flex items-center justify-between px-6 py-4 border-b border-navy/10 bg-surface sticky top-0 z-10">
         <h2 className="font-serif text-2xl text-navy">Mes favoris</h2>
-        <button onClick={onClose} className="w-8 h-8 rounded-full bg-navy/07 flex items-center justify-center text-sm hover:bg-navy/15 transition-colors">✕</button>
+        <button aria-label="Fermer" onClick={onClose} className="w-8 h-8 rounded-full bg-navy/07 flex items-center justify-center text-sm hover:bg-navy/15 transition-colors">✕</button>
       </div>
 
       {favBiens.length === 0 ? (
@@ -38,7 +38,7 @@ export default function FavoritesPanel({ onClose }: Props) {
                 <span className={`absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded ${b.type === 'vente' ? 'bg-primary' : 'bg-location'}`}>
                   {b.type === 'vente' ? 'Vente' : 'Location'}
                 </span>
-                <button onClick={e => { e.stopPropagation(); toggleFavorite(b.id) }}
+                <button aria-label="Retirer des favoris" onClick={e => { e.stopPropagation(); toggleFavorite(b.id) }}
                   className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center text-[#e05a5a] text-sm hover:scale-110 transition-transform">
                   ♥
                 </button>

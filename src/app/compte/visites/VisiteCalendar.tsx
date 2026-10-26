@@ -114,7 +114,7 @@ export default function VisiteCalendar({ visites }: Props) {
       {/* Navigation mois */}
       <div className="bg-white rounded-2xl border border-navy/08 mb-4">
         <div className="flex items-center justify-between px-5 py-4 border-b border-navy/06">
-          <button onClick={prevMonth}
+          <button aria-label="Mois précédent" onClick={prevMonth}
             className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-navy/06 transition-colors text-navy/50 hover:text-navy">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -131,7 +131,7 @@ export default function VisiteCalendar({ visites }: Props) {
             )}
           </div>
 
-          <button onClick={nextMonth}
+          <button aria-label="Mois suivant" onClick={nextMonth}
             className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-navy/06 transition-colors text-navy/50 hover:text-navy">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

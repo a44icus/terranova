@@ -157,7 +157,7 @@ export default function DetailPopup({ bien, insightsHtml, onClose, onRoute }: Pr
           </Link>
 
           {/* Fermer */}
-          <button
+          <button aria-label="Fermer"
             onClick={onClose}
             style={{
               width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
@@ -275,7 +275,7 @@ export default function DetailPopup({ bien, insightsHtml, onClose, onRoute }: Pr
           {/* Infos */}
           <div style={{ flex: 1, minWidth: 0, padding: isMobile ? '10px 10px 8px' : '14px 14px 12px', position: 'relative' }}>
             {!isMobile && (
-              <button onClick={onClose} style={{ position: 'absolute', top: 8, right: 8, width: 22, height: 22, borderRadius: '50%', background: 'rgba(26,26,24,0.07)', border: 'none', cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+              <button aria-label="Fermer" onClick={onClose} style={{ position: 'absolute', top: 8, right: 8, width: 22, height: 22, borderRadius: '50%', background: 'rgba(26,26,24,0.07)', border: 'none', cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
             )}
 
             {/* Badges */}

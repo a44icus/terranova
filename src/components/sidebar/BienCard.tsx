@@ -53,6 +53,7 @@ export default function BienCard({ bien, grid = false }: Props) {
             </span>
           )}
           <button
+            aria-label={isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'} aria-pressed={isFav}
             onClick={e => { e.stopPropagation(); toggleFavorite(bien.id) }}
             className="absolute top-1.5 right-1.5 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center text-xs transition-colors"
             style={{ color: isFav ? '#e05a5a' : 'rgba(26,26,24,0.35)' }}
@@ -118,6 +119,7 @@ export default function BienCard({ bien, grid = false }: Props) {
           </span>
         )}
         <button
+          aria-label={isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'} aria-pressed={isFav}
           onClick={e => { e.stopPropagation(); toggleFavorite(bien.id) }}
           className="absolute top-1.5 right-1.5 w-[22px] h-[22px] bg-white/90 rounded-full flex items-center justify-center text-xs transition-colors"
           style={{ color: isFav ? '#e05a5a' : 'rgba(26,26,24,0.35)' }}

@@ -28,7 +28,7 @@ export default function NearbyPanel({ biens, position, onSelectBien, onClose }: 
       {/* Header */}
       <div className="flex items-center justify-between px-3.5 pt-3 pb-2 border-b border-navy/10">
         <span className="text-[11px] font-medium text-navy/45 uppercase tracking-wider">📍 À proximité</span>
-        <button onClick={onClose} className="w-5 h-5 rounded-full bg-navy/07 flex items-center justify-center text-[11px] hover:bg-navy/15 transition-colors">✕</button>
+        <button aria-label="Fermer" onClick={onClose} className="w-5 h-5 rounded-full bg-navy/07 flex items-center justify-center text-[11px] hover:bg-navy/15 transition-colors">✕</button>
       </div>
 
       {/* Rayon */}

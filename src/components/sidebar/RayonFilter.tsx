@@ -60,7 +60,7 @@ export default function RayonFilter() {
           readOnly={isActive}
         />
         {isActive ? (
-          <button onClick={clear} className="text-xs text-[#0F172A]/40 hover:text-red-500 px-2">✕</button>
+          <button aria-label="Retirer le rayon" onClick={clear} className="text-xs text-[#0F172A]/40 hover:text-red-500 px-2">✕</button>
         ) : (
           <button onClick={geocode} disabled={loading} className="text-xs bg-[#0F172A] text-white px-3 py-1.5 rounded-lg hover:bg-[#4F46E5] transition-colors disabled:opacity-40">
             {loading ? '…' : '→'}
