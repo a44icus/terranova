@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useRef } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { BienPublic } from '@/lib/types'
@@ -59,7 +60,7 @@ function BienCard({ bien }: { bien: BienPublic }) {
       {/* Image */}
       <div className="w-[108px] flex-shrink-0 bg-gradient-to-br from-[#e0ddd8] to-[#c8c4bc] relative overflow-hidden">
         {bien.photo_url ? (
-          <img src={bien.photo_url} alt={bien.titre} className="w-full h-full object-cover" />
+          <Image src={bien.photo_url} alt={bien.titre} fill sizes="108px" className="object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-3xl opacity-30">🏠</div>
         )}

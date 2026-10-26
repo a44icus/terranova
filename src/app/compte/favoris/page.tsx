@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
@@ -53,7 +54,7 @@ export default async function FavorisPage() {
               <div key={bien.id} className="bg-white rounded-2xl border border-navy/08 overflow-hidden hover:border-primary/40 hover:-translate-y-0.5 transition-all">
                 <div className="h-44 bg-gradient-to-br from-[#e0ddd8] to-[#c8c4bc] relative overflow-hidden">
                   {photo
-                    ? <img src={photo} alt={bien.titre} className="w-full h-full object-cover" />
+                    ? <Image src={photo} alt={bien.titre} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" />
                     : <div className="w-full h-full flex items-center justify-center text-4xl opacity-20">🏠</div>
                   }
                   <span className={`absolute top-2 left-2 text-white text-[10px] font-semibold px-2 py-0.5 rounded ${bien.type === 'vente' ? 'bg-primary' : 'bg-location'}`}>

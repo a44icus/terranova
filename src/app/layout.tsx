@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import './globals.css'
 import { getSiteSettings } from '@/lib/siteSettings'
+import { SITE_URL } from '@/lib/site'
 import CookieBanner from '@/components/ui/CookieBanner'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -9,9 +10,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${s.nom_site} – Immobilier en France`,
     description: s.meta_description || s.slogan,
-    openGraph: s.og_image_url ? {
-      images: [{ url: s.og_image_url, width: 1200, height: 630 }],
-    } : undefined,
+    metadataBase: new URL(SITE_URL),
+    // Image de partage : celle des réglages admin, sinon l'image générée par défaut.
+    // Les pages qui ont leur propre image (annonce, article) la remplacent.
+    openGraph: {
+      siteName: s.nom_site,
+      locale: 'fr_FR',
+      images: [{ url: s.og_image_url || '/api/og', width: 1200, height: 630 }],
+    },
+    twitter: { card: 'summary_large_image' },
   }
 }
 

@@ -1,4 +1,5 @@
-﻿import { createClient } from '@/lib/supabase/server'
+import Image from 'next/image'
+import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -239,7 +240,7 @@ export default async function VendeurPage({ params }: { params: Promise<{ id: st
                     {/* Photo */}
                     <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-slate-200 to-slate-300">
                       {photo && (
-                        <img src={photo} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
                       )}
                       <div className="absolute bottom-2 left-2 bg-[#0F172A]/85 text-white text-xs font-semibold px-2.5 py-1 rounded-lg backdrop-blur-sm">
                         {prixLabel}

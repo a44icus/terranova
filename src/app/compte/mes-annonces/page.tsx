@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
@@ -201,9 +202,9 @@ export default async function MesAnnoncesPage({ searchParams }: Props) {
                 <div key={bien.id} className="bg-white rounded-2xl border border-navy/08 overflow-hidden hover:border-navy/15 transition-all">
                   <div className="flex items-center gap-4 p-4">
                     {/* Photo */}
-                    <div className="w-20 h-16 sm:w-24 sm:h-20 flex-shrink-0 rounded-xl bg-gradient-to-br from-[#e0ddd8] to-[#c8c4bc] overflow-hidden">
+                    <div className="relative w-20 h-16 sm:w-24 sm:h-20 flex-shrink-0 rounded-xl bg-gradient-to-br from-[#e0ddd8] to-[#c8c4bc] overflow-hidden">
                       {photo
-                        ? <img src={photo} alt={bien.titre} className="w-full h-full object-cover" />
+                        ? <Image src={photo} alt={bien.titre} fill sizes="96px" className="object-cover" />
                         : <div className="w-full h-full flex items-center justify-center text-2xl opacity-20">🏠</div>
                       }
                     </div>
