@@ -41,6 +41,8 @@ const ContentSecurityPolicy = [
     "https://analytics.google.com",
     // Géocodage (SearchBar)
     "https://nominatim.openstreetmap.org",
+    // Base Adresse Nationale (CityAutocomplete, ville de l'utilisateur sur /marche)
+    "https://api-adresse.data.gouv.fr",
     // Tuiles OSM (Plan)
     "https://tile.openstreetmap.org",
     // Tuiles satellite Esri

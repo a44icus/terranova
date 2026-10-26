@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrix } from '@/lib/geo'
@@ -41,14 +41,85 @@ const FILTRES = [
   { key: 'appartement', label: 'Apparts' },
 ]
 
+/** Dernière position choisie via « Me localiser », gardée dans ce navigateur uniquement. */
+const STORAGE_KEY = 'jazzimmo:ma-position'
+
+function lirePosition(): { lat: number; lng: number } | null {
+  try {
+    const v = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null')
+    return Number.isFinite(v?.lat) && Number.isFinite(v?.lng) ? v : null
+  } catch { return null }
+}
+
 function isNouveau(date?: string | null) {
   if (!date) return false
   const days = (Date.now() - new Date(date).getTime()) / (1000 * 60 * 60 * 24)
   return days < 7
 }
 
-export default function LatestBiens({ biens, nearby }: Props) {
+export default function LatestBiens({ biens: biensServeur, nearby: nearbyServeur }: Props) {
   const [filter, setFilter] = useState('all')
+
+  // ── « Me localiser » : position précise du navigateur, avec l'accord du visiteur ──
+  const [local, setLocal]   = useState<{ biens: Bien[]; ville: string | null } | null>(null)
+  const [locState, setLocState] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [locError, setLocError] = useState('')
+
+  const chargerAutour = useCallback(async (lat: number, lng: number) => {
+    setLocState('loading')
+    try {
+      const res = await fetch(`/api/biens-proches?lat=${lat}&lng=${lng}`)
+      if (!res.ok) throw new Error()
+      const data = await res.json() as { biens: Bien[]; ville: string | null }
+      if (!data.biens?.length) {
+        setLocError('Aucune annonce trouvée autour de vous pour le moment.')
+        setLocState('error')
+        return
+      }
+      setLocal(data)
+      setLocState('idle')
+    } catch {
+      setLocError('Impossible de charger les annonces proches.')
+      setLocState('error')
+    }
+  }, [])
+
+  // Position déjà choisie lors d'une visite précédente : réutilisée sans redemander
+  useEffect(() => {
+    const p = lirePosition()
+    if (p) chargerAutour(p.lat, p.lng)
+  }, [chargerAutour])
+
+  function meLocaliser() {
+    if (!navigator.geolocation) {
+      setLocError('Votre navigateur ne permet pas la géolocalisation.')
+      setLocState('error')
+      return
+    }
+    setLocState('loading')
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ lat: coords.latitude, lng: coords.longitude })) } catch {}
+        chargerAutour(coords.latitude, coords.longitude)
+      },
+      err => {
+        setLocError(err.code === 1
+          ? 'Localisation refusée. Vous pouvez l’autoriser dans les réglages du navigateur.'
+          : 'Position introuvable pour le moment.')
+        setLocState('error')
+      },
+      { timeout: 10_000, maximumAge: 10 * 60_000 },
+    )
+  }
+
+  function oublierPosition() {
+    try { localStorage.removeItem(STORAGE_KEY) } catch {}
+    setLocal(null)
+    setLocState('idle')
+  }
+
+  const biens  = local?.biens ?? biensServeur
+  const nearby = local ? { ville: local.ville ?? 'votre position' } : nearbyServeur
 
   const filtered = useMemo(() => {
     if (filter === 'all')      return biens
@@ -85,6 +156,21 @@ export default function LatestBiens({ biens, nearby }: Props) {
                 ? <>Annonces près de <em style={{ color: '#4F46E5' }}>{nearby.ville}</em></>
                 : <>Annonces dans <em style={{ color: '#4F46E5' }}>votre région</em></>}
           </h2>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            {local ? (
+              <button onClick={oublierPosition}
+                className="text-[#0F172A]/45 hover:text-[#4F46E5] underline underline-offset-2 transition-colors">
+                Ne plus utiliser ma position
+              </button>
+            ) : (
+              <button onClick={meLocaliser} disabled={locState === 'loading'}
+                className="inline-flex items-center gap-1.5 text-[#4F46E5] font-medium hover:text-[#4338CA] disabled:opacity-60 transition-colors">
+                <span aria-hidden="true">📍</span>
+                {locState === 'loading' ? 'Localisation…' : 'Me localiser'}
+              </button>
+            )}
+            {locState === 'error' && <span className="text-[#0F172A]/50" role="status">{locError}</span>}
+          </div>
         </div>
         <Link href="/annonces"
           className="hidden sm:inline-flex items-center gap-2 text-sm text-[#0F172A]/50 hover:text-[#4F46E5] transition-colors font-medium border-b border-[#0F172A]/20 hover:border-[#4F46E5] pb-0.5 self-start lg:self-auto">
