@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import './globals.css'
 import { getSiteSettings } from '@/lib/siteSettings'
@@ -19,8 +19,13 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [{ url: s.og_image_url || '/api/og', width: 1200, height: 630 }],
     },
     twitter: { card: 'summary_large_image' },
+    // Icône écran d'accueil iOS (le manifeste PWA couvre Android)
+    icons: { apple: '/api/icone?taille=192' },
+    appleWebApp: { capable: true, title: s.nom_site, statusBarStyle: 'black-translucent' },
   }
 }
+
+export const viewport: Viewport = { themeColor: '#0F172A' }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const s = await getSiteSettings()

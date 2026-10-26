@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { getConversation } from './actions'
 import ReplyForm from '@/components/compte/ReplyForm'
+import ConversationLive from '@/components/compte/ConversationLive'
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -108,6 +109,7 @@ export default async function MessageThreadPage({ params }: { params: Promise<{ 
 
       {/* Reply form */}
       <ReplyForm contactId={id} />
+      <ConversationLive contactId={id} />
     </div>
   )
 }

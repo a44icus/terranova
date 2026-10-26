@@ -16,7 +16,7 @@ export async function GET() {
           Jazz<span style={{ color: '#818CF8', fontStyle: 'italic' }}>Immo</span>
         </div>
         <div style={{ display: 'flex', fontSize: 40, marginTop: 24, color: 'rgba(255,255,255,0.75)' }}>
-          L&apos;immobilier sur une carte, sans intermédiaire
+          {'L’immobilier sur une carte, sans intermédiaire'}
         </div>
         <div style={{ display: 'flex', fontSize: 28, marginTop: 48, color: '#818CF8' }}>{SITE_DOMAIN}</div>
       </div>
