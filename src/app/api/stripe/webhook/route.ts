@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
+import { signalerErreur } from '@/lib/alertesErreurs'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPlanConfig, type PlanConfigs } from '@/lib/plan'
 import type { PlanType } from '@/lib/types'
@@ -177,6 +178,7 @@ export async function POST(req: NextRequest) {
     }
   } catch (err) {
     console.error('[Webhook] Erreur traitement:', err)
+    await signalerErreur({ source: 'Webhook Stripe', erreur: err, details: { evenement: event.type, id: event.id } })
     return NextResponse.json({ error: 'Webhook handler error' }, { status: 500 })
   }
 

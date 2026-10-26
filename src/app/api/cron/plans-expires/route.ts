@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkCronAuth } from '@/lib/cronAuth'
+import { signalerErreur } from '@/lib/alertesErreurs'
 
 // GET pour Vercel Cron, POST pour les appels externes
 export async function GET(req: NextRequest) { return POST(req) }
@@ -19,6 +20,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await createAdminClient().rpc('expirer_plans')
   if (error) {
     console.error('[Cron plans-expires]', error.message)
+    await signalerErreur({ source: 'Cron plans-expires', erreur: error.message })
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
   return NextResponse.json({ ok: true, expires: data ?? 0 })

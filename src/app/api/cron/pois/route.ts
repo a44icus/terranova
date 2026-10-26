@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkCronAuth } from '@/lib/cronAuth'
+import { signalerErreur } from '@/lib/alertesErreurs'
 import { computeAndStorePois } from '@/lib/poisBien'
 
 export const runtime = 'nodejs'
@@ -38,6 +39,7 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     console.error('[Cron pois]', error.message)
+    await signalerErreur({ source: 'Cron pois', erreur: error.message })
     return NextResponse.json({ error: 'Lecture des biens impossible' }, { status: 500 })
   }
 

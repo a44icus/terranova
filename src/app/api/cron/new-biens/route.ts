@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkCronAuth } from '@/lib/cronAuth'
+import { signalerErreur } from '@/lib/alertesErreurs'
 import { escHtml, emailLayout, emailEyebrow, emailTitle, sendEmail, getDbEmailConfig } from '@/lib/emails'
 import { SITE_NAME, SITE_URL } from '@/lib/site'
 
@@ -62,6 +63,7 @@ export async function POST(req: NextRequest) {
 
   if (biensError) {
     console.error('[Cron new-biens] Lecture des biens impossible:', biensError.message)
+    await signalerErreur({ source: 'Cron new-biens', erreur: biensError.message })
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
   if (!nouveauxBiens?.length) {
